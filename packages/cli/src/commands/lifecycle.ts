@@ -9,7 +9,9 @@ import {
   resolveSelection,
 } from "../core/planner.js";
 import { readTemplate, type PackagedRegistry } from "../core/registry.js";
+import type { AgentId } from "../adapters/index.js";
 import type { Diagnostic } from "../core/diagnostics.js";
+import type { Manifest } from "../core/schemas.js";
 import { mutate } from "./mutate.js";
 import type { ApplyHooks } from "../core/writer.js";
 
@@ -30,22 +32,30 @@ export function install(
   options: Common & {
     command: "init" | "add";
     context: boolean;
-    select: (registry: PackagedRegistry) => Promise<string[] | Diagnostic>;
+    /** Agents to add to the installation; empty keeps the recorded ones (default: claude). */
+    agents: AgentId[];
+    select: (
+      registry: PackagedRegistry,
+      manifest: Manifest | undefined,
+    ) => Promise<string[] | Diagnostic>;
   },
 ): Promise<number> {
   return mutate({
     ...options,
     prepare: async ({ registry, manifest, cliVersion }) => {
-      const ids = await options.select(registry);
+      const ids = await options.select(registry, manifest);
       if (!Array.isArray(ids)) return [ids];
       const selection = resolveSelection(registry, ids);
       if (!selection.request) return selection.diagnostics;
-      const request = { ...selection.request, context: options.context };
+      const request = { ...selection.request, context: options.context, agents: options.agents };
       const contextTemplate = request.context
         ? await readTemplate(registry, "agent-context.md")
         : "";
       return {
-        paths: requiredPaths(manifest, request.items, request.context),
+        paths: requiredPaths(registry, manifest, request.items, {
+          context: request.context,
+          agents: request.agents,
+        }),
         plan: (files) =>
           planInstall({ registry, manifest, files, cliVersion, request, contextTemplate }),
       };
@@ -60,7 +70,7 @@ export function update(options: Common & { ids: string[]; allowMajor: boolean })
     prepare: async ({ registry, manifest, cliVersion }) => {
       if (!manifest) return [notInstalled("update")];
       return {
-        paths: requiredPaths(manifest, registry.index.items),
+        paths: requiredPaths(registry, manifest, registry.index.items),
         plan: (files) =>
           planUpdate({
             registry,
@@ -84,7 +94,7 @@ export function removeOrEject(
     prepare: async ({ registry, manifest, cliVersion }) => {
       if (!manifest) return [notInstalled(options.command)];
       return {
-        paths: requiredPaths(manifest),
+        paths: requiredPaths(registry, manifest),
         plan: (files) => planner({ registry, manifest, files, cliVersion, ids: options.ids }),
       };
     },
@@ -96,7 +106,7 @@ export function uninstall(options: Common): Promise<number> {
     ...options,
     command: "uninstall",
     prepare: async ({ registry, manifest, cliVersion }) => ({
-      paths: requiredPaths(manifest),
+      paths: requiredPaths(registry, manifest),
       plan: (files) => planUninstall({ registry, manifest, files, cliVersion }),
     }),
   });

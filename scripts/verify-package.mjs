@@ -150,6 +150,23 @@ try {
     readFileSync(path.join(project, "CLAUDE.md"), "utf8") === "# Existing instructions\n",
     "CLAUDE.md is restored exactly",
   );
+
+  // Codex: install, check, and remove again.
+  check(
+    kit("init", "--preset", "base", "--agent", "codex").code === 0,
+    "init --agent codex exits 0",
+  );
+  check(tree().includes(".agents/skills/kit-code-review/SKILL.md"), "Codex skills are installed");
+  check(
+    tree().includes(".agents/skills/kit-testing-rules/SKILL.md"),
+    "rules are converted to Codex skills",
+  );
+  check(kit("doctor").code === 0, "doctor finds no problems in the Codex installation");
+  check(kit("uninstall").code === 0, "uninstall of the Codex installation exits 0");
+  check(
+    JSON.stringify(tree()) === JSON.stringify(["CLAUDE.md", "docs", "docs/agent-context.md"]),
+    "Codex uninstall leaves only user-owned files",
+  );
 } finally {
   rmSync(project, { recursive: true, force: true });
 }

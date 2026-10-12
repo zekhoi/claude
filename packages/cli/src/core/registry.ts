@@ -2,6 +2,7 @@ import { copyFile, lstat, mkdir, readFile, readdir, rm, writeFile } from "node:f
 import path from "node:path";
 import type { ZodError, ZodType } from "zod";
 import { validateContent, validateItemFiles } from "../adapters/claude.js";
+import { renderItem, validateRendered } from "../adapters/index.js";
 import { contentHash, decodeUtf8 } from "./content.js";
 import { validateQuality } from "./quality.js";
 import { error, hasErrors, type Diagnostic } from "./diagnostics.js";
@@ -12,6 +13,7 @@ import {
   REGISTRY_SCHEMA_VERSION,
   SourceIndexSchema,
   type PackagedIndex,
+  type PackagedItem,
   type Preset,
   type RegistryItem,
 } from "./schemas.js";
@@ -120,7 +122,30 @@ function validateCatalog(
         }),
       );
     }
+    const before = diagnostics.length;
     diagnostics.push(...validateItemFiles(item));
+    for (const file of item.files) {
+      const content = contents.get(file.source);
+      if (content !== undefined) diagnostics.push(...validateContent(item, file, content));
+    }
+    // Other agents' renderings are checked only for valid items, so one source problem is
+    // reported once.
+    if (diagnostics.length === before && item.files.every((f) => contents.has(f.source))) {
+      for (const file of renderItem(item as PackagedItem, contents, ["codex"])) {
+        diagnostics.push(...validateRendered(item as PackagedItem, file, "codex"));
+        if (file.install === "managed-block") continue;
+        const key = `codex\0${collisionKey(file.destination)}`;
+        const owner = destinations.get(key);
+        if (owner !== undefined) {
+          diagnostics.push(
+            error("DESTINATION_COLLISION", `${item.id} and ${owner} share a Codex destination`, {
+              path: file.destination,
+            }),
+          );
+        }
+        destinations.set(key, item.id);
+      }
+    }
     for (const file of item.files) {
       const key = collisionKey(file.destination);
       const owner = destinations.get(key);
@@ -133,10 +158,7 @@ function validateCatalog(
       }
       destinations.set(key, item.id);
       const content = contents.get(file.source);
-      if (content !== undefined) {
-        diagnostics.push(...validateContent(item, file, content));
-        diagnostics.push(...validateQuality(item, file, content));
-      }
+      if (content !== undefined) diagnostics.push(...validateQuality(item, file, content));
     }
   }
 

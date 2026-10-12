@@ -25,8 +25,10 @@ export function hasAgentsImport(text: string): boolean {
 export function ownedDirs(destination: string): string[] {
   const parts = destination.split("/");
   let root: number | undefined;
-  if (parts[0] === ".claude" && parts[1] === "skills" && parts[2]?.startsWith(NAME_PREFIX))
-    root = 3;
+  const skillsDir =
+    (parts[0] === ".claude" && parts[1] === "skills") ||
+    (parts[0] === ".agents" && parts[1] === "skills");
+  if (skillsDir && parts[2]?.startsWith(NAME_PREFIX)) root = 3;
   else if (destination.startsWith(`${RULES_DIR}/`)) root = RULES_DIR.split("/").length;
   if (root === undefined) return [];
   const dirs: string[] = [];

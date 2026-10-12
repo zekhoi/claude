@@ -54,7 +54,7 @@ export async function inspectTarget(
     return { root, diagnostics: [...read.diagnostics, ...lockDiagnostics] };
   }
   if (!read.manifest) return { root, registry: loaded.value, diagnostics: lockDiagnostics };
-  const files = await readTargetFiles(root, requiredPaths(read.manifest));
+  const files = await readTargetFiles(root, requiredPaths(loaded.value, read.manifest));
   return {
     root,
     registry: loaded.value,

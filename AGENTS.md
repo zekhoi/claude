@@ -5,7 +5,7 @@ Instructions for agents working on this repository. Content installed into user 
 - Read `docs/PLAN.md` before changing behavior; it is the source of truth for commands, safety rules, and scope.
 - Use pnpm (`corepack pnpm` if pnpm is not installed). Before reporting work as done, run `pnpm -r run typecheck`, `pnpm -r run test`, `pnpm exec eslint .`, and `pnpm exec prettier --check .`.
 - Registry source metadata never contains checksums; the build generates them. Run the tests after editing anything in `registry/`; they validate the real registry.
-- The core produces plans, the adapter maps and validates destinations, and the writer applies plans. Keep filesystem writes out of the core.
+- The core produces plans, adapters (`packages/cli/src/adapters/`) render registry items for each coding agent and validate them, and the writer applies plans. The registry stores the Claude Code layout; other agents derive from it. Keep filesystem writes out of the core.
 - Never weaken path validation, checksum checks, or conflict handling to make a test pass.
 - Write all distributed content and documentation in English.
 - Do not publish the package or change release configuration without an explicit instruction.

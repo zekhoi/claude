@@ -1,65 +1,68 @@
 import { readdir } from "node:fs/promises";
 import path from "node:path";
-import { CLAUDE_MD, NAME_PREFIX, parseFrontmatter, validateContent } from "../adapters/claude.js";
+import { CLAUDE_MD, NAME_PREFIX } from "../adapters/claude.js";
+import { invocationName, validateInstalledFile } from "../adapters/index.js";
 import { error, warning, type Diagnostic } from "../core/diagnostics.js";
 import { MANIFEST_PATH } from "../core/manifest.js";
 import { emit } from "../core/output.js";
 import { requiredPaths } from "../core/planner.js";
+import type { PackagedRegistry } from "../core/registry.js";
 import type { Manifest, RegistryItem } from "../core/schemas.js";
 import { readTargetFile, resolveIn } from "../core/target.js";
 import { inspectTarget, type Inspection } from "./status.js";
 
-/** Installed names that Claude Code uses for invocation, mapped to their item's destination. */
-function installedNames(manifest: Manifest): Map<string, string> {
-  const names = new Map<string, string>();
-  for (const [id, entry] of Object.entries(manifest.items)) {
-    const [type, name] = id.split("/");
-    if (type !== "skill" && type !== "agent") continue;
-    const main = entry.files.find((f) =>
-      type === "skill" ? f.destination.endsWith("/SKILL.md") : true,
-    );
-    if (main) names.set(`${NAME_PREFIX}${name}`, main.destination);
-  }
-  return names;
-}
-
-/** Other project skills and agents that claim one of our names. */
+/** Other project skills and agents that claim one of our installed names, per tool. */
 async function nameCollisions(root: string, manifest: Manifest): Promise<Diagnostic[]> {
-  const ours = installedNames(manifest);
+  const ours = new Map<string, string>();
+  for (const entry of Object.values(manifest.items)) {
+    for (const f of entry.files) {
+      const state = await readTargetFile(root, f.destination);
+      const id = invocationName(f.destination, state.state === "file" ? state.text : undefined);
+      if (id) ours.set(`${id.namespace}\0${id.name}`, f.destination);
+    }
+  }
   const diagnostics: Diagnostic[] = [];
-  const check = async (rel: string, fallbackName: string) => {
+  const check = async (rel: string) => {
     const state = await readTargetFile(root, rel);
     if (state.state !== "file") return;
-    const declared = parseFrontmatter(state.text)?.["name"];
-    const name = typeof declared === "string" ? declared : fallbackName;
-    const owner = ours.get(name);
-    if (owner && owner !== rel) {
+    const id = invocationName(rel, state.text);
+    const owner = id && ours.get(`${id.namespace}\0${id.name}`);
+    if (id && owner && owner !== rel) {
       diagnostics.push(
-        error("NAME_COLLISION", `${rel} also declares the name ${name}, installed at ${owner}`, {
+        error("NAME_COLLISION", `${rel} also declares the name ${id.name}, installed at ${owner}`, {
           path: rel,
-          action: "Rename one of them so Claude Code can tell them apart",
+          action: `Rename one of them so ${id.namespace.replace(/ (skills|subagents)$/, "")} can tell them apart`,
         }),
       );
     }
   };
   const list = (dir: string) =>
     readdir(resolveIn(root, dir), { withFileTypes: true }).catch(() => []);
-  for (const entry of await list(".claude/skills")) {
-    if (entry.isDirectory()) await check(`.claude/skills/${entry.name}/SKILL.md`, entry.name);
+  for (const dir of [".claude/skills", ".agents/skills"]) {
+    for (const entry of await list(dir)) {
+      if (entry.isDirectory()) await check(`${dir}/${entry.name}/SKILL.md`);
+    }
   }
-  for (const entry of await list(".claude/agents")) {
-    if (entry.isFile() && entry.name.endsWith(".md")) {
-      await check(`.claude/agents/${entry.name}`, entry.name.slice(0, -3));
+  for (const [dir, ext] of [
+    [".claude/agents", ".md"],
+    [".codex/agents", ".toml"],
+  ] as const) {
+    for (const entry of await list(dir)) {
+      if (entry.isFile() && entry.name.endsWith(ext)) await check(`${dir}/${entry.name}`);
     }
   }
   return diagnostics;
 }
 
 /** Staging and backup files left by interrupted commands. */
-async function leftovers(root: string, manifest: Manifest | undefined): Promise<Diagnostic[]> {
+async function leftovers(
+  root: string,
+  registry: PackagedRegistry,
+  manifest: Manifest | undefined,
+): Promise<Diagnostic[]> {
   const diagnostics: Diagnostic[] = [];
   const byDir = new Map<string, Set<string>>();
-  for (const rel of [...requiredPaths(manifest), MANIFEST_PATH]) {
+  for (const rel of [...requiredPaths(registry, manifest), MANIFEST_PATH]) {
     const dir = path.posix.dirname(rel);
     byDir.set(dir, (byDir.get(dir) ?? new Set()).add(path.posix.basename(rel)));
   }
@@ -138,15 +141,16 @@ async function checkInstallation(inspection: Inspection): Promise<Diagnostic[]> 
         const state = await readTargetFile(root, f.destination);
         if (state.state === "file") {
           const [type, name] = item.id.split("/") as [RegistryItem["type"], string];
-          const pseudo = { id: item.id, type } as RegistryItem;
+          const tool = f.destination.startsWith(".claude/") ? "Claude Code" : "Codex";
           diagnostics.push(
-            ...validateContent(
-              pseudo,
-              { source: f.destination, destination: f.destination, install: "file" },
+            ...validateInstalledFile(
+              { id: item.id, type, version: item.version },
+              f.destination,
               state.text,
             ).map((d) => ({
               ...d,
-              action: d.action ?? `Claude Code may not recognize ${NAME_PREFIX}${name}`,
+              path: f.destination,
+              action: d.action ?? `${tool} may not recognize ${NAME_PREFIX}${name}`,
             })),
           );
         }
@@ -198,7 +202,9 @@ export async function doctor(options: { cwd: string; json: boolean }): Promise<n
   const diagnostics = [...inspection.diagnostics];
   if ("registry" in inspection) {
     diagnostics.push(...(await checkInstallation(inspection)));
-    diagnostics.push(...(await leftovers(inspection.root, inspection.manifest)));
+    diagnostics.push(
+      ...(await leftovers(inspection.root, inspection.registry, inspection.manifest)),
+    );
   }
   const installed = "manifest" in inspection && inspection.manifest !== undefined;
   const data = { installed, checked: root !== null };

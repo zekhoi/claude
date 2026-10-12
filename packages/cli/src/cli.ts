@@ -1,5 +1,6 @@
 import { createInterface } from "node:readline/promises";
-import { Command, CommanderError, Option } from "commander";
+import { Command, CommanderError, InvalidArgumentError, Option } from "commander";
+import { AGENT_IDS, type AgentId } from "./adapters/index.js";
 import { doctor } from "./commands/doctor.js";
 import { install, removeOrEject, uninstall, update } from "./commands/lifecycle.js";
 import { list } from "./commands/list.js";
@@ -96,12 +97,24 @@ export async function run(argv: string[]): Promise<number> {
         (value: string, previous: string[] = []) => [...previous, value],
       ),
     )
+    .addOption(
+      new Option(
+        "--agent <name>",
+        `coding agent to install for: ${AGENT_IDS.join(" or ")} (repeatable; default: claude, or the agents already installed)`,
+      ).argParser((value: string, previous: AgentId[] = []) => {
+        if (!(AGENT_IDS as readonly string[]).includes(value)) {
+          throw new InvalidArgumentError(`expected one of: ${AGENT_IDS.join(", ")}`);
+        }
+        return [...previous, value as AgentId];
+      }),
+    )
     .option("--context", "create a project-owned docs/agent-context.md template", false)
     .option("--dry-run", "show the planned changes without writing anything", false)
     .option("--diff", "show a unified diff of each planned change", false)
     .action(
       async (
         opts: CommonOptions & {
+          agent?: AgentId[];
           preset?: string[];
           context: boolean;
           dryRun: boolean;
@@ -115,14 +128,18 @@ export async function run(argv: string[]): Promise<number> {
           dryRun: opts.dryRun,
           diff: opts.diff,
           context: opts.context,
-          select: async (registry) =>
+          agents: opts.agent ?? [],
+          // Adding agents to an existing installation needs no new presets.
+          select: async (registry, manifest) =>
             opts.preset
               ? opts.preset.map(presetId)
-              : opts.json
-                ? error("INPUT_REQUIRED", "init needs a preset selection", {
-                    action: "Pass --preset <name> (repeatable)",
-                  })
-                : promptPresets(registry),
+              : manifest && opts.agent?.length
+                ? []
+                : opts.json
+                  ? error("INPUT_REQUIRED", "init needs a preset selection", {
+                      action: "Pass --preset <name> (repeatable)",
+                    })
+                  : promptPresets(registry),
           ...withHooks(),
         });
       },
@@ -141,6 +158,7 @@ export async function run(argv: string[]): Promise<number> {
         dryRun: opts.dryRun,
         diff: opts.diff,
         context: false,
+        agents: [],
         select: async () => ids,
         ...withHooks(),
       });
