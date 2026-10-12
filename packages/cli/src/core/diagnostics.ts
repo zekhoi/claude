@@ -36,6 +36,7 @@ export const DIAGNOSTIC_CODES = [
   "PLACEHOLDER",
   "BROKEN_REFERENCE",
   "TRIGGER_UNCLEAR",
+  "SCOPE_MISMATCH",
 ] as const;
 
 export type DiagnosticCode = (typeof DIAGNOSTIC_CODES)[number];

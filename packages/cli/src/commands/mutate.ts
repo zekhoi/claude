@@ -8,7 +8,10 @@ import type { Plan } from "../core/plan-builder.js";
 import { loadPackagedRegistry, type PackagedRegistry } from "../core/registry.js";
 import { BUNDLED_REGISTRY_DIR, CLI_VERSION } from "../core/runtime.js";
 import type { Manifest, PlannedChange } from "../core/schemas.js";
-import { readTargetFiles, resolveIn, resolveTarget, type FileState } from "../core/target.js";
+import type { AgentId } from "../adapters/index.js";
+import { agentsFor } from "../core/planner.js";
+import { checkScope, resolveWhere, type Where } from "../core/scope.js";
+import { readTargetFiles, resolveIn, type FileState } from "../core/target.js";
 import {
   applyWrites,
   removeLeftovers,
@@ -21,9 +24,10 @@ export interface PlanRequest {
   plan: (files: Awaited<ReturnType<typeof readTargetFiles>>) => Plan;
 }
 
-export interface MutateOptions {
+export interface MutateOptions extends Where {
   command: string;
-  cwd: string;
+  /** Agents the command adds, checked for user-scope support before planning. */
+  agents?: readonly AgentId[];
   json: boolean;
   dryRun: boolean;
   /** Attach a unified diff to every planned write. */
@@ -116,7 +120,7 @@ export async function mutate(options: MutateOptions): Promise<number> {
   if (!loaded.value || loaded.diagnostics.length > 0) return done(null, loaded.diagnostics);
   const registry = loaded.value;
 
-  const { root, diagnostics: targetDiagnostics } = await resolveTarget(options.cwd);
+  const { root, scope, diagnostics: targetDiagnostics } = await resolveWhere(options);
   if (!root) return done(null, targetDiagnostics);
 
   let lock: Lock | undefined;
@@ -130,6 +134,8 @@ export async function mutate(options: MutateOptions): Promise<number> {
   try {
     const { manifest, diagnostics: manifestDiagnostics } = await readManifest(root);
     if (manifestDiagnostics.length > 0) return done(root, manifestDiagnostics);
+    const scopeDiagnostics = checkScope(manifest, scope, agentsFor(manifest, options.agents));
+    if (scopeDiagnostics.length > 0) return done(root, scopeDiagnostics);
 
     const request = await options.prepare({ registry, manifest, cliVersion: CLI_VERSION });
     if (Array.isArray(request)) return done(root, request);

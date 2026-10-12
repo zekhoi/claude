@@ -99,6 +99,8 @@ const ManifestFileSchema = z.strictObject({
 export const ManifestSchema = z.strictObject({
   manifestSchemaVersion: z.literal(MANIFEST_SCHEMA_VERSION),
   cliVersion: z.string().min(1),
+  /** `project`: a repository. `user`: the user's home directory (`--global`). */
+  scope: z.enum(["project", "user"]).default("project"),
   /** Coding agents the installation targets; every item is rendered for each of them. */
   agents: z.array(z.enum(["claude", "codex"])).min(1),
   /** Presets the user requested; informational only, never used to add items during update. */

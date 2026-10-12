@@ -6,6 +6,9 @@ Install engineering guidelines, rules, subagents, and skills for [Claude Code](h
 # From the root of the repository to set up
 npx @zekhoi/agent-kit@latest init --preset node
 
+# Once for your user account, for every project
+npx @zekhoi/agent-kit@latest init --global --preset base
+
 # For Codex, or for both agents
 npx @zekhoi/agent-kit@latest init --preset node --agent codex
 npx @zekhoi/agent-kit@latest init --preset node --agent claude --agent codex
@@ -35,6 +38,6 @@ It does not launch any agent, need an API key, or change agent settings such as 
 | `doctor`                                                    | Check the installation without changing anything                                                                  |
 | `uninstall`                                                 | Remove everything agent-kit manages                                                                               |
 
-Every command accepts `--cwd <path>` and `--json`; commands that change files accept `--dry-run`. Exit codes: `0` success, `1` error, `2` conflict that needs your decision.
+Every command accepts `--cwd <path>` (or `--global` for the user-level installation) and `--json`; commands that change files accept `--dry-run`. Exit codes: `0` success, `1` error, `2` conflict that needs your decision.
 
 Requires Node.js 22.12 or later.

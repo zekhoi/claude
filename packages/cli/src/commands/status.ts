@@ -7,7 +7,8 @@ import { requiredPaths } from "../core/planner.js";
 import { loadPackagedRegistry, type PackagedRegistry } from "../core/registry.js";
 import { BUNDLED_REGISTRY_DIR } from "../core/runtime.js";
 import type { Manifest } from "../core/schemas.js";
-import { readTargetFiles, resolveTarget } from "../core/target.js";
+import { checkScope, resolveWhere, type Where } from "../core/scope.js";
+import { readTargetFiles } from "../core/target.js";
 
 export interface Inspection {
   root: string;
@@ -19,11 +20,11 @@ export interface Inspection {
 
 /** Loads everything read-only commands need. Never writes, locks, or creates directories. */
 export async function inspectTarget(
-  cwd: string,
+  where: Where,
 ): Promise<Inspection | { diagnostics: Diagnostic[]; root?: string }> {
   const loaded = await loadPackagedRegistry(BUNDLED_REGISTRY_DIR);
   if (!loaded.value || loaded.diagnostics.length > 0) return { diagnostics: loaded.diagnostics };
-  const { root, diagnostics } = await resolveTarget(cwd);
+  const { root, scope, diagnostics } = await resolveWhere(where);
   if (!root) return { diagnostics };
 
   const lockDiagnostics: Diagnostic[] = [];
@@ -54,6 +55,8 @@ export async function inspectTarget(
     return { root, diagnostics: [...read.diagnostics, ...lockDiagnostics] };
   }
   if (!read.manifest) return { root, registry: loaded.value, diagnostics: lockDiagnostics };
+  const scopeDiagnostics = checkScope(read.manifest, scope, read.manifest.agents);
+  if (scopeDiagnostics.length > 0) return { root, diagnostics: scopeDiagnostics };
   const files = await readTargetFiles(root, requiredPaths(loaded.value, read.manifest));
   return {
     root,
@@ -116,8 +119,8 @@ function render(root: string, data: StatusData): string {
   return lines.join("\n");
 }
 
-export async function status(options: { cwd: string; json: boolean }): Promise<number> {
-  const result = await inspectTarget(options.cwd);
+export async function status(options: Where & { json: boolean }): Promise<number> {
+  const result = await inspectTarget(options);
   const root = result.root ?? null;
   if (!("registry" in result)) {
     return emit(

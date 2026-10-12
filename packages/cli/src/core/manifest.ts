@@ -10,10 +10,12 @@ export const LOCK_PATH = `${STATE_DIR}/lock`;
 export function emptyManifest(
   cliVersion: string,
   agents: Manifest["agents"] = ["claude"],
+  scope: Manifest["scope"] = "project",
 ): Manifest {
   return {
     manifestSchemaVersion: MANIFEST_SCHEMA_VERSION,
     cliVersion,
+    scope,
     agents,
     presets: [],
     items: {},

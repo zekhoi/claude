@@ -9,6 +9,7 @@ import { requiredPaths } from "../core/planner.js";
 import type { PackagedRegistry } from "../core/registry.js";
 import type { Manifest, RegistryItem } from "../core/schemas.js";
 import { readTargetFile, resolveIn } from "../core/target.js";
+import type { Where } from "../core/scope.js";
 import { inspectTarget, type Inspection } from "./status.js";
 
 /** Other project skills and agents that claim one of our installed names, per tool. */
@@ -196,8 +197,8 @@ async function checkInstallation(inspection: Inspection): Promise<Diagnostic[]> 
 }
 
 /** Read-only diagnostics. Exits 1 when any error is found. Never writes or locks. */
-export async function doctor(options: { cwd: string; json: boolean }): Promise<number> {
-  const inspection = await inspectTarget(options.cwd);
+export async function doctor(options: Where & { json: boolean }): Promise<number> {
+  const inspection = await inspectTarget(options);
   const root = inspection.root ?? null;
   const diagnostics = [...inspection.diagnostics];
   if ("registry" in inspection) {
