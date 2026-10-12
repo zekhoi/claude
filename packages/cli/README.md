@@ -2,11 +2,9 @@
 
 Install engineering guidelines, rules, subagents, and skills for [Claude Code](https://code.claude.com/docs) into a repository with one command, then keep them up to date without losing your own edits.
 
-> Status: pre-release. The package name is a placeholder until the first published version.
-
 ```bash
 # From the root of the repository to set up
-npx @yourname/agent-kit@latest init --preset node
+npx @zekhoi/agent-kit@latest init --preset node
 ```
 
 This writes plain files you can review and commit:

@@ -1,6 +1,6 @@
 {
-  "name": "@yourname/agent-kit",
-  "version": "0.0.0",
+  "name": "@zekhoi/agent-kit",
+  "version": "0.1.0",
   "description": "Install engineering guidelines, rules, agents, and skills for Claude Code into a repository",
   "type": "module",
   "license": "MIT",

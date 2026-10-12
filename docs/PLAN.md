@@ -8,7 +8,7 @@ Build a repository containing engineering guidelines, rules, agents, and skills 
 
 The primary target is Claude Code. `AGENTS.md` provides shared instructions for other agents; additional installation adapters will follow once the Claude integration is stable.
 
-Working name: `agent-kit`. Example package name: `@yourname/agent-kit`. All commands in this document describe the proposed CLI, which is not yet available as a published package.
+Name: `agent-kit`, published as `@zekhoi/agent-kit` (chosen 2026-10-12). The first release is 0.1.0.
 
 ### Release scope
 
@@ -27,7 +27,7 @@ Phases 1–4 define the initial public release. Phase 5 is future work and does 
 
 ### Decisions before release
 
-Keep `agent-kit` and `@yourname/agent-kit` as placeholders until the owner selects an available repository name and npm scope. Do not claim name availability or configure publishing against these placeholders.
+The package is `@zekhoi/agent-kit` in the `zekhoi/claude` repository, licensed MIT.
 
 During foundation work, select and record Node and Claude Code version ranges using current official documentation and verification; current values and verified format assumptions are in `docs/compatibility.md`. These unresolved values block publication, not local development. Select the publisher account and publishing mechanism during release preparation.
 
@@ -35,20 +35,20 @@ During foundation work, select and record Node and Claude Code version ranges us
 
 ```bash
 # Run from the target repository root
-npx @yourname/agent-kit@latest init
+npx @zekhoi/agent-kit@latest init
 
 # Add individual components
-npx @yourname/agent-kit@latest add skill/code-review
-npx @yourname/agent-kit@latest add agent/debugger
-npx @yourname/agent-kit@latest add rule/typescript
+npx @zekhoi/agent-kit@latest add skill/code-review
+npx @zekhoi/agent-kit@latest add agent/debugger
+npx @zekhoi/agent-kit@latest add rule/typescript
 
 # Inspect the catalog and installation status
-npx @yourname/agent-kit@latest list
-npx @yourname/agent-kit@latest status
+npx @zekhoi/agent-kit@latest list
+npx @zekhoi/agent-kit@latest status
 
 # Preview and apply updates
-npx @yourname/agent-kit@latest update --dry-run
-npx @yourname/agent-kit@latest update
+npx @zekhoi/agent-kit@latest update --dry-run
+npx @zekhoi/agent-kit@latest update
 ```
 
 Installation produces local files that Claude can read and users can commit with their projects. The CLI does not launch Claude, request API keys, or require a backend application.
@@ -342,7 +342,7 @@ Complete when lifecycle commands preserve user changes, a customized item never 
 
 ### Phase 4 — Verification and distribution
 
-- [ ] Finalize the repository name and npm scope.
+- [x] Finalize the repository name and npm scope.
 - [x] Implement GitHub Actions `ci.yml` and `compatibility.yml` for pull requests and default-branch pushes.
 - [x] Test Linux, macOS, and Windows across the supported Node matrix.
 - [ ] Configure required checks and secure release workflow permissions.

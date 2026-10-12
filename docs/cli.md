@@ -3,7 +3,7 @@
 Run commands from the repository you want to configure, or pass `--cwd <path>`. Agent Kit never moves to the git root or touches other packages on its own.
 
 ```bash
-npx @yourname/agent-kit@latest <command> [options]
+npx @zekhoi/agent-kit@latest <command> [options]
 ```
 
 ## Common options

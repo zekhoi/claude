@@ -4,7 +4,7 @@ Publishing requires an explicit decision by a maintainer. Pull requests and push
 
 ## One-time setup
 
-1. Choose the npm package name and scope, and replace `@yourname/agent-kit` in `packages/cli/package.json`, the README files, and `docs/cli.md`.
+1. The package is `@zekhoi/agent-kit`, published from the `zekhoi` npm account. Log in to npm as that account before configuring trusted publishing.
 2. The license is MIT (`LICENSE` at the repository root and in `packages/cli/`). Keep both copies identical.
 3. On npmjs.com, configure [trusted publishing](https://docs.npmjs.com/trusted-publishers) for the package with this repository and the workflow file `release.yml`. No npm token is stored in GitHub.
 4. In the GitHub repository settings, create an environment named `npm-publish` with required reviewers, and restrict it to the default branch.

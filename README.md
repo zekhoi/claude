@@ -2,7 +2,7 @@
 
 A CLI that installs engineering guidelines, rules, subagents, and skills for Claude Code into a repository.
 
-> Status: in development. The package is not published and `@yourname/agent-kit` is a placeholder name.
+> Status: preparing the first release, `@zekhoi/agent-kit` 0.1.0. It is not published yet.
 > See [docs/PLAN.md](docs/PLAN.md) for the design and roadmap.
 
 ## Development

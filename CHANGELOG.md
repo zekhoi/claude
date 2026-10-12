@@ -2,9 +2,9 @@
 
 All notable changes to the CLI and its bundled catalog. Item versions are listed per release; see [versioning rules](docs/PLAN.md#content-versioning).
 
-## Unreleased
+## 0.1.0
 
-First release candidate. Not yet published.
+First release. Published as `@zekhoi/agent-kit`.
 
 ### CLI
 

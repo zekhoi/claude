@@ -23,7 +23,8 @@ if (pkg.license && pkg.license !== "UNLICENSED" && !existsSync(path.join(repo, "
 }
 
 const compatibility = read("docs/compatibility.md");
-if (compatibility.includes("_provisional_")) {
+// Only table rows declare ranges; the explanatory text mentions the marker itself.
+if (/^\|.*_provisional_.*\|$/m.test(compatibility)) {
   problems.push("docs/compatibility.md still lists provisional ranges; verify them in CI first");
 }
 if (/\| *Claude Code *\| *Not yet declared/.test(compatibility)) {
