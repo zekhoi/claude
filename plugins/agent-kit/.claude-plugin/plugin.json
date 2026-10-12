@@ -1,0 +1,20 @@
+{
+  "name": "agent-kit",
+  "version": "0.1.0",
+  "description": "Engineering guidelines, skills, rules, and subagents for code review, debugging, feature work, commits, pull requests, security audits, and database design.",
+  "author": {
+    "name": "Khoironi Kurnia Syah",
+    "url": "https://github.com/zekhoi"
+  },
+  "homepage": "https://github.com/zekhoi/claude",
+  "repository": "https://github.com/zekhoi/claude",
+  "license": "MIT",
+  "keywords": [
+    "engineering",
+    "code-review",
+    "debugging",
+    "commits",
+    "pull-requests",
+    "security"
+  ]
+}

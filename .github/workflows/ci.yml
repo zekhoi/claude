@@ -54,6 +54,15 @@ jobs:
         run: pnpm build
       - name: Test
         run: pnpm test
+      - name: Check the Claude Code plugin is up to date
+        run: |
+          pnpm build:plugin
+          git diff --exit-code -- plugins .claude-plugin
+          test -z "$(git status --porcelain -- plugins .claude-plugin)"
+      - name: Validate the Claude Code plugin and marketplace
+        run: |
+          npx -y @anthropic-ai/claude-code@2.1.296 plugin validate --strict plugins/agent-kit
+          npx -y @anthropic-ai/claude-code@2.1.296 plugin validate --strict .
       - name: Verify package
         run: node scripts/verify-package.mjs --out artifacts
       - name: Upload package

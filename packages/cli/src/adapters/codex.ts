@@ -26,7 +26,7 @@ function itemName(item: PackagedItem): string {
 }
 
 /** Splits leading YAML frontmatter from the body. */
-function splitFrontmatter(content: string): { data: Record<string, unknown>; body: string } {
+export function splitFrontmatter(content: string): { data: Record<string, unknown>; body: string } {
   const normalized = content.replace(/\r\n?/g, "\n");
   const match = /^---\n[\s\S]*?\n---(?:\n|$)/.exec(normalized);
   return {
@@ -94,7 +94,8 @@ function agentToml(item: PackagedItem, content: string): string {
   return `${lines.join("\n")}\n`;
 }
 
-function ruleSkill(item: PackagedItem, content: string): string {
+/** Converts a path-scoped rule into a skill whose description names the files it applies to. */
+export function ruleSkill(item: PackagedItem, content: string, skillName: string): string {
   const { data, body } = splitFrontmatter(content);
   const raw = data["paths"];
   const globs =
@@ -107,7 +108,7 @@ function ruleSkill(item: PackagedItem, content: string): string {
       : "Use for any change in this project. Do not use outside this project.";
   const frontmatter = [
     "---",
-    `name: ${NAME_PREFIX}${itemName(item)}-rules`,
+    `name: ${skillName}`,
     `description: ${JSON.stringify(`${title} for this project. ${scope}`)}`,
     "---",
     "",
@@ -142,7 +143,7 @@ export function renderCodex(
         return {
           ...base,
           destination: `${CODEX_SKILLS_DIR}/${NAME_PREFIX}${itemName(item)}-rules/SKILL.md`,
-          content: ruleSkill(item, content),
+          content: ruleSkill(item, content, `${NAME_PREFIX}${itemName(item)}-rules`),
         };
     }
   });

@@ -21,6 +21,17 @@ This writes plain files you can review and commit:
 - `.agents/skills/kit-*` and `.codex/agents/kit-*.toml`: the same for Codex (rules become skills, since Codex has no path-scoped rules; project subagents load once you trust the project in Codex).
 - `.agent-kit/manifest.json`: what was installed, so updates can detect your local edits.
 
+### As a Claude Code plugin
+
+The skills and subagents are also published as a Claude Code plugin, with no npm or files in your repository:
+
+```text
+/plugin marketplace add zekhoi/claude
+/plugin install agent-kit@agent-kit
+```
+
+Plugin components are namespaced (`/agent-kit:code-review`). Plugins cannot load always-on guidelines or path-scoped rules, so the plugin ships them as skills; use the CLI when you want guidelines in every session, rules scoped to files, Codex support, or update tracking that preserves your edits. Use one or the other in a project, not both.
+
 It does not launch any agent, need an API key, or change agent settings such as `.claude/settings.json` or `.codex/config.toml`.
 
 ## Commands

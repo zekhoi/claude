@@ -64,3 +64,9 @@ Checked on 2026-10-13 with codex-cli 0.162.1 on macOS, in a scratch git reposito
 | Read-only sandbox for `kit-reviewer`       | Not independently verified: the parent session was already read-only                                                                                                                                                                         |
 
 Trust is recorded by Codex itself (`[projects."<path>"] trust_level = "trusted"` in `~/.codex/config.toml`) when the user approves a project; a `-c projects....trust_level` command-line override did not enable project configuration in 0.162.1.
+
+## Claude Code plugin
+
+`plugins/agent-kit/` is generated from the registry with `pnpm build:plugin`, and `.claude-plugin/marketplace.json` makes this repository a plugin marketplace ([plugins](https://code.claude.com/docs/en/plugins/manifest-reference), [marketplaces](https://code.claude.com/docs/en/plugins/marketplace-reference)). Components are namespaced by the plugin, so names drop the `kit-` prefix: `/agent-kit:code-review`, subagent `agent-kit:reviewer`. Plugins cannot ship CLAUDE.md content or path-scoped rules; the guidelines become the `engineering-guidelines` skill and each rule a `*-rules` skill, which load on relevance rather than always.
+
+Verified on 2026-10-13 with Claude Code 2.1.296: `claude plugin validate --strict` passes for the plugin and the marketplace (also in CI, without authentication); with `--plugin-dir`, all 11 skills and both subagents load under `agent-kit:`; a delegation produced an `Agent` call with `subagent_type: agent-kit:reviewer`; and `/agent-kit:code-review` produced findings in the skill's format without editing files.

@@ -1,0 +1,16 @@
+{
+  "name": "agent-kit",
+  "description": "The agent-kit plugin: engineering guidelines, skills, rules, and subagents for code review, debugging, feature work, commits, pull requests, security audits, and database design.",
+  "owner": {
+    "name": "Khoironi Kurnia Syah",
+    "url": "https://github.com/zekhoi"
+  },
+  "plugins": [
+    {
+      "name": "agent-kit",
+      "source": "./plugins/agent-kit",
+      "description": "Engineering guidelines, skills, rules, and subagents for code review, debugging, feature work, commits, pull requests, security audits, and database design.",
+      "version": "0.1.0"
+    }
+  ]
+}

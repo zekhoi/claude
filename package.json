@@ -13,7 +13,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "git config core.hooksPath .githooks || true"
+    "prepare": "git config core.hooksPath .githooks || true",
+    "build:plugin": "node packages/cli/dist/scripts/build-plugin.js packages/cli/dist/registry plugins/agent-kit .claude-plugin/marketplace.json"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
