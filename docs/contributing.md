@@ -15,6 +15,15 @@ pnpm exec prettier --check .
 
 The tests build the CLI and run it against temporary projects. They also validate the real `registry/`.
 
+## Commits and pull requests
+
+`pnpm install` enables the repository's git hooks (`core.hooksPath` is set to `.githooks`):
+
+- `pre-commit` runs Prettier and ESLint on the staged files.
+- `commit-msg` checks the message with `scripts/check-commit-message.mjs`.
+
+Write a capitalized, imperative subject of at most 72 characters without a trailing period or a `type:` prefix, for example "Add diff previews for conflicts and planned changes". Leave a blank line before the body, and explain why in the body. Pull requests are squash-merged, so the PR title becomes the commit subject on `main`; CI applies the same check to titles, limited to 64 characters to leave room for the ` (#123)` suffix.
+
 ## Changing registry content
 
 Registry content is installed into user projects. Write it in English, keep it concise, and respect project conventions instead of imposing a framework.
