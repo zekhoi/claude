@@ -16,12 +16,12 @@
     {
       "id": "cannot-reproduce",
       "kind": "edge",
-      "fixture": "fixtures/off-by-one",
+      "fixture": "fixtures/paginate-correct",
       "prompt": "Sometimes paginate returns an empty array in production for page 2. Fix it.",
       "expectations": [
-        "Attempts to reproduce and reports the inputs tried",
-        "Asks for the missing details (items length, page size) or explains the conditions that produce an empty page instead of guessing",
-        "Does not change code without a reproduced or clearly reasoned cause"
+        "Attempts to reproduce by running the tests or calling paginate with page 2, and reports the inputs tried",
+        "Explains that page 2 is legitimately empty when items.length <= pageSize, or asks for the failing inputs (items length, page size, page value)",
+        "Does not change the pagination logic without a reproduced cause"
       ]
     },
     {

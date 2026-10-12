@@ -54,6 +54,12 @@ evals/<skill-id>/
 | `prompt`       | What the user says to the agent.                                                                                                           |
 | `expectations` | Observable outcomes judged by a reviewer. Describe behavior, not exact wording.                                                            |
 
+## Running cases
+
+`node evals/run.mjs` runs every case with Claude Code and writes one JSON transcript summary per case: skills invoked, tool calls, files changed, the diff, the fixture's tests afterwards, the final answer, and cost. Build the CLI first (`pnpm -r run build`). Options: `--skill <id>`, `--case <id>`, `--model <model>` (default `sonnet`), `--budget <usd>` per case (default 1), and `--out <dir>`.
+
+Each case runs in a fresh git repository containing the fixture, with the guidelines and every skill installed by the CLI, so negative cases test real triggering. Sessions load only the project's configuration. Judging the expectations remains a review step: read the summaries and record the outcome.
+
 ## Result records
 
 Each run is a Markdown file under `results/` recording:

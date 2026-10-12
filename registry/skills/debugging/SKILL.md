@@ -1,6 +1,6 @@
 ---
 name: kit-debugging
-description: Systematically debug a failure by reproducing it, isolating the root cause, fixing it, and verifying the fix. Use when the user reports a bug, error, failing test, crash, regression, or unexpected behavior and wants it diagnosed or fixed. Do not use for code review, new feature work, or performance tuning without a concrete failure.
+description: Systematically debug a failure by reproducing it, isolating the root cause, fixing it, and verifying the fix. Use when the user reports a bug, error, failing test, crash, regression, or unexpected behavior and wants it diagnosed or fixed, including intermittent or production-only problems they ask you to fix. Do not use for code review, new feature work, or performance tuning without a concrete failure.
 ---
 
 # Debugging

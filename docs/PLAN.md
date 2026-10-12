@@ -1,6 +1,6 @@
 # Agent Kit — Implementation Plan
 
-Status: Phases 1–4 implemented. Outstanding before the first release: owner decisions (package name and scope, license, publisher setup), a green CI matrix on GitHub, and recorded skill evaluations.
+Status: Phases 1–4 implemented; CI and the cross-platform matrix pass on GitHub, and initial skill evaluations are recorded. Outstanding before the first release: the package name and scope, the npm publisher and GitHub environment setup, branch protection, the declared Claude Code range, and the version and changelog.
 
 ## 1. Goal
 
@@ -321,7 +321,7 @@ Complete when the built CLI can read and validate the bundled registry.
 - [x] Add the initial skills and rules catalog.
 - [x] Install this repository's own managed blocks through the CLI.
 - [x] Document the custom skill generation workflow and write evaluation cases for each initial skill.
-- [ ] Run each initial skill's evaluation cases with Claude Code and record the results.
+- [x] Run each initial skill's evaluation cases with Claude Code and record the results.
 
 Complete when installation works for new projects and projects with existing instructions without losing content.
 
@@ -344,7 +344,7 @@ Complete when lifecycle commands preserve user changes, a customized item never 
 
 - [ ] Finalize the repository name and npm scope.
 - [x] Implement GitHub Actions `ci.yml` and `compatibility.yml` for pull requests and default-branch pushes.
-- [ ] Test Linux, macOS, and Windows across the supported Node matrix.
+- [x] Test Linux, macOS, and Windows across the supported Node matrix.
 - [ ] Configure required checks and secure release workflow permissions.
 - [x] Verify the `npm pack` tarball, `bin` field, shebang, and registry assets.
 - [x] Run the CLI from a local tarball in a separate project.
@@ -352,7 +352,7 @@ Complete when lifecycle commands preserve user changes, a customized item never 
 - [x] Write the README, command reference, contribution guide, and changelog.
 - [x] Record source provenance, licenses, and required notices for reused content.
 - [x] Document versioning rules.
-- [ ] Record agent evaluation results for initial skills.
+- [x] Record agent evaluation results for initial skills.
 - [x] Add content quality checks to CI.
 - [x] Document release, published-package smoke testing, and recovery procedures.
 - [x] Prepare the release workflow; publish only after the package identity, compatibility ranges, publisher setup, and release authorization are established.

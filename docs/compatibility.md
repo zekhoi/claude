@@ -2,14 +2,14 @@
 
 Status: development. Ranges marked _provisional_ have not been verified by the CI matrix and must not be published as supported until they are. Remove the marker only after the `Compatibility` workflow passes on every listed combination; the release gate (`scripts/check-release.mjs`) refuses to release while any remain.
 
-| Component                    | Supported                                   | Notes                                                                                                                                              |
-| ---------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Node.js                      | >= 22.12.0 (22 LTS, 24 LTS) — _provisional_ | Node 20 reached end of life in April 2026. 22.12 is required by `commander` 15. Enforced by `engines` and a startup check (`UNSUPPORTED_RUNTIME`). |
-| Operating systems            | Linux, macOS, Windows — _provisional_       | Verified locally on macOS only.                                                                                                                    |
-| Claude Code                  | >= 2.1.296 — _provisional_                  | Verified end to end with 2.1.296 on 2026-10-12 (see below). Earlier versions are untested.                                                         |
-| Registry schema              | 1                                           | Newer versions are rejected with `UNSUPPORTED_SCHEMA` before any write.                                                                            |
-| Manifest schema              | 1                                           | Newer versions are rejected with `UNSUPPORTED_SCHEMA` before any write.                                                                            |
-| CLI output schema (`--json`) | 1                                           | `outputSchemaVersion` in every JSON result.                                                                                                        |
+| Component                    | Supported                   | Notes                                                                                                                                                                                                  |
+| ---------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Node.js                      | >= 22.12.0 (22 LTS, 24 LTS) | Node 20 reached end of life in April 2026; 22.12 is required by `commander` 15. Enforced by `engines` and a startup check (`UNSUPPORTED_RUNTIME`). CI tests 22.12.0, the latest 22, and the latest 24. |
+| Operating systems            | Linux, macOS, Windows       | All tests and package verification pass on `ubuntu-latest`, `macos-latest`, and `windows-latest` for every Node version above (first verified in the Compatibility workflow on 2026-10-12).            |
+| Claude Code                  | >= 2.1.296 — _provisional_  | Verified end to end with 2.1.296 on 2026-10-12 (see below). Earlier versions are untested.                                                                                                             |
+| Registry schema              | 1                           | Newer versions are rejected with `UNSUPPORTED_SCHEMA` before any write.                                                                                                                                |
+| Manifest schema              | 1                           | Newer versions are rejected with `UNSUPPORTED_SCHEMA` before any write.                                                                                                                                |
+| CLI output schema (`--json`) | 1                           | `outputSchemaVersion` in every JSON result.                                                                                                                                                            |
 
 ## Claude Code format assumptions
 

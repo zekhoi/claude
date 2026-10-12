@@ -23,3 +23,5 @@ First release candidate. Not yet published.
 | `skill/code-review`, `skill/debugging`, `skill/feature-implementation`, `skill/database-design` | 1.0.0   |
 | `agent/reviewer`, `agent/debugger`                                                              | 1.0.0   |
 | Presets `base`, `node`, `python`                                                                | —       |
+
+All four skills were evaluated with Claude Code 2.1.296 (Sonnet) against normal, edge, and negative cases; see `evals/*/results/`. The `debugging` description now also covers intermittent and production-only problems after an evaluation showed it did not trigger for them.
