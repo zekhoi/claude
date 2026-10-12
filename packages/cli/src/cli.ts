@@ -84,7 +84,8 @@ export async function run(argv: string[]): Promise<number> {
     .description("Print an item's bundled files for comparison or manual restore")
     .argument("<type/name>", "item id, for example skill/code-review")
     .option("--file <destination>", "print only the file installed at this destination")
-    .action(async (id: string, opts: CommonOptions & { file?: string }) => {
+    .option("--diff", "compare the target's files with the bundled version", false)
+    .action(async (id: string, opts: CommonOptions & { file?: string; diff: boolean }) => {
       exitCode = await show(id, opts);
     });
 
@@ -97,13 +98,22 @@ export async function run(argv: string[]): Promise<number> {
     )
     .option("--context", "create a project-owned docs/agent-context.md template", false)
     .option("--dry-run", "show the planned changes without writing anything", false)
+    .option("--diff", "show a unified diff of each planned change", false)
     .action(
-      async (opts: CommonOptions & { preset?: string[]; context: boolean; dryRun: boolean }) => {
+      async (
+        opts: CommonOptions & {
+          preset?: string[];
+          context: boolean;
+          dryRun: boolean;
+          diff: boolean;
+        },
+      ) => {
         exitCode = await install({
           command: "init",
           cwd: opts.cwd,
           json: opts.json,
           dryRun: opts.dryRun,
+          diff: opts.diff,
           context: opts.context,
           select: async (registry) =>
             opts.preset
@@ -122,12 +132,14 @@ export async function run(argv: string[]): Promise<number> {
     .description("Install items or presets (preset/<name>)")
     .argument("<ids...>", "item or preset ids, for example skill/code-review preset/node")
     .option("--dry-run", "show the planned changes without writing anything", false)
-    .action(async (ids: string[], opts: CommonOptions & { dryRun: boolean }) => {
+    .option("--diff", "show a unified diff of each planned change", false)
+    .action(async (ids: string[], opts: CommonOptions & { dryRun: boolean; diff: boolean }) => {
       exitCode = await install({
         command: "add",
         cwd: opts.cwd,
         json: opts.json,
         dryRun: opts.dryRun,
+        diff: opts.diff,
         context: false,
         select: async () => ids,
         ...withHooks(),
@@ -145,8 +157,12 @@ export async function run(argv: string[]): Promise<number> {
     .argument("[ids...]", "installed item ids to update")
     .option("--allow-major", "allow major version updates for the selected items", false)
     .option("--dry-run", "show the planned changes without writing anything", false)
+    .option("--diff", "show a unified diff of each planned change", false)
     .action(
-      async (ids: string[], opts: CommonOptions & { allowMajor: boolean; dryRun: boolean }) => {
+      async (
+        ids: string[],
+        opts: CommonOptions & { allowMajor: boolean; dryRun: boolean; diff: boolean },
+      ) => {
         exitCode = await update({ ...opts, ids, ...withHooks() });
       },
     );
@@ -159,7 +175,8 @@ export async function run(argv: string[]): Promise<number> {
       .description(description)
       .argument("<ids...>", "installed item ids")
       .option("--dry-run", "show the planned changes without writing anything", false)
-      .action(async (ids: string[], opts: CommonOptions & { dryRun: boolean }) => {
+      .option("--diff", "show a unified diff of each planned change", false)
+      .action(async (ids: string[], opts: CommonOptions & { dryRun: boolean; diff: boolean }) => {
         exitCode = await removeOrEject({ ...opts, command: name, ids, ...withHooks() });
       });
   }
@@ -167,7 +184,8 @@ export async function run(argv: string[]): Promise<number> {
   withCommon(program.command("uninstall"))
     .description("Remove every managed item and block; keeps your own content and project context")
     .option("--dry-run", "show the planned changes without writing anything", false)
-    .action(async (opts: CommonOptions & { dryRun: boolean }) => {
+    .option("--diff", "show a unified diff of each planned change", false)
+    .action(async (opts: CommonOptions & { dryRun: boolean; diff: boolean }) => {
       exitCode = await uninstall({ ...opts, ...withHooks() });
     });
 

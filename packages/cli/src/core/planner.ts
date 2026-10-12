@@ -313,7 +313,7 @@ function planItemUpdate(
           base,
           "LOCAL_EDIT_CONFLICT",
           "the file was edited locally",
-          `Keep your version with \`agent-kit eject ${item.id}\`, or compare with \`agent-kit show ${item.id} --file ${file.destination}\`, restore it, and rerun`,
+          `Compare with \`agent-kit show ${item.id} --diff\`; keep your version with \`agent-kit eject ${item.id}\`, or restore the bundled one with \`agent-kit show ${item.id} --file ${file.destination}\` and rerun`,
         );
       }
     }
@@ -355,7 +355,7 @@ function deleteManagedFile(
       base,
       "LOCAL_EDIT_CONFLICT",
       "the file was edited locally and will not be deleted",
-      `Keep it with \`agent-kit eject ${itemId}\`, or revert your edits and rerun`,
+      `Compare with \`agent-kit show ${itemId} --diff\`; keep it with \`agent-kit eject ${itemId}\`, or revert your edits and rerun`,
     );
     return;
   } else {

@@ -151,5 +151,7 @@ export const PlannedChangeSchema = z.strictObject({
   toVersion: z.string().optional(),
   code: z.string().optional(),
   reason: z.string().optional(),
+  /** Unified diff of the planned write, present when `--diff` is requested. */
+  diff: z.string().optional(),
 });
 export type PlannedChange = z.infer<typeof PlannedChangeSchema>;

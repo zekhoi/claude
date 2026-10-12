@@ -8,11 +8,12 @@ npx @zekhoi/agent-kit@latest <command> [options]
 
 ## Common options
 
-| Option         | Commands                                                | Meaning                                                                   |
-| -------------- | ------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `--cwd <path>` | all                                                     | Target directory (default: the current directory). It must exist.         |
-| `--json`       | all                                                     | Print exactly one JSON result on stdout; see [JSON output](#json-output). |
-| `--dry-run`    | `init`, `add`, `update`, `remove`, `eject`, `uninstall` | Show the plan without creating, changing, or locking anything.            |
+| Option         | Commands                                                | Meaning                                                                                                    |
+| -------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `--cwd <path>` | all                                                     | Target directory (default: the current directory). It must exist.                                          |
+| `--json`       | all                                                     | Print exactly one JSON result on stdout; see [JSON output](#json-output).                                  |
+| `--dry-run`    | `init`, `add`, `update`, `remove`, `eject`, `uninstall` | Show the plan without creating, changing, or locking anything.                                             |
+| `--diff`       | `init`, `add`, `update`, `remove`, `eject`, `uninstall` | Add a unified diff of every planned write or deletion; combine with `--dry-run` to review before applying. |
 
 ## Commands
 
@@ -20,9 +21,9 @@ npx @zekhoi/agent-kit@latest <command> [options]
 
 Shows every item and preset bundled with this CLI version. Content is bundled in the package, so a newer CLI version may ship newer content.
 
-### `show <item> [--file <destination>]`
+### `show <item> [--file <destination>] [--diff]`
 
-Prints an item's bundled files. With `--file`, prints exactly the content that would be installed at that destination, suitable for redirecting: `agent-kit show skill/code-review --file .claude/skills/kit-code-review/SKILL.md > .claude/skills/kit-code-review/SKILL.md`.
+Prints an item's bundled files. With `--diff`, compares what the target holds (the file, or the managed block body) with the bundled version and prints a unified diff per file; files that match are reported as identical, and missing files as missing. With `--file`, prints exactly the content that would be installed at that destination, suitable for redirecting: `agent-kit show skill/code-review --file .claude/skills/kit-code-review/SKILL.md > .claude/skills/kit-code-review/SKILL.md`.
 
 ### `init [--preset <name>]... [--context]`
 
@@ -109,6 +110,7 @@ With `--json`, stdout contains one object and nothing else; prompts are disabled
 - `status` is `ok`, `error`, or `conflict`, matching exit codes `0`, `1`, and `2`.
 - `changes[].action` is one of `create`, `update`, `delete`, `unchanged`, `adopt` (an existing identical file or block is taken over), `release` (no longer managed), or `conflict`.
 - `changes[].kind` is `file`, `managed-block`, or `context`.
+- `changes[].diff` holds a unified diff when `--diff` was passed.
 - `data` for `list`, `show`, `status`, and `doctor` is command-specific; see `--json` output for its shape.
 - Fields may be added in later versions; existing fields change only with a new `outputSchemaVersion`.
 
