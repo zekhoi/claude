@@ -33,6 +33,9 @@ export const DIAGNOSTIC_CODES = [
   "NAME_COLLISION",
   "LEFTOVER_FILE",
   "CONTEXT_MISSING",
+  "PLACEHOLDER",
+  "BROKEN_REFERENCE",
+  "TRIGGER_UNCLEAR",
 ] as const;
 
 export type DiagnosticCode = (typeof DIAGNOSTIC_CODES)[number];

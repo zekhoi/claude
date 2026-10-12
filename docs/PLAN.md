@@ -1,6 +1,6 @@
 # Agent Kit — Implementation Plan
 
-Status: Phases 1–3 complete except running the initial skill evaluations; Phase 4 not started.
+Status: Phases 1–4 implemented. Outstanding before the first release: owner decisions (package name and scope, license, publisher setup), a green CI matrix on GitHub, and recorded skill evaluations.
 
 ## 1. Goal
 
@@ -343,18 +343,19 @@ Complete when lifecycle commands preserve user changes, a customized item never 
 ### Phase 4 — Verification and distribution
 
 - [ ] Finalize the repository name and npm scope.
-- [ ] Implement GitHub Actions `ci.yml` and `compatibility.yml` for pull requests and default-branch pushes.
+- [x] Implement GitHub Actions `ci.yml` and `compatibility.yml` for pull requests and default-branch pushes.
 - [ ] Test Linux, macOS, and Windows across the supported Node matrix.
 - [ ] Configure required checks and secure release workflow permissions.
-- [ ] Verify the `npm pack` tarball, `bin` field, shebang, and registry assets.
-- [ ] Run the CLI from a local tarball in a separate project.
-- [ ] Test in Claude Code: instruction imports, rules, `/kit-code-review`, and subagents.
-- [ ] Write the README, command reference, contribution guide, and changelog.
-- [ ] Record source provenance, licenses, and required notices for reused content.
-- [ ] Record agent evaluation results for initial skills and document versioning rules.
-- [ ] Add content quality checks to CI.
-- [ ] Document release, published-package smoke testing, and recovery procedures.
-- [ ] Prepare the release workflow; publish only after the package identity, compatibility ranges, publisher setup, and release authorization are established.
+- [x] Verify the `npm pack` tarball, `bin` field, shebang, and registry assets.
+- [x] Run the CLI from a local tarball in a separate project.
+- [x] Test in Claude Code: instruction imports, rules, `/kit-code-review`, and subagents.
+- [x] Write the README, command reference, contribution guide, and changelog.
+- [x] Record source provenance, licenses, and required notices for reused content.
+- [x] Document versioning rules.
+- [ ] Record agent evaluation results for initial skills.
+- [x] Add content quality checks to CI.
+- [x] Document release, published-package smoke testing, and recovery procedures.
+- [x] Prepare the release workflow; publish only after the package identity, compatibility ranges, publisher setup, and release authorization are established.
 
 Complete when the packaged CLI installs content that Claude recognizes.
 

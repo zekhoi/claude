@@ -3,6 +3,7 @@ import path from "node:path";
 import type { ZodError, ZodType } from "zod";
 import { validateContent, validateItemFiles } from "../adapters/claude.js";
 import { contentHash, decodeUtf8 } from "./content.js";
+import { validateQuality } from "./quality.js";
 import { error, hasErrors, type Diagnostic } from "./diagnostics.js";
 import { collisionKey, isSafeRelativePath } from "./paths.js";
 import {
@@ -132,7 +133,10 @@ function validateCatalog(
       }
       destinations.set(key, item.id);
       const content = contents.get(file.source);
-      if (content !== undefined) diagnostics.push(...validateContent(item, file, content));
+      if (content !== undefined) {
+        diagnostics.push(...validateContent(item, file, content));
+        diagnostics.push(...validateQuality(item, file, content));
+      }
     }
   }
 
@@ -187,6 +191,12 @@ export async function loadSourceRegistry(root: string): Promise<LoadResult<Sourc
     diagnostics.push(...result.diagnostics);
     if (result.value !== undefined) contents.set(file.source, result.value);
   }
+  // Required attribution notices for reused content must exist so the build can ship them.
+  for (const item of index.value.items) {
+    if (item.provenance?.notice) {
+      diagnostics.push(...(await readRegistryFile(root, item.provenance.notice)).diagnostics);
+    }
+  }
   diagnostics.push(...validateCatalog(index.value.items, presets, contents));
   return { value: { items: index.value.items, presets, contents }, diagnostics };
 }
@@ -220,6 +230,7 @@ export async function buildRegistry(sourceRoot: string, outDir: string): Promise
     presets: [...value.presets].sort((a, b) => a.id.localeCompare(b.id)),
   };
   for (const file of value.items.flatMap((i) => i.files)) await copy(file.source);
+  for (const item of value.items) if (item.provenance?.notice) await copy(item.provenance.notice);
 
   const templates = await readdir(path.join(sourceRoot, "templates"), {
     withFileTypes: true,

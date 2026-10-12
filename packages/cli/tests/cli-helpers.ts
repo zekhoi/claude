@@ -41,3 +41,6 @@ export async function json(cwd: string, args: string[]) {
 
 export const codesOf = (result: { diagnostics: { code: string }[] }) =>
   result.diagnostics.map((d) => d.code);
+
+/** True when the test-only hook terminated the CLI (SIGKILL, or exit code 86 on Windows). */
+export const wasKilled = (run: Run) => run.signal === "SIGKILL" || run.code === 86;

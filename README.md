@@ -31,9 +31,10 @@ Commands: `list`, `show`, `init`, `add`, `status`, `update`, `remove`, `eject`, 
 
 ## Layout
 
-| Path            | Contents                                                                                    |
-| --------------- | ------------------------------------------------------------------------------------------- |
-| `packages/cli/` | The CLI: commands, core planning and validation, and the Claude adapter                     |
-| `registry/`     | Content installed into user projects: guidelines, rules, agents, skills, presets, templates |
-| `evals/`        | Authoring evaluations for skills (not installed)                                            |
-| `docs/`         | Plan, compatibility table, and contributor documentation                                    |
+| Path            | Contents                                                                                                                                                                                                     |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `packages/cli/` | The CLI: commands, core planning and validation, and the Claude adapter                                                                                                                                      |
+| `registry/`     | Content installed into user projects: guidelines, rules, agents, skills, presets, templates                                                                                                                  |
+| `evals/`        | Authoring evaluations for skills (not installed)                                                                                                                                                             |
+| `docs/`         | [Plan](docs/PLAN.md), [command reference](docs/cli.md), [customization](docs/customization.md), [compatibility](docs/compatibility.md), [contributing](docs/contributing.md), [releasing](docs/releasing.md) |
+| `scripts/`      | Package verification and release checks used by CI                                                                                                                                                           |

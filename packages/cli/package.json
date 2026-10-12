@@ -3,13 +3,27 @@
   "version": "0.0.0",
   "description": "Install engineering guidelines, rules, agents, and skills for Claude Code into a repository",
   "type": "module",
-  "license": "UNLICENSED",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zekhoi/claude.git",
+    "directory": "packages/cli"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "agents",
+    "skills",
+    "cli"
+  ],
   "bin": {
     "agent-kit": "dist/index.js"
   },
   "files": [
     "dist",
-    "!dist/scripts"
+    "!dist/scripts",
+    "README.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=22.12.0"

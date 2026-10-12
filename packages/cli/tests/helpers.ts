@@ -26,8 +26,9 @@ export async function writeTree(files: Record<string, string | object>): Promise
   return root;
 }
 
-export const SKILL_MD =
-  "---\nname: kit-review\ndescription: Review changes for defects\n---\n\nSteps.\n";
+export const SKILL_DESCRIPTION =
+  "Review changes for defects. Use when asked to review. Do not use for edits.";
+export const SKILL_MD = `---\nname: kit-review\ndescription: ${SKILL_DESCRIPTION}\n---\n\nSteps.\n`;
 
 export function item(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {

@@ -18,11 +18,19 @@ import {
 } from "../src/core/registry.js";
 import type { Manifest } from "../src/core/schemas.js";
 import { rawHash, type FileState } from "../src/core/target.js";
-import { guidelineItem, item, registryFiles, tempDir, writeTree } from "./helpers.js";
+import {
+  guidelineItem,
+  item,
+  registryFiles,
+  SKILL_DESCRIPTION,
+  tempDir,
+  writeTree,
+} from "./helpers.js";
 
 const SKILL = ".claude/skills/kit-review/SKILL.md";
 const REF = ".claude/skills/kit-review/references/checks.md";
-const skillMd = (body: string) => `---\nname: kit-review\ndescription: Review\n---\n\n${body}\n`;
+const skillMd = (body: string) =>
+  `---\nname: kit-review\ndescription: ${SKILL_DESCRIPTION}\n---\n\n${body}\n`;
 
 async function registryVersion(
   guideline: { version: string; text: string },

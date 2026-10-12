@@ -100,6 +100,35 @@ describe("loadSourceRegistry", () => {
   });
 });
 
+describe("provenance", () => {
+  const provenance = {
+    repository: "https://github.com/example/skills",
+    ref: "0123456789abcdef",
+    path: "skills/review",
+    license: "MIT",
+    notice: "notices/review.txt",
+    modifications: "Renamed to kit-review",
+  };
+
+  it("requires the declared notice file", async () => {
+    expect(await codes(registryFiles([item({ provenance })]))).toEqual(["MISSING_SOURCE"]);
+  });
+
+  it("rejects incomplete provenance", async () => {
+    const partial = Object.fromEntries(Object.entries(provenance).filter(([k]) => k !== "license"));
+    expect(await codes(registryFiles([item({ provenance: partial })]))).toContain("SCHEMA_INVALID");
+  });
+
+  it("ships notice files in the packaged registry", async () => {
+    const source = await writeTree(
+      registryFiles([item({ provenance })], { "notices/review.txt": "MIT License\n" }),
+    );
+    const out = path.join(await tempDir(), "registry");
+    expect(await buildRegistry(source, out)).toEqual([]);
+    expect(await readFile(path.join(out, "notices/review.txt"), "utf8")).toBe("MIT License\n");
+  });
+});
+
 describe("buildRegistry and loadPackagedRegistry", () => {
   it("generates checksums that the packaged loader verifies", async () => {
     const source = await writeTree({

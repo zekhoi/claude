@@ -2,7 +2,7 @@ import { readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { contentHash } from "../src/core/content.js";
-import { codesOf, json, kit } from "./cli-helpers.js";
+import { codesOf, json, kit, wasKilled } from "./cli-helpers.js";
 import { snapshotTree, tempDir, writeTree } from "./helpers.js";
 
 const SKILL = ".claude/skills/kit-code-review/SKILL.md";
@@ -265,7 +265,7 @@ describe("interrupted lifecycle commands", () => {
     for (let killAt = 1; ; killAt++) {
       const root = await setup();
       const run = await kit(root, args, { AGENT_KIT_TEST_KILL_AT: String(killAt) });
-      if (run.signal !== "SIGKILL") {
+      if (!wasKilled(run)) {
         expect(run.code).toBe(0);
         expect(killAt, "the command should be interrupted at several steps").toBeGreaterThan(3);
         break;

@@ -48,6 +48,31 @@ Build skills from concrete engineering workflows. Claude can draft them; maintai
 
 Keep long reference material in `references/` and tools in `scripts/`. Installing a skill never executes its scripts.
 
+## Content checks
+
+`pnpm build` and the tests validate the whole registry and fail on:
+
+- schema errors, duplicate ids, unsafe or colliding destinations, and nonempty `dependencies`;
+- frontmatter Claude Code needs (`name: kit-<id>`, a description, skill descriptions of at most 1,536 characters, rule `paths`);
+- unfinished placeholders (`TODO`, `TBD`, `FIXME`, `XXX`, lorem ipsum, `<placeholder>`) in installed files;
+- relative links that would not resolve to a file of the same item once installed;
+- skill descriptions that do not say both "Use when ..." and "Do not use ...";
+- reused content without complete `provenance` or with a missing notice file (see [registry/PROVENANCE.md](../registry/PROVENANCE.md)).
+
+External links are not fetched during validation, so checks stay deterministic. Structural checks cannot tell whether a description triggers well; use the evaluation cases for that.
+
+## Continuous integration
+
+| Workflow            | Runs on                            | Does                                                                                                                                                            |
+| ------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`            | Pull requests and pushes to `main` | Format, lint, typecheck, build (registry validation), tests, and `scripts/verify-package.mjs`, which packs the CLI and exercises the tarball in a clean project |
+| `compatibility.yml` | Pull requests and pushes to `main` | Build, tests, and package verification on Ubuntu, macOS, and Windows with Node 22.12.0, 22, and 24                                                              |
+| `release.yml`       | Manual dispatch only               | Release gates, approval, publishing, and a smoke test; see [releasing.md](releasing.md)                                                                         |
+
+Workflows default to read-only permissions, pin third-party actions to commit SHAs (update the SHA and the version comment together), and never receive publishing credentials on pull requests.
+
+Agent evaluations are not part of CI: they need an agent and are nondeterministic. Record their results under `evals/` before releasing a changed skill.
+
 ## Code structure
 
 | Path                                | Responsibility                                                    |

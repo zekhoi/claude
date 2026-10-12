@@ -18,9 +18,12 @@ interface CommonOptions {
 
 const presetId = (name: string) => (name.startsWith("preset/") ? name : `preset/${name}`);
 
+/** Exit code used by the test-only termination hook where signals are unavailable (Windows). */
+export const TEST_KILL_EXIT_CODE = 86;
+
 /**
- * Test-only: `AGENT_KIT_TEST_KILL_AT=<n>` terminates the process with SIGKILL before the n-th
- * mutation step, so integration tests can verify recovery from a real interruption.
+ * Test-only: `AGENT_KIT_TEST_KILL_AT=<n>` terminates the process before the n-th mutation step,
+ * without running cleanup, so integration tests can verify recovery from a real interruption.
  */
 function testHooks(): ApplyHooks | undefined {
   const killAt = Number(process.env["AGENT_KIT_TEST_KILL_AT"]);
@@ -28,7 +31,9 @@ function testHooks(): ApplyHooks | undefined {
   let count = 0;
   return {
     onStep: () => {
-      if (++count === killAt) process.kill(process.pid, "SIGKILL");
+      if (++count !== killAt) return;
+      if (process.platform === "win32") process.exit(TEST_KILL_EXIT_CODE);
+      process.kill(process.pid, "SIGKILL");
     },
   };
 }

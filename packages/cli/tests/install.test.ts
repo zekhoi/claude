@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { BLOCK_START } from "../src/core/blocks.js";
-import { json, kit } from "./cli-helpers.js";
+import { json, kit, wasKilled } from "./cli-helpers.js";
 import { snapshotTree, tempDir, writeTree } from "./helpers.js";
 
 const SKILL = ".claude/skills/kit-code-review/SKILL.md";
@@ -212,7 +212,7 @@ describe("interrupted runs", () => {
       const run = await kit(root, ["init", "--preset", "base", "--context"], {
         AGENT_KIT_TEST_KILL_AT: String(killAt),
       });
-      if (run.signal !== "SIGKILL") {
+      if (!wasKilled(run)) {
         expect(run.code).toBe(0);
         expect(killAt).toBeGreaterThan(3);
         break;

@@ -40,6 +40,19 @@ export const RegistryItemSchema = z.strictObject({
   // Reserved; the initial release requires an empty list (validated separately for a clear diagnostic).
   dependencies: z.array(ItemIdSchema).default([]),
   files: z.array(SourceFileSchema).min(1),
+  /** Required for content reused from elsewhere; absent means original to this repository. */
+  provenance: z
+    .strictObject({
+      repository: z.url(),
+      /** Exact commit or tag; never a branch. */
+      ref: z.string().min(7),
+      path: z.string().min(1),
+      license: z.string().min(1),
+      /** Registry-relative file holding required attribution notices. */
+      notice: z.string().min(1).optional(),
+      modifications: z.string().min(1),
+    })
+    .optional(),
 });
 export type RegistryItem = z.infer<typeof RegistryItemSchema>;
 
