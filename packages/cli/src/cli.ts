@@ -1,8 +1,10 @@
 import { createInterface } from "node:readline/promises";
 import { Command, CommanderError, Option } from "commander";
-import { install } from "./commands/install.js";
+import { doctor } from "./commands/doctor.js";
+import { install, removeOrEject, uninstall, update } from "./commands/lifecycle.js";
 import { list } from "./commands/list.js";
 import { show } from "./commands/show.js";
+import { status } from "./commands/status.js";
 import { error, type Diagnostic } from "./core/diagnostics.js";
 import { EXIT_ERROR } from "./core/output.js";
 import type { PackagedRegistry } from "./core/registry.js";
@@ -125,6 +127,49 @@ export async function run(argv: string[]): Promise<number> {
         select: async () => ids,
         ...withHooks(),
       });
+    });
+
+  withCommon(program.command("status"))
+    .description("Show installed items, local changes, and missing files (read-only)")
+    .action(async (opts: CommonOptions) => {
+      exitCode = await status(opts);
+    });
+
+  withCommon(program.command("update"))
+    .description("Update installed items; with no ids, update all and skip items with conflicts")
+    .argument("[ids...]", "installed item ids to update")
+    .option("--allow-major", "allow major version updates for the selected items", false)
+    .option("--dry-run", "show the planned changes without writing anything", false)
+    .action(
+      async (ids: string[], opts: CommonOptions & { allowMajor: boolean; dryRun: boolean }) => {
+        exitCode = await update({ ...opts, ids, ...withHooks() });
+      },
+    );
+
+  for (const [name, description] of [
+    ["remove", "Delete installed items whose files have not been modified"],
+    ["eject", "Stop managing items and keep their files as your own"],
+  ] as const) {
+    withCommon(program.command(name))
+      .description(description)
+      .argument("<ids...>", "installed item ids")
+      .option("--dry-run", "show the planned changes without writing anything", false)
+      .action(async (ids: string[], opts: CommonOptions & { dryRun: boolean }) => {
+        exitCode = await removeOrEject({ ...opts, command: name, ids, ...withHooks() });
+      });
+  }
+
+  withCommon(program.command("uninstall"))
+    .description("Remove every managed item and block; keeps your own content and project context")
+    .option("--dry-run", "show the planned changes without writing anything", false)
+    .action(async (opts: CommonOptions & { dryRun: boolean }) => {
+      exitCode = await uninstall({ ...opts, ...withHooks() });
+    });
+
+  withCommon(program.command("doctor"))
+    .description("Check the installation and report problems without changing anything")
+    .action(async (opts: CommonOptions) => {
+      exitCode = await doctor(opts);
     });
 
   try {

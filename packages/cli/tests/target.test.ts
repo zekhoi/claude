@@ -8,7 +8,11 @@ describe("readTargetFile", () => {
   it("reads files and reports missing ones", async () => {
     const root = (await resolveTarget(await writeTree({ "a.md": "hi" }))).root!;
     expect(await readTargetFile(root, "a.md")).toMatchObject({ state: "file", text: "hi" });
-    expect(await readTargetFile(root, "x/y/z.md")).toEqual({ state: "missing" });
+    expect(await readTargetFile(root, "x/y/z.md")).toEqual({
+      state: "missing",
+      missingDirs: ["x", "x/y"],
+    });
+    expect(await readTargetFile(root, "b.md")).toEqual({ state: "missing" });
   });
 
   it("rejects parents that resolve outside the target through a symlink", async () => {

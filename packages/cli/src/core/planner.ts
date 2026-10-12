@@ -1,11 +1,20 @@
-import { AGENTS_IMPORT, AGENTS_MD, CLAUDE_MD, hasAgentsImport } from "../adapters/claude.js";
-import { parseBlock, writeBlock } from "./blocks.js";
+import {
+  AGENTS_IMPORT,
+  AGENTS_MD,
+  CLAUDE_MD,
+  hasAgentsImport,
+  ownedDirs,
+} from "../adapters/claude.js";
+import { parseBlock } from "./blocks.js";
 import { contentHash, normalizeContent } from "./content.js";
-import { conflict, error, warning, type Diagnostic, type DiagnosticCode } from "./diagnostics.js";
-import { emptyManifest } from "./manifest.js";
+import { error, warning, type Diagnostic } from "./diagnostics.js";
+import { MANIFEST_PATH } from "./manifest.js";
+import { PlanBuilder, type Plan } from "./plan-builder.js";
 import type { PackagedRegistry } from "./registry.js";
-import type { Manifest, PackagedItem, PlannedChange } from "./schemas.js";
+import type { Manifest, PackagedItem } from "./schemas.js";
 import type { FileState } from "./target.js";
+
+export type { Plan, WriteOp } from "./plan-builder.js";
 
 /** Project-owned context file created from the bundled template by `init --context`. */
 export const CONTEXT_PATH = "docs/agent-context.md";
@@ -16,30 +25,21 @@ export interface InstallRequest {
   context: boolean;
 }
 
-/** A file write the writer must perform, guarded by the state observed while planning. */
-export interface WriteOp {
-  destination: string;
-  content: string;
-  /** `missing`, or the raw hash of the file content the plan was computed from. */
-  expected: "missing" | string;
-}
-
-export interface Plan {
-  changes: PlannedChange[];
-  writes: WriteOp[];
-  manifest: Manifest;
-  manifestChanged: boolean;
-  diagnostics: Diagnostic[];
-}
-
-export interface PlanInput {
+interface PlanContext {
   registry: PackagedRegistry;
   manifest: Manifest | undefined;
   files: ReadonlyMap<string, FileState>;
-  request: InstallRequest;
   cliVersion: string;
+}
+
+export interface PlanInput extends PlanContext {
+  request: InstallRequest;
   contextTemplate: string;
 }
+
+type ManifestItem = Manifest["items"][string];
+
+const NOT_INSTALLED_ACTION = "Run `agent-kit status` to see installed items";
 
 /** Expands item and preset ids into items, deduplicated in first-seen order. */
 export function resolveSelection(
@@ -73,12 +73,19 @@ export function resolveSelection(
     : { request: { items: [...items.values()], presets }, diagnostics };
 }
 
-/** Every target path an install of `request` may read or write. */
-export function requiredPaths(request: InstallRequest): string[] {
-  const paths = request.items.flatMap((i) => i.files.map((f) => f.destination));
-  paths.push(AGENTS_MD, CLAUDE_MD);
-  if (request.context) paths.push(CONTEXT_PATH);
-  return paths;
+/** Every target path that planning against `manifest` and these items may read or write. */
+export function requiredPaths(
+  manifest: Manifest | undefined,
+  items: readonly PackagedItem[] = [],
+  context = false,
+): string[] {
+  const paths = [AGENTS_MD, CLAUDE_MD];
+  for (const entry of Object.values(manifest?.items ?? {})) {
+    paths.push(...entry.files.map((f) => f.destination));
+  }
+  for (const item of items) paths.push(...item.files.map((f) => f.destination));
+  if (context || manifest?.contextPath) paths.push(manifest?.contextPath ?? CONTEXT_PATH);
+  return [...new Set(paths)];
 }
 
 /** Body of the AGENTS.md managed block: guideline parts followed by the context reference. */
@@ -92,33 +99,119 @@ export function composeAgentsBody(parts: readonly string[], contextPath?: string
   return sections.join("\n\n");
 }
 
-/** Plans an `init` or `add`. Pure: reads only its inputs and performs no I/O. */
-export function planInstall(input: PlanInput): Plan {
-  const { registry, manifest, files, request, cliVersion } = input;
-  const next: Manifest = structuredClone(manifest ?? emptyManifest(cliVersion));
-  const changes: PlannedChange[] = [];
-  const writes: WriteOp[] = [];
-  const diagnostics: Diagnostic[] = [];
-  const stateOf = (p: string): FileState => files.get(p) ?? { state: "missing" };
+function blockFile(entry: { files: readonly { destination: string; install: string }[] }) {
+  return entry.files.find((f) => f.install === "managed-block" && f.destination === AGENTS_MD);
+}
 
-  const reject = (
-    change: Omit<PlannedChange, "action" | "code" | "reason">,
-    code: DiagnosticCode,
-    message: string,
-    action: string,
-  ) => {
-    changes.push({ ...change, action: "conflict", code, reason: message });
-    diagnostics.push(conflict(code, message, { path: change.destination, action }));
+/**
+ * Recomputes the AGENTS.md block from the items in the next manifest. `fresh` supplies content
+ * for items changed by this plan; other items must match the bundled registry version.
+ */
+function syncAgentsBlock(
+  b: PlanBuilder,
+  registry: PackagedRegistry,
+  fresh: ReadonlyMap<string, string>,
+  itemId?: string,
+): void {
+  const parts: string[] = [];
+  for (const [id, entry] of Object.entries(b.next.items).sort(([x], [y]) => x.localeCompare(y))) {
+    if (!blockFile(entry)) continue;
+    const content = fresh.get(id) ?? bundledBlockContent(registry, id, entry.version);
+    if (content === undefined) {
+      b.reject(
+        { destination: AGENTS_MD, kind: "managed-block", itemId: id },
+        "OUTDATED_ITEM",
+        `${id} must be updated before the AGENTS.md block can change`,
+        `Run \`agent-kit update ${id}\`, then rerun`,
+      );
+      return;
+    }
+    parts.push(content);
+  }
+  const empty = parts.length === 0 && !b.next.contextPath;
+  b.block(AGENTS_MD, empty ? undefined : composeAgentsBody(parts, b.next.contextPath), itemId);
+  syncBridge(b);
+}
+
+function bundledBlockContent(
+  registry: PackagedRegistry,
+  id: string,
+  version: string,
+): string | undefined {
+  const item = registry.index.items.find((i) => i.id === id);
+  const file = item?.files.find(
+    (f) => f.install === "managed-block" && f.destination === AGENTS_MD,
+  );
+  return item?.version === version && file ? registry.contents.get(file.source) : undefined;
+}
+
+/** Keeps the CLAUDE.md → AGENTS.md import in step with whether the AGENTS.md block exists. */
+function syncBridge(b: PlanBuilder): void {
+  const hasAgentsBlock = b.next.blocks[AGENTS_MD] !== undefined;
+  if (hasAgentsBlock && b.next.claudeImport === undefined) {
+    const state = b.stateOf(CLAUDE_MD);
+    const parsed = state.state === "file" ? parseBlock(state.text) : undefined;
+    const outside =
+      state.state !== "file"
+        ? ""
+        : parsed?.kind === "block"
+          ? parsed.before + parsed.after
+          : state.text;
+    if (hasAgentsImport(outside)) {
+      b.next.claudeImport = "user-owned";
+      b.change({
+        action: "unchanged",
+        destination: CLAUDE_MD,
+        kind: "managed-block",
+        reason: "existing @AGENTS.md import is user-owned",
+      });
+    } else {
+      b.next.claudeImport = "managed";
+      b.block(CLAUDE_MD, AGENTS_IMPORT);
+    }
+  } else if (!hasAgentsBlock && b.next.claudeImport !== undefined) {
+    if (b.next.claudeImport === "managed") b.block(CLAUDE_MD, undefined);
+    if (b.next.blocks[CLAUDE_MD] === undefined) delete b.next.claudeImport;
+  }
+}
+
+function manifestEntry(item: PackagedItem): ManifestItem {
+  return {
+    version: item.version,
+    files: item.files.map(({ destination, install, sha256 }) => ({ destination, install, sha256 })),
   };
+}
 
-  // Managed-block content contributed by items installed in this command, keyed by destination.
-  const newBlockParts = new Map<string, Map<string, string>>();
+/** Plans placing a registry file where no managed file was recorded. */
+function placeNewFile(b: PlanBuilder, item: PackagedItem, destination: string, content: string) {
+  const base = { destination, kind: "file" as const, itemId: item.id, toVersion: item.version };
+  const state = b.stateOf(destination);
+  if (state.state === "missing") b.write(destination, content, { ...base, action: "create" });
+  else if (state.state === "unsafe") {
+    b.reject(base, "UNSAFE_PATH", state.reason, "Move or remove the path, then rerun");
+  } else if (normalizeContent(state.text) === normalizeContent(content)) {
+    b.change({ ...base, action: "adopt", reason: "existing file matches" });
+  } else {
+    b.reject(
+      base,
+      "UNMANAGED_FILE_CONFLICT",
+      "an existing file not managed by agent-kit occupies this destination",
+      `Rename or move the existing file, or replace it with \`agent-kit show ${item.id} --file ${destination}\`, then rerun`,
+    );
+  }
+}
+
+/** Plans an `init` or `add`. */
+export function planInstall(input: PlanInput): Plan {
+  const { registry, manifest, request } = input;
+  const b = new PlanBuilder(manifest, input.files, input.cliVersion);
+  const fresh = new Map<string, string>();
 
   for (const item of request.items) {
     const installed = manifest?.items[item.id];
     if (installed) {
       if (installed.version !== item.version) {
-        diagnostics.push(
+        b.diagnostics.push(
           warning(
             "UPDATE_AVAILABLE",
             `${item.id} is installed at ${installed.version}; ${item.version} is available`,
@@ -127,7 +220,7 @@ export function planInstall(input: PlanInput): Plan {
         );
       }
       for (const f of installed.files) {
-        changes.push({
+        b.change({
           action: "unchanged",
           destination: f.destination,
           kind: f.install,
@@ -138,185 +231,281 @@ export function planInstall(input: PlanInput): Plan {
       }
       continue;
     }
-
     for (const file of item.files) {
       const content = registry.contents.get(file.source)!;
-      const base = {
-        destination: file.destination,
-        kind: file.install,
-        itemId: item.id,
-        toVersion: item.version,
-      };
-      if (file.install === "managed-block") {
-        const parts = newBlockParts.get(file.destination) ?? new Map<string, string>();
-        newBlockParts.set(file.destination, parts.set(item.id, content));
-        continue;
-      }
-      const state = stateOf(file.destination);
-      if (state.state === "missing") {
-        writes.push({ destination: file.destination, content, expected: "missing" });
-        changes.push({ ...base, action: "create" });
-      } else if (state.state === "unsafe") {
-        reject(base, "UNSAFE_PATH", state.reason, "Move or remove the path, then rerun");
-      } else if (normalizeContent(state.text) === normalizeContent(content)) {
-        changes.push({ ...base, action: "adopt", reason: "existing file matches" });
-      } else {
-        reject(
-          base,
-          "UNMANAGED_FILE_CONFLICT",
-          "an existing file not managed by agent-kit occupies this destination",
-          "Rename or move the existing file, or replace it with the bundled content (`agent-kit show`), then rerun",
-        );
-      }
+      if (file.install === "managed-block") fresh.set(item.id, content);
+      else placeNewFile(b, item, file.destination, content);
     }
-    next.items[item.id] = {
-      version: item.version,
-      files: item.files.map(({ destination, install, sha256 }) => ({
-        destination,
-        install,
-        sha256,
-      })),
-    };
+    b.next.items[item.id] = manifestEntry(item);
   }
 
   let contextAdded = false;
-  if (request.context && !next.contextPath) {
+  if (request.context && !b.next.contextPath) {
     const base = { destination: CONTEXT_PATH, kind: "context" as const };
-    const state = stateOf(CONTEXT_PATH);
+    const state = b.stateOf(CONTEXT_PATH);
     if (state.state === "missing") {
-      writes.push({
-        destination: CONTEXT_PATH,
-        content: input.contextTemplate,
-        expected: "missing",
+      b.write(CONTEXT_PATH, input.contextTemplate, {
+        ...base,
+        action: "create",
+        reason: "project-owned template to fill in",
       });
-      changes.push({ ...base, action: "create", reason: "project-owned template to fill in" });
     } else if (state.state === "unsafe") {
-      reject(base, "UNSAFE_PATH", state.reason, "Move or remove the path, then rerun");
+      b.reject(base, "UNSAFE_PATH", state.reason, "Move or remove the path, then rerun");
     } else {
-      changes.push({ ...base, action: "unchanged", reason: "existing project context referenced" });
+      b.change({ ...base, action: "unchanged", reason: "existing project context referenced" });
     }
-    next.contextPath = CONTEXT_PATH;
+    b.next.contextPath = CONTEXT_PATH;
     contextAdded = true;
   }
 
-  const planBlock = (destination: string, body: string, itemId?: string) => {
-    const base = { destination, kind: "managed-block" as const, ...(itemId ? { itemId } : {}) };
-    const record = manifest?.blocks[destination];
-    const desired = contentHash(body);
-    const state = stateOf(destination);
-    const setRecord = (createdFile: boolean) => {
-      next.blocks[destination] = { sha256: desired, createdFile };
-    };
+  if (fresh.size > 0 || contextAdded) {
+    syncAgentsBlock(b, registry, fresh, fresh.keys().next().value);
+  }
+  b.next.presets = [...new Set([...b.next.presets, ...request.presets])].sort();
+  return b.finish();
+}
 
+function major(version: string): number {
+  return Number(version.split(".")[0]);
+}
+
+/** Plans one item's update. Conflicts are recorded on the builder. */
+function planItemUpdate(
+  b: PlanBuilder,
+  registry: PackagedRegistry,
+  installed: ManifestItem,
+  item: PackagedItem,
+): void {
+  const recorded = new Map(installed.files.map((f) => [f.destination, f]));
+  const versions = { itemId: item.id, fromVersion: installed.version, toVersion: item.version };
+  let blockContent: string | undefined;
+
+  for (const file of item.files) {
+    const content = registry.contents.get(file.source)!;
+    if (file.install === "managed-block") {
+      blockContent = content;
+      continue;
+    }
+    const old = recorded.get(file.destination);
+    if (!old) {
+      placeNewFile(b, item, file.destination, content);
+      continue;
+    }
+    const base = { destination: file.destination, kind: "file" as const, ...versions };
+    const state = b.stateOf(file.destination);
     if (state.state === "unsafe") {
-      reject(base, "UNSAFE_PATH", state.reason, "Move or remove the path, then rerun");
-      return;
-    }
-    if (state.state === "missing") {
-      writes.push({ destination, content: writeBlock(undefined, body), expected: "missing" });
-      changes.push({ ...base, action: "create" });
-      setRecord(record?.createdFile ?? true);
-      return;
-    }
-    const parsed = parseBlock(state.text);
-    if (parsed.kind === "malformed") {
-      reject(
+      b.reject(base, "UNSAFE_PATH", state.reason, "Move or remove the path, then rerun");
+    } else if (state.state === "missing") {
+      b.reject(
         base,
-        "MALFORMED_BLOCK",
-        `agent-kit markers are malformed: ${parsed.reason}`,
-        "Repair or remove the <!-- agent-kit:start --> / <!-- agent-kit:end --> markers, then rerun",
+        "MISSING_FILE",
+        "a managed file was deleted locally",
+        `Restore it with \`agent-kit show ${item.id} --file ${file.destination}\`, or run \`agent-kit remove ${item.id}\` or \`agent-kit eject ${item.id}\``,
       );
-      return;
-    }
-    // An unrecorded file holding nothing but a block was created by an interrupted run.
-    const createdFile =
-      record?.createdFile ??
-      (parsed.kind === "block" && (parsed.before + parsed.after).trim() === "");
-    if (parsed.kind === "none") {
-      writes.push({ destination, content: writeBlock(state.text, body), expected: state.rawHash });
-      changes.push({ ...base, action: "update", reason: "add managed block" });
-      setRecord(createdFile);
-      return;
-    }
-    const current = contentHash(parsed.body);
-    if (current === desired) {
-      changes.push({ ...base, action: record?.sha256 === desired ? "unchanged" : "adopt" });
-      setRecord(createdFile);
-    } else if (record && current === record.sha256) {
-      writes.push({ destination, content: writeBlock(state.text, body), expected: state.rawHash });
-      changes.push({ ...base, action: "update" });
-      setRecord(createdFile);
     } else {
-      reject(
-        base,
-        "LOCAL_EDIT_CONFLICT",
-        "the managed block was edited locally",
-        "Move your edits outside the agent-kit markers or revert them, then rerun",
-      );
+      const current = contentHash(state.text);
+      if (current === file.sha256) {
+        b.change({ ...base, action: old.sha256 === file.sha256 ? "unchanged" : "adopt" });
+      } else if (current === old.sha256) {
+        b.write(file.destination, content, { ...base, action: "update" });
+      } else {
+        b.reject(
+          base,
+          "LOCAL_EDIT_CONFLICT",
+          "the file was edited locally",
+          `Keep your version with \`agent-kit eject ${item.id}\`, or compare with \`agent-kit show ${item.id} --file ${file.destination}\`, restore it, and rerun`,
+        );
+      }
     }
+  }
+
+  // Files the new version no longer ships are deleted only if unmodified.
+  const current = new Set(item.files.map((f) => f.destination));
+  for (const old of installed.files) {
+    if (old.install !== "file" || current.has(old.destination)) continue;
+    deleteManagedFile(b, item.id, old, versions);
+  }
+
+  const hadBlock = blockFile(installed) !== undefined;
+  b.next.items[item.id] = manifestEntry(item);
+  if (blockContent !== undefined || hadBlock) {
+    syncAgentsBlock(
+      b,
+      registry,
+      blockContent === undefined ? new Map() : new Map([[item.id, blockContent]]),
+      item.id,
+    );
+  }
+}
+
+function deleteManagedFile(
+  b: PlanBuilder,
+  itemId: string,
+  file: ManifestItem["files"][number],
+  extra: { fromVersion?: string; toVersion?: string } = {},
+): void {
+  const base = { destination: file.destination, kind: "file" as const, itemId, ...extra };
+  const state = b.stateOf(file.destination);
+  if (state.state === "missing") {
+    b.change({ ...base, action: "unchanged", reason: "already deleted" });
+  } else if (state.state === "unsafe") {
+    b.reject(base, "UNSAFE_PATH", state.reason, "Move or remove the path, then rerun");
+  } else if (contentHash(state.text) !== file.sha256) {
+    b.reject(
+      base,
+      "LOCAL_EDIT_CONFLICT",
+      "the file was edited locally and will not be deleted",
+      `Keep it with \`agent-kit eject ${itemId}\`, or revert your edits and rerun`,
+    );
+    return;
+  } else {
+    b.delete(file.destination, { ...base, action: "delete" });
+  }
+  for (const dir of ownedDirs(file.destination)) b.pruneIfEmpty(dir);
+}
+
+export interface UpdateInput extends PlanContext {
+  /** Items to update; empty means every installed item, skipping items with conflicts. */
+  ids: readonly string[];
+  allowMajor: boolean;
+}
+
+/** Plans `update`. */
+export function planUpdate(input: UpdateInput): Plan {
+  const { registry, manifest } = input;
+  const b = new PlanBuilder(manifest, input.files, input.cliVersion);
+  const named = input.ids.length > 0;
+  const ids = named ? [...new Set(input.ids)] : Object.keys(manifest?.items ?? {}).sort();
+  const skipped: { changes: Plan["changes"]; diagnostics: Diagnostic[] } = {
+    changes: [],
+    diagnostics: [],
   };
 
-  const agentsParts = newBlockParts.get(AGENTS_MD);
-  if (agentsParts || contextAdded) {
-    const parts: string[] = [];
-    let outdated: string | undefined;
-    for (const [id, entry] of Object.entries(next.items).sort(([a], [b]) => a.localeCompare(b))) {
-      if (!entry.files.some((f) => f.install === "managed-block" && f.destination === AGENTS_MD)) {
-        continue;
+  for (const id of ids) {
+    const installed = manifest?.items[id];
+    if (!installed) {
+      b.diagnostics.push(
+        error("NOT_INSTALLED", `${id} is not installed`, { action: NOT_INSTALLED_ACTION }),
+      );
+      continue;
+    }
+    const item = registry.index.items.find((i) => i.id === id);
+    if (!item) {
+      b.diagnostics.push(
+        warning("ITEM_RETIRED", `${id} is no longer in the catalog bundled with this CLI`, {
+          action: `Keep it with \`agent-kit eject ${id}\` or delete it with \`agent-kit remove ${id}\``,
+        }),
+      );
+      continue;
+    }
+    const sameContent =
+      installed.version === item.version &&
+      JSON.stringify(installed.files) === JSON.stringify(manifestEntry(item).files);
+    if (sameContent) continue;
+
+    if (major(item.version) > major(installed.version) && !input.allowMajor) {
+      const message = `${id} ${installed.version} → ${item.version} is a major update and may change its behavior or invocation`;
+      const action = `Review the changelog, then run \`agent-kit update ${id} --allow-major\``;
+      if (named) {
+        b.reject({ destination: id, kind: "file", itemId: id }, "MAJOR_UPDATE", message, action);
+      } else {
+        b.diagnostics.push(warning("MAJOR_UPDATE", message, { action }));
       }
-      const fresh = agentsParts?.get(id);
-      const registryItem = registry.index.items.find((i) => i.id === id);
-      const file = registryItem?.files.find((f) => f.destination === AGENTS_MD);
-      if (fresh !== undefined) parts.push(fresh);
-      else if (registryItem?.version === entry.version && file) {
-        parts.push(registry.contents.get(file.source)!);
-      } else outdated = id;
+      continue;
     }
-    if (outdated) {
-      reject(
-        { destination: AGENTS_MD, kind: "managed-block", itemId: outdated },
-        "OUTDATED_ITEM",
-        `${outdated} must be updated before the AGENTS.md block can change`,
-        `Run \`agent-kit update ${outdated}\`, then rerun`,
-      );
-    } else {
-      planBlock(
-        AGENTS_MD,
-        composeAgentsBody(parts, next.contextPath),
-        agentsParts?.keys().next().value,
-      );
+
+    const mark = b.checkpoint();
+    const before = b.conflictCount();
+    planItemUpdate(b, registry, installed, item);
+    if (!named && b.conflictCount() > before) {
+      const conflicts = b.rollback(mark);
+      skipped.changes.push(...conflicts.changes);
+      skipped.diagnostics.push(...conflicts.diagnostics);
     }
   }
 
-  if (next.blocks[AGENTS_MD] && next.claudeImport === undefined) {
-    const state = stateOf(CLAUDE_MD);
-    const parsed = state.state === "file" ? parseBlock(state.text) : undefined;
-    const outside =
-      state.state !== "file"
-        ? ""
-        : parsed?.kind === "block"
-          ? parsed.before + parsed.after
-          : state.text;
-    if (hasAgentsImport(outside)) {
-      next.claudeImport = "user-owned";
-      changes.push({
-        action: "unchanged",
-        destination: CLAUDE_MD,
-        kind: "managed-block",
-        reason: "existing @AGENTS.md import is user-owned",
+  b.changes.push(...skipped.changes);
+  b.diagnostics.push(...skipped.diagnostics);
+  return b.finish({ partial: !named });
+}
+
+export interface SelectInput extends PlanContext {
+  ids: readonly string[];
+}
+
+/** Plans `remove`: deletes unmodified managed files of the selected items. */
+export function planRemove(input: SelectInput): Plan {
+  const b = new PlanBuilder(input.manifest, input.files, input.cliVersion);
+  let blockChanged = false;
+  for (const id of new Set(input.ids)) {
+    const installed = input.manifest?.items[id];
+    if (!installed) {
+      b.diagnostics.push(
+        error("NOT_INSTALLED", `${id} is not installed`, { action: NOT_INSTALLED_ACTION }),
+      );
+      continue;
+    }
+    for (const f of installed.files) {
+      if (f.install === "file") deleteManagedFile(b, id, f, { fromVersion: installed.version });
+    }
+    if (blockFile(installed)) blockChanged = true;
+    delete b.next.items[id];
+  }
+  if (blockChanged) syncAgentsBlock(b, input.registry, new Map());
+  return b.finish();
+}
+
+/** Plans `eject`: forgets the selected items and leaves their content in place as user-owned. */
+export function planEject(input: SelectInput): Plan {
+  const b = new PlanBuilder(input.manifest, input.files, input.cliVersion);
+  let unwrap: string | undefined;
+  for (const id of new Set(input.ids)) {
+    const installed = input.manifest?.items[id];
+    if (!installed) {
+      b.diagnostics.push(
+        error("NOT_INSTALLED", `${id} is not installed`, { action: NOT_INSTALLED_ACTION }),
+      );
+      continue;
+    }
+    for (const f of installed.files) {
+      if (f.install !== "file") continue;
+      b.change({
+        action: "release",
+        destination: f.destination,
+        kind: "file",
+        itemId: id,
+        fromVersion: installed.version,
+        reason: "kept as your own file",
       });
-    } else {
-      next.claudeImport = "managed";
-      planBlock(CLAUDE_MD, AGENTS_IMPORT);
     }
+    if (blockFile(installed)) unwrap = id;
+    delete b.next.items[id];
   }
+  // The guidelines block also holds the context reference; ejecting keeps all of its text.
+  if (unwrap) {
+    b.unwrap(AGENTS_MD, unwrap);
+    delete b.next.contextPath;
+    if (b.next.claudeImport === "managed") b.unwrap(CLAUDE_MD);
+    delete b.next.claudeImport;
+  }
+  return b.finish();
+}
 
-  next.presets = [...new Set([...next.presets, ...request.presets])].sort();
-
-  const comparable = (m: Manifest | undefined) =>
-    m && JSON.stringify({ ...m, cliVersion: "" }, null, 0);
-  const manifestChanged = comparable(next) !== comparable(manifest);
-  if (manifestChanged) next.cliVersion = cliVersion;
-
-  return { changes, writes, manifest: next, manifestChanged, diagnostics };
+/** Plans `uninstall`: removes every managed item and block, then the manifest. */
+export function planUninstall(input: PlanContext): Plan {
+  const b = new PlanBuilder(input.manifest, input.files, input.cliVersion);
+  if (!input.manifest) return b.finish({ deleteManifest: true });
+  for (const [id, installed] of Object.entries(input.manifest.items)) {
+    for (const f of installed.files) {
+      if (f.install === "file") deleteManagedFile(b, id, f, { fromVersion: installed.version });
+    }
+    delete b.next.items[id];
+  }
+  // The context file and any user-owned import are project-owned and stay.
+  delete b.next.contextPath;
+  delete b.next.claudeImport;
+  for (const destination of Object.keys(input.manifest.blocks)) b.block(destination, undefined);
+  for (const dir of input.manifest.createdDirs) b.pruneIfEmpty(dir);
+  b.pruneIfEmpty(MANIFEST_PATH.split("/")[0]!);
+  return b.finish({ deleteManifest: true });
 }

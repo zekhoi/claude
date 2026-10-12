@@ -6,7 +6,8 @@ import { error, type Diagnostic } from "./diagnostics.js";
 import { isSafeRelativePath } from "./paths.js";
 
 export type FileState =
-  | { state: "missing" }
+  /** `missingDirs`: target-relative ancestor directories that do not exist, shallowest first. */
+  | { state: "missing"; missingDirs?: string[] }
   | { state: "file"; text: string; rawHash: string }
   | { state: "unsafe"; reason: string };
 
@@ -48,6 +49,7 @@ export async function readTargetFile(root: string, rel: string): Promise<FileSta
   const abs = resolveIn(root, rel);
 
   let ancestor = path.dirname(abs);
+  const missingDirs: string[] = [];
   for (;;) {
     try {
       const real = await realpath(ancestor);
@@ -60,6 +62,7 @@ export async function readTargetFile(root: string, rel: string): Promise<FileSta
       break;
     } catch (e) {
       if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
+      missingDirs.unshift(path.relative(root, ancestor).split(path.sep).join("/"));
       ancestor = path.dirname(ancestor);
     }
   }
@@ -68,7 +71,9 @@ export async function readTargetFile(root: string, rel: string): Promise<FileSta
   try {
     info = await lstat(abs);
   } catch (e) {
-    if ((e as NodeJS.ErrnoException).code === "ENOENT") return { state: "missing" };
+    if ((e as NodeJS.ErrnoException).code === "ENOENT") {
+      return missingDirs.length > 0 ? { state: "missing", missingDirs } : { state: "missing" };
+    }
     throw e;
   }
   if (info.isSymbolicLink()) return { state: "unsafe", reason: "destination is a symlink" };

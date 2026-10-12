@@ -1,6 +1,6 @@
 # Agent Kit — Implementation Plan
 
-Status: Phases 1–2 complete except running the initial skill evaluations; Phase 3 not started.
+Status: Phases 1–3 complete except running the initial skill evaluations; Phase 4 not started.
 
 ## 1. Goal
 
@@ -264,7 +264,7 @@ In noninteractive terminals, commands requiring a choice must fail with a messag
 9. Write the manifest last, after all changes succeed.
 10. Report changed files and commands for inspecting the result.
 
-The manifest records the schema version, CLI version, presets, item versions, destinations, and checksums of the last installed content. For root instruction files, store only managed block checksums so edits outside those blocks do not cause conflicts.
+The manifest records the schema version, CLI version, presets, item versions, destinations, checksums of the last installed content, and the directories the CLI created. For root instruction files, store only managed block checksums so edits outside those blocks do not cause conflicts. Directories created by a run that was interrupted before its manifest was written cannot be attributed afterwards, so `uninstall` may leave them behind empty.
 
 Checksums are computed over normalized content: strip a leading UTF-8 BOM, convert CRLF and CR to LF, and ignore a single trailing newline difference. Line-ending conversion by git (`core.autocrlf`) or editors must never produce a conflict. Comparisons between local files and registry content use the same normalization.
 
@@ -327,16 +327,16 @@ Complete when installation works for new projects and projects with existing ins
 
 ### Phase 3 — Lifecycle
 
-- [ ] Implement `status`, `update`, `remove`, and `eject`.
-- [ ] Implement item-level conflict skipping for no-argument `update`.
-- [ ] Handle missing files and file list changes between item versions.
-- [ ] Display conflicts with clear resolution instructions.
-- [ ] Implement read-only `doctor` diagnostics.
-- [ ] Add major-version update checks and the explicit `--allow-major` flag.
-- [ ] Reject unsupported newer registry and manifest schemas without mutation.
-- [ ] Document the customization and ownership policy, including conflict resolution recipes.
-- [ ] Extend interruption tests to lifecycle operations.
-- [ ] Implement `uninstall`, including conflicts, dry runs, and repeat execution.
+- [x] Implement `status`, `update`, `remove`, and `eject`.
+- [x] Implement item-level conflict skipping for no-argument `update`.
+- [x] Handle missing files and file list changes between item versions.
+- [x] Display conflicts with clear resolution instructions.
+- [x] Implement read-only `doctor` diagnostics.
+- [x] Add major-version update checks and the explicit `--allow-major` flag.
+- [x] Reject unsupported newer registry and manifest schemas without mutation.
+- [x] Document the customization and ownership policy, including conflict resolution recipes.
+- [x] Extend interruption tests to lifecycle operations.
+- [x] Implement `uninstall`, including conflicts, dry runs, and repeat execution.
 
 Complete when lifecycle commands preserve user changes, a customized item never blocks updates to other items, and interrupted operations converge on rerun.
 

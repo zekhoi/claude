@@ -25,6 +25,14 @@ export const DIAGNOSTIC_CODES = [
   "TARGET_CHANGED",
   "WRITE_FAILED",
   "UPDATE_AVAILABLE",
+  "MAJOR_UPDATE",
+  "NOT_INSTALLED",
+  "MISSING_FILE",
+  "ITEM_RETIRED",
+  "IMPORT_MISSING",
+  "NAME_COLLISION",
+  "LEFTOVER_FILE",
+  "CONTEXT_MISSING",
 ] as const;
 
 export type DiagnosticCode = (typeof DIAGNOSTIC_CODES)[number];

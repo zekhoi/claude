@@ -83,7 +83,7 @@ describe("planInstall in an empty project", () => {
   });
 
   it("records items, blocks, presets, and import ownership in the manifest", () => {
-    const m = p().manifest;
+    const m = p().manifest!;
     expect(Object.keys(m.items)).toEqual(["guideline/engineering", "skill/review"]);
     expect(m.blocks["AGENTS.md"]).toEqual({ sha256: contentHash(GUIDELINE_MD), createdFile: true });
     expect(m.claudeImport).toBe("managed");
@@ -97,7 +97,7 @@ describe("planInstall with existing content", () => {
   it("preserves an existing @AGENTS.md import as user-owned", () => {
     const p = plan({ "CLAUDE.md": file("# Project\n\nSee @AGENTS.md for rules.\n") });
     expect(actions(p)["CLAUDE.md"]).toBe("unchanged");
-    expect(p.manifest.claudeImport).toBe("user-owned");
+    expect(p.manifest!.claudeImport).toBe("user-owned");
     expect(p.writes.some((w) => w.destination === "CLAUDE.md")).toBe(false);
   });
 
@@ -105,9 +105,9 @@ describe("planInstall with existing content", () => {
     const text = "# Team rules\n";
     const p = plan({ "AGENTS.md": file(text) });
     const write = p.writes.find((w) => w.destination === "AGENTS.md")!;
-    expect(write.content.startsWith(text)).toBe(true);
+    expect(write.content!.startsWith(text)).toBe(true);
     expect(write.expected).toBe(rawHash(text));
-    expect(p.manifest.blocks["AGENTS.md"]?.createdFile).toBe(false);
+    expect(p.manifest!.blocks["AGENTS.md"]?.createdFile).toBe(false);
   });
 
   it("adopts an existing file that already matches", () => {
@@ -147,8 +147,8 @@ describe("planInstall on an existing installation", () => {
   const installed = () => {
     const first = plan();
     const files: Record<string, FileState> = {};
-    for (const w of first.writes) files[w.destination] = file(w.content);
-    return { manifest: first.manifest, files };
+    for (const w of first.writes) files[w.destination] = file(w.content!);
+    return { manifest: first.manifest!, files };
   };
 
   it("is a no-op when repeated with the same inputs", () => {
@@ -164,7 +164,7 @@ describe("planInstall on an existing installation", () => {
     const p = plan(files, manifest, request(["preset/base"], true));
     expect(actions(p)).toMatchObject({ [CONTEXT_PATH]: "create", "AGENTS.md": "update" });
     expect(p.writes.find((w) => w.destination === "AGENTS.md")?.content).toContain(CONTEXT_PATH);
-    expect(p.manifest.contextPath).toBe(CONTEXT_PATH);
+    expect(p.manifest!.contextPath).toBe(CONTEXT_PATH);
   });
 
   it("references an existing context file without replacing it", () => {

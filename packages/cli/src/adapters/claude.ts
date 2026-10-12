@@ -18,6 +18,22 @@ export function hasAgentsImport(text: string): boolean {
   return /(^|\s)@(\.\/)?AGENTS\.md(?=\s|$)/m.test(text);
 }
 
+/**
+ * Directories owned by agent-kit that contain `destination`, deepest first. Only these may be
+ * removed (when empty) after their files are deleted; shared directories like `.claude/` never are.
+ */
+export function ownedDirs(destination: string): string[] {
+  const parts = destination.split("/");
+  let root: number | undefined;
+  if (parts[0] === ".claude" && parts[1] === "skills" && parts[2]?.startsWith(NAME_PREFIX))
+    root = 3;
+  else if (destination.startsWith(`${RULES_DIR}/`)) root = RULES_DIR.split("/").length;
+  if (root === undefined) return [];
+  const dirs: string[] = [];
+  for (let i = parts.length - 1; i >= root; i--) dirs.push(parts.slice(0, i).join("/"));
+  return dirs;
+}
+
 /** Claude Code caps skill descriptions at 1,536 characters. */
 const SKILL_DESCRIPTION_MAX = 1536;
 

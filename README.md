@@ -27,7 +27,7 @@ node packages/cli/dist/index.js add agent/reviewer --cwd ../some-project
 node packages/cli/dist/index.js show skill/code-review
 ```
 
-Commands available so far: `list`, `show`, `init`, and `add`. All accept `--cwd` and `--json`; `init` and `add` accept `--dry-run`. Exit codes: `0` success, `1` error, `2` conflict requiring user action.
+Commands: `list`, `show`, `init`, `add`, `status`, `update`, `remove`, `eject`, `doctor`, and `uninstall`. All accept `--cwd` and `--json`; commands that change files accept `--dry-run`. See [docs/customization.md](docs/customization.md) for how local edits and conflicts are handled. Exit codes: `0` success, `1` error, `2` conflict requiring user action.
 
 ## Layout
 

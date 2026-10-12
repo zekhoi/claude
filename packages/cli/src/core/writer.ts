@@ -1,8 +1,8 @@
 import { constants } from "node:fs";
-import { copyFile, mkdir, rename, rm, unlink, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, rename, rm, rmdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { MANIFEST_PATH } from "./manifest.js";
-import type { WriteOp } from "./planner.js";
+import type { WriteOp } from "./plan-builder.js";
 import { readTargetFile, resolveIn } from "./target.js";
 
 /** A destination changed between planning and writing; nothing was left modified. */
@@ -17,23 +17,31 @@ export interface ApplyHooks {
   onStep?: (step: string) => void;
 }
 
+export interface ApplyInput {
+  writes: readonly WriteOp[];
+  /** Serialized manifest to write last, `null` to delete it last, or undefined to leave it. */
+  manifest: string | null | undefined;
+  /** Directories to remove after success if empty, deepest first. */
+  pruneDirs?: readonly string[];
+}
+
 interface Staged {
   op: WriteOp;
   abs: string;
-  tmp: string;
+  tmp?: string;
   backup?: string;
   committed: boolean;
 }
 
 /**
- * Applies planned writes, then the manifest. New content is staged beside each destination,
- * replaced files are backed up, and any failure before the manifest is written restores the
- * previous state. The manifest is written last so it never records changes that did not happen.
+ * Applies planned writes and deletions, then the manifest. New content is staged beside each
+ * destination, replaced or deleted files are backed up, and any failure before the manifest step
+ * completes restores the previous state. The manifest goes last so it never records changes that
+ * did not happen.
  */
 export async function applyWrites(
   root: string,
-  writes: readonly WriteOp[],
-  manifest: string | undefined,
+  input: ApplyInput,
   hooks: ApplyHooks = {},
 ): Promise<void> {
   const step = hooks.onStep ?? (() => undefined);
@@ -41,8 +49,7 @@ export async function applyWrites(
   const staged: Staged[] = [];
   const createdDirs: string[] = [];
 
-  const stage = async (destination: string, content: string): Promise<string> => {
-    const abs = resolveIn(root, destination);
+  const stage = async (abs: string, content: string): Promise<string> => {
     const created = await mkdir(path.dirname(abs), { recursive: true });
     if (created !== undefined) createdDirs.push(created);
     const tmp = `${abs}${suffix}.tmp`;
@@ -50,14 +57,18 @@ export async function applyWrites(
     return tmp;
   };
 
+  // The manifest is the final step, replaced or deleted like any other file.
+  const manifestAbs = resolveIn(root, MANIFEST_PATH);
+  let manifestEntry: Staged | undefined;
+
   try {
-    for (const op of writes) {
-      step(`stage ${op.destination}`);
-      const abs = resolveIn(root, op.destination);
-      // Push before writing so a partially written staging file is still cleaned up.
-      const entry: Staged = { op, abs, tmp: `${abs}${suffix}.tmp`, committed: false };
+    for (const op of input.writes) {
+      const entry: Staged = { op, abs: resolveIn(root, op.destination), committed: false };
       staged.push(entry);
-      entry.tmp = await stage(op.destination, op.content);
+      if (op.content === null) continue;
+      step(`stage ${op.destination}`);
+      entry.tmp = `${entry.abs}${suffix}.tmp`;
+      await stage(entry.abs, op.content);
     }
 
     for (const entry of staged) {
@@ -72,27 +83,45 @@ export async function applyWrites(
         entry.backup = `${entry.abs}${suffix}.bak`;
         await copyFile(entry.abs, entry.backup, constants.COPYFILE_EXCL);
       }
-      await rename(entry.tmp, entry.abs);
+      if (entry.tmp) await rename(entry.tmp, entry.abs);
+      else await unlink(entry.abs);
       entry.committed = true;
     }
 
-    if (manifest !== undefined) {
+    if (input.manifest !== undefined) {
       step("manifest");
-      const tmp = await stage(MANIFEST_PATH, manifest);
-      try {
-        await rename(tmp, resolveIn(root, MANIFEST_PATH));
-      } catch (e) {
-        await unlink(tmp).catch(() => undefined);
-        throw e;
+      const current = await readTargetFile(root, MANIFEST_PATH);
+      manifestEntry = {
+        op: {
+          destination: MANIFEST_PATH,
+          content: input.manifest,
+          expected: current.state === "file" ? current.rawHash : "missing",
+        },
+        abs: manifestAbs,
+        committed: false,
+      };
+      if (current.state === "file") {
+        manifestEntry.backup = `${manifestAbs}${suffix}.bak`;
+        await copyFile(manifestAbs, manifestEntry.backup, constants.COPYFILE_EXCL);
       }
+      if (input.manifest === null) {
+        if (current.state === "file") await unlink(manifestAbs);
+      } else {
+        manifestEntry.tmp = await stage(manifestAbs, input.manifest);
+        await rename(manifestEntry.tmp, manifestAbs);
+      }
+      manifestEntry.committed = true;
     }
   } catch (e) {
-    await rollback(staged, createdDirs);
+    await rollback(manifestEntry ? [...staged, manifestEntry] : staged, createdDirs);
     throw e;
   }
 
-  for (const entry of staged) {
+  for (const entry of manifestEntry ? [...staged, manifestEntry] : staged) {
     if (entry.backup) await unlink(entry.backup).catch(() => undefined);
+  }
+  for (const dir of input.pruneDirs ?? []) {
+    await rmdir(resolveIn(root, dir)).catch(() => undefined);
   }
 }
 
@@ -103,7 +132,7 @@ async function rollback(staged: readonly Staged[], createdDirs: readonly string[
       if (entry.backup) await rename(entry.backup, entry.abs).catch(ignore);
       else await unlink(entry.abs).catch(ignore);
     } else {
-      await unlink(entry.tmp).catch(ignore);
+      if (entry.tmp) await unlink(entry.tmp).catch(ignore);
       if (entry.backup) await unlink(entry.backup).catch(ignore);
     }
   }
@@ -119,7 +148,8 @@ export async function removeLeftovers(
 ): Promise<void> {
   for (const destination of new Set(destinations)) {
     const abs = resolveIn(root, destination);
-    for (const ext of ["tmp", "bak"])
+    for (const ext of ["tmp", "bak"]) {
       await unlink(`${abs}.agent-kit-${pid}.${ext}`).catch(() => undefined);
+    }
   }
 }

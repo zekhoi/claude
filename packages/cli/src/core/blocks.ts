@@ -66,3 +66,22 @@ export function writeBlock(text: string | undefined, body: string): string {
   const separator = text.endsWith("\n") ? eol : eol + eol;
   return text + separator + renderBlock(body, eol);
 }
+
+/** Returns the file content with the managed block and the separator added before it removed. */
+export function removeBlock(text: string): string {
+  const parsed = parseBlock(text);
+  if (parsed.kind !== "block") return text;
+  const eol = eolOf(text);
+  const before =
+    parsed.after === "" ? parsed.before.replace(new RegExp(`(?:${eol})+$`), eol) : parsed.before;
+  return (before.trim() === "" && parsed.after === "" ? "" : before) + parsed.after;
+}
+
+/** Returns the file content with the markers removed and the block body kept as plain content. */
+export function unwrapBlock(text: string): string {
+  const parsed = parseBlock(text);
+  if (parsed.kind !== "block") return text;
+  const eol = eolOf(text);
+  const body = parsed.body === "" ? "" : parsed.body.replace(/\r?\n/g, eol) + eol;
+  return parsed.before + body + parsed.after;
+}

@@ -1,43 +1,9 @@
-import { execFile } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
 import { BLOCK_START } from "../src/core/blocks.js";
+import { json, kit } from "./cli-helpers.js";
 import { snapshotTree, tempDir, writeTree } from "./helpers.js";
-
-const execFileAsync = promisify(execFile);
-const bin = fileURLToPath(new URL("../dist/index.js", import.meta.url));
-
-interface Run {
-  code: number;
-  stdout: string;
-  stderr: string;
-  signal?: string | null;
-}
-
-async function kit(cwd: string, args: string[], env: Record<string, string> = {}): Promise<Run> {
-  try {
-    const { stdout, stderr } = await execFileAsync(process.execPath, [bin, ...args, "--cwd", cwd], {
-      env: { ...process.env, NO_COLOR: "1", ...env },
-    });
-    return { code: 0, stdout, stderr };
-  } catch (e) {
-    const err = e as { code?: number; stdout: string; stderr: string; signal?: string | null };
-    return {
-      code: err.code ?? -1,
-      stdout: err.stdout,
-      stderr: err.stderr,
-      signal: err.signal ?? null,
-    };
-  }
-}
-
-const json = async (cwd: string, args: string[]) => {
-  const run = await kit(cwd, [...args, "--json"]);
-  return { ...run, result: JSON.parse(run.stdout) };
-};
 
 const SKILL = ".claude/skills/kit-code-review/SKILL.md";
 
@@ -264,7 +230,14 @@ describe("interrupted runs", () => {
 
       const rerun = await kit(root, ["init", "--preset", "base", "--context"]);
       expect(rerun.code, `rerun after kill at step ${killAt}: ${rerun.stderr}`).toBe(0);
-      expect(await snapshotTree(root), `after kill at step ${killAt}`).toEqual(expected);
+      // Directories created before the interruption cannot be attributed to agent-kit afterwards.
+      const withoutDirs = (tree: Record<string, string>) => {
+        const m = JSON.parse(tree[".agent-kit/manifest.json"]!);
+        return { ...tree, ".agent-kit/manifest.json": { ...m, createdDirs: [] } };
+      };
+      expect(withoutDirs(await snapshotTree(root)), `after kill at step ${killAt}`).toEqual(
+        withoutDirs(expected),
+      );
     }
   }, 60_000);
 });

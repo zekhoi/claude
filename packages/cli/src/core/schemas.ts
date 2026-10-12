@@ -107,6 +107,8 @@ export const ManifestSchema = z.strictObject({
       createdFile: z.boolean(),
     }),
   ),
+  /** Directories the CLI created; removed on uninstall when empty. */
+  createdDirs: z.array(z.string()).default([]),
   /** Whether the CLAUDE.md import of AGENTS.md is in a CLI-managed block or was already user-owned. */
   claudeImport: z.enum(["managed", "user-owned"]).optional(),
   /** Project context file referenced from the AGENTS.md block; always project-owned. */
@@ -114,7 +116,16 @@ export const ManifestSchema = z.strictObject({
 });
 export type Manifest = z.infer<typeof ManifestSchema>;
 
-export const ChangeActionSchema = z.enum(["create", "update", "unchanged", "adopt", "conflict"]);
+/** `release`: the item is no longer managed and its content stays as user-owned. */
+export const ChangeActionSchema = z.enum([
+  "create",
+  "update",
+  "delete",
+  "unchanged",
+  "adopt",
+  "release",
+  "conflict",
+]);
 export type ChangeAction = z.infer<typeof ChangeActionSchema>;
 
 /** One planned change as reported to users (`--json` `data.changes`). */

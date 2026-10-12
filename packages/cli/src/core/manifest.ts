@@ -15,6 +15,7 @@ export function emptyManifest(cliVersion: string): Manifest {
     presets: [],
     items: {},
     blocks: {},
+    createdDirs: [],
   };
 }
 

@@ -5,7 +5,7 @@ import { conflict, type Diagnostic } from "./diagnostics.js";
 import { LOCK_PATH, STATE_DIR } from "./manifest.js";
 import { resolveIn } from "./target.js";
 
-interface LockInfo {
+export interface LockInfo {
   pid: number;
   host: string;
   startedAt: string;
@@ -25,6 +25,21 @@ function isProcessAlive(pid: number): boolean {
   } catch (e) {
     return (e as NodeJS.ErrnoException).code === "EPERM";
   }
+}
+
+/** Reads the current lock holder without acquiring it; `null` means no lock file exists. */
+export async function inspectLock(
+  root: string,
+): Promise<{ holder: LockInfo | undefined; alive: boolean | undefined } | null> {
+  const file = resolveIn(root, LOCK_PATH);
+  try {
+    await readFile(file);
+  } catch {
+    return null;
+  }
+  const holder = await readLock(file);
+  const alive = holder && holder.host === hostname() ? isProcessAlive(holder.pid) : undefined;
+  return { holder, alive };
 }
 
 async function readLock(file: string): Promise<LockInfo | undefined> {
