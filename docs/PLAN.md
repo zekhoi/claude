@@ -1,6 +1,6 @@
 # Agent Kit — Implementation Plan
 
-Status: Phase 1 (foundation) complete; Phase 2 not started.
+Status: Phases 1–2 complete except running the initial skill evaluations; Phase 3 not started.
 
 ## 1. Goal
 
@@ -135,7 +135,7 @@ target-project/
 
 Rules are namespaced by directory because their file names are not invocation names. Agents and skills are invoked by name, so they are namespaced by the `kit-` prefix instead. Agent and skill names must be clearly distinct from each other (for example, the `kit-reviewer` agent and the `kit-code-review` skill).
 
-For root instruction files, the CLI only modifies blocks delimited by `<!-- agent-kit:start -->` and `<!-- agent-kit:end -->`. Preserve all content outside those blocks. Treat incomplete or repeated markers as conflicts rather than repairing them automatically.
+For root instruction files, the CLI only modifies blocks delimited by `<!-- agent-kit:start -->` and `<!-- agent-kit:end -->`. Preserve all content outside those blocks. Treat incomplete or repeated markers as conflicts rather than repairing them automatically. Write a blank line inside each marker and ignore blank lines at the edges of a block body, so Markdown formatters such as Prettier do not cause conflicts.
 
 Do not create or modify `.claude/settings.json` by default. Permissions, hooks, and MCP configuration are outside the initial scope.
 
@@ -311,16 +311,17 @@ Complete when the built CLI can read and validate the bundled registry.
 
 ### Phase 2 — Installation
 
-- [ ] Implement `list`, `show`, `init`, and `add`.
-- [ ] Implement managed blocks and the Claude import bridge.
-- [ ] Add `--cwd`, `--dry-run`, `--preset`, and noninteractive mode.
-- [ ] Implement staging, manifests, local edit detection, project locks, and rollback.
-- [ ] Add interruption tests showing that a rerun converges and the manifest never records unapplied changes.
-- [ ] Define human and JSON output contracts with stable diagnostic codes.
-- [ ] Implement explicit target selection and test root and package installations in a monorepo fixture.
-- [ ] Add the initial skills and rules catalog.
-- [ ] Install this repository's own managed blocks through the CLI.
-- [ ] Document the custom skill generation workflow and evaluate each initial skill against representative cases.
+- [x] Implement `list`, `show`, `init`, and `add`.
+- [x] Implement managed blocks and the Claude import bridge.
+- [x] Add `--cwd`, `--dry-run`, `--preset`, and noninteractive mode.
+- [x] Implement staging, manifests, local edit detection, project locks, and rollback.
+- [x] Add interruption tests showing that a rerun converges and the manifest never records unapplied changes.
+- [x] Define human and JSON output contracts with stable diagnostic codes.
+- [x] Implement explicit target selection and test root and package installations in a monorepo fixture.
+- [x] Add the initial skills and rules catalog.
+- [x] Install this repository's own managed blocks through the CLI.
+- [x] Document the custom skill generation workflow and write evaluation cases for each initial skill.
+- [ ] Run each initial skill's evaluation cases with Claude Code and record the results.
 
 Complete when installation works for new projects and projects with existing instructions without losing content.
 

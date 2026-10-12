@@ -18,11 +18,16 @@ pnpm lint
 pnpm format:check
 ```
 
-Try the built CLI:
+Try the built CLI against another project:
 
 ```bash
 node packages/cli/dist/index.js list
+node packages/cli/dist/index.js init --preset node --context --dry-run --cwd ../some-project
+node packages/cli/dist/index.js add agent/reviewer --cwd ../some-project
+node packages/cli/dist/index.js show skill/code-review
 ```
+
+Commands available so far: `list`, `show`, `init`, and `add`. All accept `--cwd` and `--json`; `init` and `add` accept `--dry-run`. Exit codes: `0` success, `1` error, `2` conflict requiring user action.
 
 ## Layout
 

@@ -1,0 +1,25 @@
+{
+  "manifestSchemaVersion": 1,
+  "cliVersion": "0.0.0",
+  "adapter": "claude",
+  "presets": [],
+  "items": {
+    "guideline/engineering": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": "AGENTS.md",
+          "install": "managed-block",
+          "sha256": "529edcc3cb52b609d03dd448f2c97e62445f060a8f61169cee3b4d2cffe734fa"
+        }
+      ]
+    }
+  },
+  "blocks": {
+    "AGENTS.md": {
+      "sha256": "529edcc3cb52b609d03dd448f2c97e62445f060a8f61169cee3b4d2cffe734fa",
+      "createdFile": false
+    }
+  },
+  "claudeImport": "user-owned"
+}

@@ -7,6 +7,17 @@ import type { InstallMode, ItemType, RegistryItem } from "../core/schemas.js";
 export const NAME_PREFIX = "kit-";
 /** Rules are namespaced by directory because their file names are not invocation names. */
 export const RULES_DIR = ".claude/rules/agent-kit";
+/** Shared instructions for all agents; holds the managed guidelines block. */
+export const AGENTS_MD = "AGENTS.md";
+/** Claude Code reads AGENTS.md natively only when no CLAUDE.md exists, so CLAUDE.md imports it. */
+export const CLAUDE_MD = "CLAUDE.md";
+export const AGENTS_IMPORT = "@AGENTS.md";
+
+/** True when text (outside the managed block) already imports AGENTS.md. */
+export function hasAgentsImport(text: string): boolean {
+  return /(^|\s)@(\.\/)?AGENTS\.md(?=\s|$)/m.test(text);
+}
+
 /** Claude Code caps skill descriptions at 1,536 characters. */
 const SKILL_DESCRIPTION_MAX = 1536;
 

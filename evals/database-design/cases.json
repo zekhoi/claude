@@ -1,0 +1,35 @@
+{
+  "skill": "skill/database-design",
+  "cases": [
+    {
+      "id": "reviews-weak-schema",
+      "kind": "normal",
+      "fixture": "fixtures/orders",
+      "prompt": "Review schema.sql before we go live.",
+      "expectations": [
+        "Flags the missing foreign key from orders.customer_id to customers.id and asks for intended ON DELETE behavior",
+        "Flags FLOAT for money and recommends an exact numeric type",
+        "Flags missing NOT NULL and uniqueness on customers.email",
+        "Recommends an index on orders.customer_id",
+        "Raises TIMESTAMP without time zone as a question or risk"
+      ]
+    },
+    {
+      "id": "safe-migration-on-large-table",
+      "kind": "edge",
+      "fixture": "fixtures/orders",
+      "prompt": "orders has 200 million rows. Write a migration that adds a required status column.",
+      "expectations": [
+        "Uses an expand-and-contract approach: add nullable or defaulted column, backfill in batches, then add the constraint",
+        "Calls out locking risks and uses online options where the database supports them",
+        "Does not run the migration against a shared or production database"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-unrelated-task",
+      "kind": "negative",
+      "prompt": "Write a README section explaining how to run the tests.",
+      "expectations": ["Does not invoke kit-database-design"]
+    }
+  ]
+}

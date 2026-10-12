@@ -13,13 +13,26 @@ export const DIAGNOSTIC_CODES = [
   "UNKNOWN_PRESET_ITEM",
   "INVALID_FRONTMATTER",
   "CHECKSUM_MISMATCH",
+  "UNKNOWN_ITEM",
+  "INPUT_REQUIRED",
+  "TARGET_INVALID",
+  "MANIFEST_INVALID",
+  "LOCK_HELD",
+  "LOCAL_EDIT_CONFLICT",
+  "UNMANAGED_FILE_CONFLICT",
+  "MALFORMED_BLOCK",
+  "OUTDATED_ITEM",
+  "TARGET_CHANGED",
+  "WRITE_FAILED",
+  "UPDATE_AVAILABLE",
 ] as const;
 
 export type DiagnosticCode = (typeof DIAGNOSTIC_CODES)[number];
 
 export interface Diagnostic {
   code: DiagnosticCode;
-  severity: "error" | "warning";
+  /** `conflict` requires user action and exits with 2; `error` exits with 1. */
+  severity: "error" | "conflict" | "warning";
   message: string;
   /** Path relative to the registry root or target root, using forward slashes. */
   path?: string;
@@ -33,6 +46,26 @@ export function error(
   extra: { path?: string; action?: string } = {},
 ): Diagnostic {
   return { code, severity: "error", message, ...extra };
+}
+
+export function conflict(
+  code: DiagnosticCode,
+  message: string,
+  extra: { path?: string; action?: string } = {},
+): Diagnostic {
+  return { code, severity: "conflict", message, ...extra };
+}
+
+export function warning(
+  code: DiagnosticCode,
+  message: string,
+  extra: { path?: string; action?: string } = {},
+): Diagnostic {
+  return { code, severity: "warning", message, ...extra };
+}
+
+export function hasConflicts(diagnostics: readonly Diagnostic[]): boolean {
+  return diagnostics.some((d) => d.severity === "conflict");
 }
 
 export function hasErrors(diagnostics: readonly Diagnostic[]): boolean {

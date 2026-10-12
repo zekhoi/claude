@@ -25,7 +25,8 @@ describe("built CLI", () => {
 
   it("prints a human-readable catalog", async () => {
     const { stdout } = await runCli("list");
-    expect(stdout).toMatch(/^Items:\n {2}guideline\/engineering/);
+    expect(stdout).toMatch(/^Items:\n/);
+    expect(stdout).toMatch(/^ {2}guideline\/engineering +Core engineering/m);
     expect(stdout).toContain("preset/base");
   });
 

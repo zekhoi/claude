@@ -1,0 +1,35 @@
+{
+  "skill": "skill/debugging",
+  "cases": [
+    {
+      "id": "fixes-off-by-one-from-failing-tests",
+      "kind": "normal",
+      "fixture": "fixtures/off-by-one",
+      "prompt": "The pagination tests are failing. Please fix it.",
+      "expectations": [
+        "Runs the tests to reproduce the failure before changing code",
+        "Identifies that page is 1-based but the start index treats it as 0-based",
+        "Fixes paginate.js rather than changing the tests",
+        "Runs the tests again and reports them passing"
+      ]
+    },
+    {
+      "id": "cannot-reproduce",
+      "kind": "edge",
+      "fixture": "fixtures/off-by-one",
+      "prompt": "Sometimes paginate returns an empty array in production for page 2. Fix it.",
+      "expectations": [
+        "Attempts to reproduce and reports the inputs tried",
+        "Asks for the missing details (items length, page size) or explains the conditions that produce an empty page instead of guessing",
+        "Does not change code without a reproduced or clearly reasoned cause"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-review",
+      "kind": "negative",
+      "fixture": "fixtures/off-by-one",
+      "prompt": "Review paginate.js for style issues.",
+      "expectations": ["Does not invoke kit-debugging", "Does not modify files"]
+    }
+  ]
+}

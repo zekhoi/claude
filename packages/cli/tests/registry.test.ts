@@ -117,7 +117,7 @@ describe("buildRegistry and loadPackagedRegistry", () => {
 
     const loaded = await loadPackagedRegistry(out);
     expect(loaded.diagnostics).toEqual([]);
-    expect(loaded.value?.presets.map((p) => p.id)).toEqual(["preset/base"]);
+    expect(loaded.value?.index.presets.map((p) => p.id)).toEqual(["preset/base"]);
   });
 
   it("accepts line-ending conversion of packaged files", async () => {

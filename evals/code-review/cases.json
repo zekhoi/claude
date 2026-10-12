@@ -1,0 +1,35 @@
+{
+  "skill": "skill/code-review",
+  "cases": [
+    {
+      "id": "finds-null-and-authorization-defects",
+      "kind": "normal",
+      "fixture": "fixtures/null-deref",
+      "prompt": "/kit-code-review Review src/user.ts; it is a new file in this change.",
+      "expectations": [
+        "Reports that greeting() dereferences an undefined user and an optional name, with file:line",
+        "Reports that deleteUser() ignores requesterId and performs no authorization check",
+        "Assigns a severity to each finding and orders findings by severity",
+        "Does not modify any file"
+      ]
+    },
+    {
+      "id": "no-findings-on-clean-change",
+      "kind": "edge",
+      "fixture": "fixtures/clean-change",
+      "prompt": "/kit-code-review Review src/math.ts",
+      "expectations": [
+        "States that no significant defects were found instead of inventing issues",
+        "Says what was checked, such as the empty-list case",
+        "Does not modify any file"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-feature-work",
+      "kind": "negative",
+      "fixture": "fixtures/clean-change",
+      "prompt": "Add a median function next to mean in src/math.ts",
+      "expectations": ["Does not invoke kit-code-review", "Implements the requested function"]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "preset/node",
+  "description": "Base preset plus TypeScript rules",
+  "items": [
+    "guideline/engineering",
+    "skill/code-review",
+    "skill/debugging",
+    "skill/feature-implementation",
+    "rule/testing",
+    "rule/typescript"
+  ]
+}

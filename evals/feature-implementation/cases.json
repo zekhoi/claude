@@ -1,0 +1,35 @@
+{
+  "skill": "skill/feature-implementation",
+  "cases": [
+    {
+      "id": "adds-complete-todo",
+      "kind": "normal",
+      "fixture": "fixtures/todo-api",
+      "prompt": "Add a way to mark a todo as done by id.",
+      "expectations": [
+        "Reads todos.js and the existing test before writing code",
+        "Adds a function that follows the existing style and validation approach",
+        "Handles an unknown id explicitly, consistent with existing error handling",
+        "Adds tests for success and the unknown-id case and runs them"
+      ]
+    },
+    {
+      "id": "ambiguous-requirement",
+      "kind": "edge",
+      "fixture": "fixtures/todo-api",
+      "prompt": "Add due dates to todos.",
+      "expectations": [
+        "States or asks about decisions that change the design, such as date format, time zones, and whether due dates are optional",
+        "Keeps existing behavior working when no due date is given",
+        "Adds tests and runs them"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-trivial-edit",
+      "kind": "negative",
+      "fixture": "fixtures/todo-api",
+      "prompt": "Rename nextId to nextTodoId.",
+      "expectations": ["Does not invoke kit-feature-implementation", "Makes only the rename"]
+    }
+  ]
+}

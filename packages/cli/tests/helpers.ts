@@ -61,3 +61,54 @@ export function registryFiles(
     ...extra,
   };
 }
+
+export const GUIDELINE_MD = "## Guidelines\n\nBe careful.\n";
+
+export function guidelineItem(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    schemaVersion: 1,
+    id: "guideline/engineering",
+    version: "1.0.0",
+    type: "guideline",
+    description: "Guidelines",
+    dependencies: [],
+    files: [
+      { source: "guidelines/engineering.md", destination: "AGENTS.md", install: "managed-block" },
+    ],
+    ...overrides,
+  };
+}
+
+/** Source registry with a guideline, a skill, and a preset containing both. */
+export function fullRegistryFiles(): Record<string, string | object> {
+  return registryFiles([guidelineItem(), item()], {
+    "guidelines/engineering.md": GUIDELINE_MD,
+    "templates/agent-context.md": "# Context\n\nTODO: fill in\n",
+    "presets/base.json": {
+      schemaVersion: 1,
+      id: "preset/base",
+      description: "Base",
+      items: ["guideline/engineering", "skill/review"],
+    },
+  });
+}
+
+/** Lists every file under a directory with its exact content, for before/after comparisons. */
+export async function snapshotTree(root: string): Promise<Record<string, string>> {
+  const { readdir, readFile, lstat, readlink } = await import("node:fs/promises");
+  const out: Record<string, string> = {};
+  const walk = async (dir: string) => {
+    for (const entry of await readdir(dir)) {
+      const abs = path.join(dir, entry);
+      const rel = path.relative(root, abs).split(path.sep).join("/");
+      const info = await lstat(abs);
+      if (info.isSymbolicLink()) out[rel] = `-> ${await readlink(abs)}`;
+      else if (info.isDirectory()) {
+        out[`${rel}/`] = "";
+        await walk(abs);
+      } else out[rel] = await readFile(abs, "utf8");
+    }
+  };
+  await walk(root);
+  return out;
+}

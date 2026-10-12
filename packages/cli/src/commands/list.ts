@@ -10,8 +10,8 @@ interface ListData {
 export async function list(options: { json: boolean }): Promise<number> {
   const { value, diagnostics } = await loadPackagedRegistry(BUNDLED_REGISTRY_DIR);
   const data: ListData | undefined = value && {
-    items: value.items.map(({ id, version, description }) => ({ id, version, description })),
-    presets: value.presets.map(({ id, description, items }) => ({ id, description, items })),
+    items: value.index.items.map(({ id, version, description }) => ({ id, version, description })),
+    presets: value.index.presets.map(({ id, description, items }) => ({ id, description, items })),
   };
   return emit(
     { command: "list", target: null, diagnostics, ...(data ? { data } : {}) },

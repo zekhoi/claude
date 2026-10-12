@@ -241,13 +241,20 @@ export async function buildRegistry(sourceRoot: string, outDir: string): Promise
 }
 
 /** Loads the registry bundled with the CLI and verifies every file against its checksum. */
-export async function loadPackagedRegistry(root: string): Promise<LoadResult<PackagedIndex>> {
+export interface PackagedRegistry {
+  root: string;
+  index: PackagedIndex;
+  /** Decoded file contents keyed by registry-relative source path. */
+  contents: Map<string, string>;
+}
+
+export async function loadPackagedRegistry(root: string): Promise<LoadResult<PackagedRegistry>> {
   const index = await readVersionedJson(
     path.join(root, "index.json"),
     "index.json",
     PackagedIndexSchema,
   );
-  if (!index.value) return index;
+  if (!index.value) return { diagnostics: index.diagnostics };
 
   const diagnostics: Diagnostic[] = [];
   const contents = new Map<string, string>();
@@ -266,5 +273,14 @@ export async function loadPackagedRegistry(root: string): Promise<LoadResult<Pac
     }
   }
   diagnostics.push(...validateCatalog(index.value.items, index.value.presets, contents));
-  return { value: index.value, diagnostics };
+  return { value: { root, index: index.value, contents }, diagnostics };
+}
+
+/** Reads a bundled template such as `agent-context.md`. */
+export async function readTemplate(registry: PackagedRegistry, name: string): Promise<string> {
+  const result = await readRegistryFile(registry.root, `templates/${name}`);
+  if (result.value === undefined) {
+    throw new Error(`bundled template ${name} is unavailable: ${result.diagnostics[0]?.message}`);
+  }
+  return result.value;
 }

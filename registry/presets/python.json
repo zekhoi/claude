@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "preset/python",
+  "description": "Base preset plus Python rules",
+  "items": [
+    "guideline/engineering",
+    "skill/code-review",
+    "skill/debugging",
+    "skill/feature-implementation",
+    "rule/testing",
+    "rule/python"
+  ]
+}

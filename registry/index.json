@@ -15,6 +15,132 @@
           "install": "managed-block"
         }
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rule/testing",
+      "version": "1.0.0",
+      "type": "rule",
+      "description": "Testing conventions applied to test files",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "rules/testing.md",
+          "destination": ".claude/rules/agent-kit/testing.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rule/typescript",
+      "version": "1.0.0",
+      "type": "rule",
+      "description": "TypeScript conventions applied to .ts and .tsx files",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "rules/typescript.md",
+          "destination": ".claude/rules/agent-kit/typescript.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rule/python",
+      "version": "1.0.0",
+      "type": "rule",
+      "description": "Python conventions applied to .py files",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "rules/python.md",
+          "destination": ".claude/rules/agent-kit/python.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/code-review",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Evidence-based code review with severity and file locations; reports without editing",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/code-review/SKILL.md",
+          "destination": ".claude/skills/kit-code-review/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/debugging",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Reproduce, isolate the root cause, fix, and verify",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/debugging/SKILL.md",
+          "destination": ".claude/skills/kit-debugging/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/feature-implementation",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Trace requirements through design, implementation, tests, and verification",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/feature-implementation/SKILL.md",
+          "destination": ".claude/skills/kit-feature-implementation/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/database-design",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Schema relationships, constraints, indexes, and safe migrations",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/database-design/SKILL.md",
+          "destination": ".claude/skills/kit-database-design/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "agent/reviewer",
+      "version": "1.0.0",
+      "type": "agent",
+      "description": "Read-only reviewer subagent for independent code review",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "agents/reviewer.md",
+          "destination": ".claude/agents/kit-reviewer.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "agent/debugger",
+      "version": "1.0.0",
+      "type": "agent",
+      "description": "Debugging subagent that reproduces, fixes, and adds regression tests",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "agents/debugger.md",
+          "destination": ".claude/agents/kit-debugger.md"
+        }
+      ]
     }
   ]
 }

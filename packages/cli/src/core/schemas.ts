@@ -78,7 +78,7 @@ export type PackagedIndex = z.infer<typeof PackagedIndexSchema>;
 const ManifestFileSchema = z.strictObject({
   destination: z.string().min(1),
   install: InstallModeSchema,
-  /** Normalized checksum of the content last installed (block body for managed blocks). */
+  /** Normalized checksum of the registry content last installed. */
   sha256: z.string().regex(sha256),
 });
 
@@ -93,41 +93,39 @@ export const ManifestSchema = z.strictObject({
     ItemIdSchema,
     z.strictObject({
       version: z.string().regex(semver),
+      /** Checksums of the registry content installed; for managed-block files, the item's part. */
       files: z.array(ManifestFileSchema).min(1),
     }),
   ),
-  /** Root instruction files the CLI created, eligible for deletion on uninstall when left empty. */
-  createdFiles: z.array(z.string()),
+  /** Managed blocks in root instruction files, keyed by file path. */
+  blocks: z.record(
+    z.string(),
+    z.strictObject({
+      /** Normalized checksum of the whole block body as last written. */
+      sha256: z.string().regex(sha256),
+      /** The CLI created the file; uninstall may delete it when nothing else remains. */
+      createdFile: z.boolean(),
+    }),
+  ),
   /** Whether the CLAUDE.md import of AGENTS.md is in a CLI-managed block or was already user-owned. */
-  claudeImport: z.enum(["managed", "user-owned"]),
-  /** Project context file referenced from the managed guidelines block; always project-owned. */
+  claudeImport: z.enum(["managed", "user-owned"]).optional(),
+  /** Project context file referenced from the AGENTS.md block; always project-owned. */
   contextPath: z.string().optional(),
 });
 export type Manifest = z.infer<typeof ManifestSchema>;
 
-export const ChangeActionSchema = z.enum([
-  "create",
-  "update",
-  "unchanged",
-  "adopt",
-  "delete",
-  "conflict",
-]);
+export const ChangeActionSchema = z.enum(["create", "update", "unchanged", "adopt", "conflict"]);
+export type ChangeAction = z.infer<typeof ChangeActionSchema>;
 
-/** One planned operation produced by the core and applied by the writer. */
+/** One planned change as reported to users (`--json` `data.changes`). */
 export const PlannedChangeSchema = z.strictObject({
   action: ChangeActionSchema,
-  itemId: ItemIdSchema.optional(),
   destination: z.string(),
-  install: InstallModeSchema,
+  kind: z.enum(["file", "managed-block", "context"]),
+  itemId: ItemIdSchema.optional(),
   fromVersion: z.string().optional(),
   toVersion: z.string().optional(),
+  code: z.string().optional(),
   reason: z.string().optional(),
 });
 export type PlannedChange = z.infer<typeof PlannedChangeSchema>;
-
-export const InstallPlanSchema = z.strictObject({
-  target: z.string(),
-  changes: z.array(PlannedChangeSchema),
-});
-export type InstallPlan = z.infer<typeof InstallPlanSchema>;
