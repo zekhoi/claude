@@ -219,7 +219,25 @@ function addAgentFiles(
 ): void {
   const entry = b.next.items[id]!;
   const item = registry.index.items.find((i) => i.id === id);
-  if (!item || item.version !== entry.version) {
+  if (!item) {
+    b.diagnostics.push(
+      warning(
+        "ITEM_RETIRED",
+        `${id} is no longer in the catalog, so it is not added for ${agents.join(", ")}`,
+        {
+          action: `Keep it with \`agent-kit eject ${id}\` or delete it with \`agent-kit remove ${id}\``,
+        },
+      ),
+    );
+    return;
+  }
+  const recorded = new Set(entry.files.map((f) => f.destination));
+  const missing = renderItem(item, registry.contents, agents).filter(
+    (f) => !recorded.has(f.destination) && f.install !== "managed-block",
+  );
+  if (missing.length === 0) return;
+  // The bundled version is the only one that can be rendered; older versions must update first.
+  if (item.version !== entry.version) {
     b.reject(
       { destination: id, kind: "file", itemId: id },
       "OUTDATED_ITEM",
@@ -228,9 +246,7 @@ function addAgentFiles(
     );
     return;
   }
-  const recorded = new Set(entry.files.map((f) => f.destination));
-  for (const file of renderItem(item, registry.contents, agents)) {
-    if (recorded.has(file.destination) || file.install === "managed-block") continue;
+  for (const file of missing) {
     placeNewFile(b, item, file.destination, file.content);
     entry.files.push({
       destination: file.destination,
@@ -238,6 +254,13 @@ function addAgentFiles(
       sha256: contentHash(file.content),
     });
   }
+  // Keep recorded files in rendering order so later comparisons are stable.
+  const order = renderItem(item, registry.contents, AGENT_IDS).map((f) => f.destination);
+  const rank = (destination: string) => {
+    const index = order.indexOf(destination);
+    return index === -1 ? order.length : index;
+  };
+  entry.files.sort((x, y) => rank(x.destination) - rank(y.destination));
 }
 
 /** Plans placing a registry file where no managed file was recorded. */
@@ -470,9 +493,11 @@ export function planUpdate(input: UpdateInput): Plan {
       continue;
     }
     const rendered = renderItem(item, registry.contents, agentsFor(manifest));
+    const byDestination = (files: ManifestItem["files"]) =>
+      JSON.stringify([...files].sort((x, y) => x.destination.localeCompare(y.destination)));
     const sameContent =
       installed.version === item.version &&
-      JSON.stringify(installed.files) === JSON.stringify(manifestEntry(item, rendered).files);
+      byDestination(installed.files) === byDestination(manifestEntry(item, rendered).files);
     if (sameContent) continue;
 
     if (major(item.version) > major(installed.version) && !input.allowMajor) {

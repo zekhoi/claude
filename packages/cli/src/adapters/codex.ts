@@ -1,3 +1,4 @@
+import { parse as parseToml } from "smol-toml";
 import { error, type Diagnostic } from "../core/diagnostics.js";
 import type { PackagedItem } from "../core/schemas.js";
 import { AGENTS_MD, NAME_PREFIX, parseFrontmatter } from "./claude.js";
@@ -34,15 +35,44 @@ function splitFrontmatter(content: string): { data: Record<string, unknown>; bod
   };
 }
 
-/** A TOML basic string. JSON escapes are a subset of TOML's, so JSON encoding is valid TOML. */
+/** Control characters TOML forbids unescaped in strings (everything but tab and newline). */
+// eslint-disable-next-line no-control-regex
+const TOML_CONTROL = /[\u0000-\u0008\u000b-\u001f\u007f]/;
+
+/**
+ * A TOML basic string. JSON escapes are a subset of TOML's, but JSON leaves DEL unescaped,
+ * which TOML forbids.
+ */
 function tomlString(value: string): string {
-  return JSON.stringify(value);
+  return JSON.stringify(value).replace(/\u007f/g, "\\u007f");
 }
 
 /** A TOML multi-line literal string when possible, so instructions stay readable. */
 function tomlMultiline(value: string): string {
   const text = value.endsWith("\n") ? value : `${value}\n`;
-  return text.includes("'''") ? tomlString(text) : `'''\n${text}'''`;
+  return text.includes("'''") || TOML_CONTROL.test(text) ? tomlString(text) : `'''\n${text}'''`;
+}
+
+/** Strips fenced code blocks so their contents are not mistaken for headings. */
+function withoutFences(markdown: string): string {
+  return markdown.replace(/^(```|~~~)[^\n]*\n[\s\S]*?^\1[^\n]*$/gm, "");
+}
+
+/** Splits comma-separated globs, keeping commas inside braces such as `*.{ts,tsx}`. */
+function splitGlobs(value: string): string[] {
+  const globs: string[] = [];
+  let depth = 0;
+  let current = "";
+  for (const ch of value) {
+    if (ch === "{") depth++;
+    if (ch === "}") depth = Math.max(0, depth - 1);
+    if (ch === "," && depth === 0) {
+      globs.push(current);
+      current = "";
+    } else current += ch;
+  }
+  globs.push(current);
+  return globs.map((g) => g.trim()).filter(Boolean);
 }
 
 function agentToml(item: PackagedItem, content: string): string {
@@ -68,12 +98,9 @@ function ruleSkill(item: PackagedItem, content: string): string {
   const { data, body } = splitFrontmatter(content);
   const raw = data["paths"];
   const globs =
-    typeof raw === "string"
-      ? raw.split(",").map((g) => g.trim())
-      : Array.isArray(raw)
-        ? raw.map(String)
-        : [];
-  const title = /^#\s+(.+)$/m.exec(body)?.[1]?.trim() ?? `${itemName(item)} conventions`;
+    typeof raw === "string" ? splitGlobs(raw) : Array.isArray(raw) ? raw.map(String) : [];
+  const title =
+    /^#[ \t]+(.+)$/m.exec(withoutFences(body))?.[1]?.trim() ?? `${itemName(item)} conventions`;
   const scope =
     globs.length > 0
       ? `Use when reading, writing, or reviewing files matching ${globs.map((g) => `\`${g}\``).join(", ")}. Do not use for other files.`
@@ -143,15 +170,21 @@ export function validateCodexFile(item: PackagedItem, file: RenderedFile): Diagn
     return problems.map((p) => error("INVALID_FRONTMATTER", `Codex: ${p}`, at));
   }
   if (file.destination.endsWith(".toml")) {
-    const required = ["name", "description", "developer_instructions"];
-    const missing = required.filter((key) => !new RegExp(`^${key} = `, "m").test(file.content));
-    const emptyDescription = /^description = ""$/m.test(file.content);
-    return [
-      ...missing.map((key) => error("INVALID_FRONTMATTER", `Codex: agent is missing ${key}`, at)),
-      ...(emptyDescription
-        ? [error("INVALID_FRONTMATTER", "Codex: agent description is empty", at)]
-        : []),
-    ];
+    let data: Record<string, unknown>;
+    try {
+      data = parseToml(file.content);
+    } catch (e) {
+      return [
+        error(
+          "INVALID_FRONTMATTER",
+          `Codex: agent file is not valid TOML: ${(e as Error).message.split("\n")[0]}`,
+          at,
+        ),
+      ];
+    }
+    return ["name", "description", "developer_instructions"]
+      .filter((key) => typeof data[key] !== "string" || String(data[key]).trim() === "")
+      .map((key) => error("INVALID_FRONTMATTER", `Codex: agent ${key} is missing or empty`, at));
   }
   return [];
 }

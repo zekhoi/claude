@@ -1,3 +1,4 @@
+import { parse as parseToml } from "smol-toml";
 import type { Diagnostic } from "../core/diagnostics.js";
 import type { InstallMode, PackagedItem } from "../core/schemas.js";
 import { parseFrontmatter, validateContent } from "./claude.js";
@@ -79,7 +80,13 @@ export function invocationName(
   }
   const codexAgent = /^\.codex\/agents\/(.+)\.toml$/.exec(destination);
   if (codexAgent) {
-    const declared = content === undefined ? undefined : /^name = "([^"]*)"/m.exec(content)?.[1];
+    let declared: string | undefined;
+    try {
+      const name = content === undefined ? undefined : parseToml(content)["name"];
+      declared = typeof name === "string" ? name : undefined;
+    } catch {
+      declared = undefined;
+    }
     return { namespace: "Codex subagents", name: declared ?? codexAgent[1]! };
   }
   return undefined;
