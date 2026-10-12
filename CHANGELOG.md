@@ -12,6 +12,7 @@ First release. Published as `@zekhoi/agent-kit`.
 - Managed blocks in `AGENTS.md` and `CLAUDE.md` that preserve surrounding content, line endings, and formatter layout.
 - Checksums over line-ending-normalized content, so line-ending conversion never causes conflicts.
 - Locked, staged writes with backups and rollback; the manifest is written last, and interrupted runs complete on rerun.
+- `show <item> --diff` compares installed files and blocks with the bundled version, and `--diff` on changing commands previews every planned write as a unified diff.
 - Requires Node.js 22.12 or later.
 
 ### Catalog

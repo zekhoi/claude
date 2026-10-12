@@ -295,3 +295,59 @@ describe("interrupted lifecycle commands", () => {
     }, ["update", "--allow-major"]);
   }, 60_000);
 });
+
+describe("diff previews", () => {
+  it("show --diff reports identical files and shows local edits", async () => {
+    const root = await installed({}, ["--preset", "base", "--context"]);
+    const clean = await json(root, ["show", "skill/code-review", "--diff"]);
+    expect(clean.code).toBe(0);
+    expect(clean.result.data.files[0]).toMatchObject({ local: "identical", diff: "" });
+    const block = await json(root, ["show", "guideline/engineering", "--diff"]);
+    expect(block.result.data.files[0].local).toBe("identical");
+
+    const original = await readFile(path.join(root, SKILL), "utf8");
+    await writeFile(
+      path.join(root, SKILL),
+      original.replace("## 1. Establish scope", "## 1. Scope it"),
+    );
+    const edited = await kit(root, ["show", "skill/code-review", "--diff"]);
+    expect(edited.stdout).toContain("--- .claude/skills/kit-code-review/SKILL.md (yours)");
+    expect(edited.stdout).toContain("+++ .claude/skills/kit-code-review/SKILL.md (bundled 1.0.0)");
+    expect(edited.stdout).toContain("-## 1. Scope it");
+    expect(edited.stdout).toContain("+## 1. Establish scope");
+  });
+
+  it("show --diff marks missing files", async () => {
+    const root = await installed();
+    await rm(path.join(root, SKILL));
+    const run = await json(root, ["show", "skill/code-review", "--diff"]);
+    expect(run.result.data.files[0].local).toBe("missing");
+    expect(run.result.data.files[0].diff).toContain("(missing)");
+  });
+
+  it("--dry-run --diff previews each planned write without changing anything", async () => {
+    const root = await installed();
+    await pretendOlder(root, "skill/code-review", SKILL, "old content\n");
+    const before = await snapshotTree(root);
+    const run = await json(root, ["update", "--allow-major", "--dry-run", "--diff"]);
+    expect(run.code).toBe(0);
+    const change = run.result.data.changes.find(
+      (c: { destination: string }) => c.destination === SKILL,
+    );
+    expect(change.diff).toContain("-old content");
+    expect(change.diff).toContain("+name: kit-code-review");
+    expect(await snapshotTree(root)).toEqual(before);
+
+    const removal = await json(root, ["uninstall", "--dry-run", "--diff"]);
+    const deleted = removal.result.data.changes.find(
+      (c: { destination: string }) => c.destination === ".claude/rules/agent-kit/testing.md",
+    );
+    expect(deleted.diff).toContain("+++ /dev/null");
+  });
+
+  it("omits diffs unless requested", async () => {
+    const root = await installed();
+    const run = await json(root, ["uninstall", "--dry-run"]);
+    expect(run.result.data.changes.some((c: { diff?: string }) => c.diff)).toBe(false);
+  });
+});

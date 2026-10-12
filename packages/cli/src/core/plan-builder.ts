@@ -186,7 +186,7 @@ export class PlanBuilder {
           base,
           "LOCAL_EDIT_CONFLICT",
           "the managed block was edited locally",
-          "Move your edits outside the agent-kit markers or revert them, then rerun",
+          "Compare with `agent-kit show guideline/engineering --diff`, then move your edits outside the agent-kit markers or revert them, and rerun",
         );
         return;
       }
@@ -214,7 +214,7 @@ export class PlanBuilder {
         base,
         "LOCAL_EDIT_CONFLICT",
         "the managed block was edited locally",
-        "Move your edits outside the agent-kit markers or revert them, then rerun",
+        "Compare with `agent-kit show guideline/engineering --diff`, then move your edits outside the agent-kit markers or revert them, and rerun",
       );
       return;
     }

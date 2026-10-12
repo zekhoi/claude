@@ -3,11 +3,12 @@ import { conflict, error, type Diagnostic } from "../core/diagnostics.js";
 import { acquireLock, type Lock } from "../core/lock.js";
 import { MANIFEST_PATH, readManifest, serializeManifest, STATE_DIR } from "../core/manifest.js";
 import { emit } from "../core/output.js";
+import { unifiedDiff } from "../core/diff.js";
 import type { Plan } from "../core/plan-builder.js";
 import { loadPackagedRegistry, type PackagedRegistry } from "../core/registry.js";
 import { BUNDLED_REGISTRY_DIR, CLI_VERSION } from "../core/runtime.js";
 import type { Manifest, PlannedChange } from "../core/schemas.js";
-import { readTargetFiles, resolveIn, resolveTarget } from "../core/target.js";
+import { readTargetFiles, resolveIn, resolveTarget, type FileState } from "../core/target.js";
 import {
   applyWrites,
   removeLeftovers,
@@ -25,6 +26,8 @@ export interface MutateOptions {
   cwd: string;
   json: boolean;
   dryRun: boolean;
+  /** Attach a unified diff to every planned write. */
+  diff?: boolean;
   hooks?: ApplyHooks;
   /**
    * Builds the plan request once the registry and manifest are loaded, or returns diagnostics
@@ -73,7 +76,32 @@ export function renderChanges(target: string, data: MutateData): string {
     if (conflicts) lines.push("Items with conflicts were skipped; see below.");
   } else if (conflicts) lines.push("Nothing was written because of conflicts; see below.");
   else lines.push("No changes.");
+  const diffs = data.changes.filter((c) => c.diff);
+  if (diffs.length > 0)
+    lines.push(
+      "",
+      ...diffs
+        .map((c) => c.diff!)
+        .join("\n\n")
+        .split("\n"),
+    );
   return lines.join("\n");
+}
+
+/** Adds a unified diff of each planned write to its change, from the snapshot the plan used. */
+function attachDiffs(plan: Plan, files: ReadonlyMap<string, FileState>): void {
+  for (const write of plan.writes) {
+    const state = files.get(write.destination);
+    const before = state?.state === "file" ? state.text : "";
+    const diff = unifiedDiff(before, write.content ?? "", {
+      from: state?.state === "file" ? `a/${write.destination}` : "/dev/null",
+      to: write.content === null ? "/dev/null" : `b/${write.destination}`,
+    });
+    const change = plan.changes.find(
+      (c) => c.destination === write.destination && PENDING.has(c.action) && c.diff === undefined,
+    );
+    if (change && diff) change.diff = diff;
+  }
 }
 
 /** Shared flow for mutating commands: lock, read, plan, then apply or preview. */
@@ -105,7 +133,9 @@ export async function mutate(options: MutateOptions): Promise<number> {
 
     const request = await options.prepare({ registry, manifest, cliVersion: CLI_VERSION });
     if (Array.isArray(request)) return done(root, request);
-    const plan = request.plan(await readTargetFiles(root, request.paths));
+    const files = await readTargetFiles(root, request.paths);
+    const plan = request.plan(files);
+    if (options.diff) attachDiffs(plan, files);
 
     const data: MutateData = { dryRun, applied: false, changes: plan.changes };
     const hasConflicts = plan.diagnostics.some((d) => d.severity === "conflict");

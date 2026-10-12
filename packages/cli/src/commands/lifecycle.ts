@@ -17,6 +17,7 @@ interface Common {
   cwd: string;
   json: boolean;
   dryRun: boolean;
+  diff: boolean;
   hooks?: ApplyHooks;
 }
 

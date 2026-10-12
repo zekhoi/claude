@@ -364,7 +364,7 @@ Complete when the packaged CLI installs content that Claude recognizes.
 - [ ] Add Codex and other agent adapters using their respective documentation.
 - [ ] Add explicitly selected global installation scope.
 - [ ] Add a remote registry with version pinning, integrity verification, and caching.
-- [ ] Add diff previews and conflict resolution assistance.
+- [x] Add diff previews and conflict resolution assistance (`show --diff`, `--diff` on changing commands, conflict guidance that points to them).
 - [ ] Add a persisted transaction journal and `recover` command if staged writes prove insufficient (see section 15).
 - [ ] Add an upgrade migration framework before the first item rename, destination move, or manifest schema change.
 - [ ] Add item dependency resolution when an item genuinely requires another.
