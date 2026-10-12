@@ -1,8 +1,10 @@
 {
   "manifestSchemaVersion": 1,
-  "cliVersion": "0.0.0",
+  "cliVersion": "0.1.0",
   "adapter": "claude",
-  "presets": [],
+  "presets": [
+    "preset/node"
+  ],
   "items": {
     "guideline/engineering": {
       "version": "1.0.0",
@@ -13,6 +15,76 @@
           "sha256": "529edcc3cb52b609d03dd448f2c97e62445f060a8f61169cee3b4d2cffe734fa"
         }
       ]
+    },
+    "skill/code-review": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": ".claude/skills/kit-code-review/SKILL.md",
+          "install": "file",
+          "sha256": "dc1e88c7ec0c0f365191f3c412920f6efb4d43ea37b6455783b26b71b1fa302e"
+        }
+      ]
+    },
+    "skill/debugging": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": ".claude/skills/kit-debugging/SKILL.md",
+          "install": "file",
+          "sha256": "6674a5049207e9499b0c76753e3b0d1eac68fee7bdbc6dffe46d325e180d89e0"
+        }
+      ]
+    },
+    "skill/feature-implementation": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": ".claude/skills/kit-feature-implementation/SKILL.md",
+          "install": "file",
+          "sha256": "cbdd0c2f80d1bd68f8458f71a4ce99a3e7fc3d8d1b78ddb022c3c4bd411431ed"
+        }
+      ]
+    },
+    "rule/testing": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": ".claude/rules/agent-kit/testing.md",
+          "install": "file",
+          "sha256": "a04f16e127b4304f6a88e5ed1225e09b3ad700c91f7b17b16260e7c001761e26"
+        }
+      ]
+    },
+    "rule/typescript": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": ".claude/rules/agent-kit/typescript.md",
+          "install": "file",
+          "sha256": "4d433d4426a987467f682bfd9c31230872bf9eebfc7a6db7a2d8d79a768a0dab"
+        }
+      ]
+    },
+    "agent/reviewer": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": ".claude/agents/kit-reviewer.md",
+          "install": "file",
+          "sha256": "dfab73c3887e6ecf6edb50013c0c87644319985d3c883fdf897af7ee8b12ef13"
+        }
+      ]
+    },
+    "agent/debugger": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": ".claude/agents/kit-debugger.md",
+          "install": "file",
+          "sha256": "ef2bb16ff4f508c1e18118cf611f657ebc67e7d2f718fbb8f34e2c6bef784232"
+        }
+      ]
     }
   },
   "blocks": {
@@ -21,5 +93,14 @@
       "createdFile": false
     }
   },
+  "createdDirs": [
+    ".claude/agents",
+    ".claude/rules",
+    ".claude/rules/agent-kit",
+    ".claude/skills",
+    ".claude/skills/kit-code-review",
+    ".claude/skills/kit-debugging",
+    ".claude/skills/kit-feature-implementation"
+  ],
   "claudeImport": "user-owned"
 }
