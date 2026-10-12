@@ -141,6 +141,48 @@
           "destination": ".claude/agents/kit-debugger.md"
         }
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/commit",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Commits with messages that follow the repository's conventions; never pushes on its own",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/commit/SKILL.md",
+          "destination": ".claude/skills/kit-commit/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/pull-request",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "GitHub pull and GitLab merge requests with accurate descriptions and test plans",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/pull-request/SKILL.md",
+          "destination": ".claude/skills/kit-pull-request/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/security-audit",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Security audit of code and dependencies with evidence-based findings; reports without editing",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/security-audit/SKILL.md",
+          "destination": ".claude/skills/kit-security-audit/SKILL.md"
+        }
+      ]
     }
   ]
 }

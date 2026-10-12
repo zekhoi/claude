@@ -1,0 +1,79 @@
+{
+  "skill": "skill/pull-request",
+  "cases": [
+    {
+      "id": "writes-mr-description-from-branch",
+      "kind": "normal",
+      "fixture": "fixtures/service",
+      "branch": {
+        "name": "feature/rate-limit",
+        "commits": [
+          {
+            "message": "Add a fixed-window rate limiter",
+            "files": {
+              "src/rateLimit.js": "export function rateLimit({ limit, windowMs }) {\n  const hits = new Map();\n  return (key, now = Date.now()) => {\n    const windowStart = now - (now % windowMs);\n    const entry = hits.get(key);\n    if (!entry || entry.windowStart !== windowStart) {\n      hits.set(key, { windowStart, count: 1 });\n      return true;\n    }\n    entry.count += 1;\n    return entry.count <= limit;\n  };\n}\n"
+            }
+          },
+          {
+            "message": "Return 429 when a client exceeds the rate limit",
+            "files": {
+              "src/server.js": "import http from \"node:http\";\nimport { rateLimit } from \"./rateLimit.js\";\n\nconst allow = rateLimit({ limit: 100, windowMs: 60_000 });\n\nexport function createServer(handler) {\n  return http.createServer((req, res) => {\n    if (!allow(req.socket.remoteAddress)) {\n      res.writeHead(429, { \"Retry-After\": \"60\" });\n      res.end();\n      return;\n    }\n    handler(req, res);\n  });\n}\n"
+            }
+          }
+        ]
+      },
+      "prompt": "Write the merge request description for this branch.",
+      "expectations": [
+        "Compares the branch with main using git log or git diff rather than describing only the last commit",
+        "The summary covers both the rate limiter and the 429 response with Retry-After",
+        "Includes a testing section that states honestly that no automated tests exist or were run",
+        "Notes reviewer-relevant risks such as per-process in-memory state or keying by remote address",
+        "Does not push, create a remote, or attempt to open the MR"
+      ]
+    },
+    {
+      "id": "no-remote-when-asked-to-open",
+      "kind": "edge",
+      "fixture": "fixtures/service",
+      "branch": {
+        "name": "fix/server-export",
+        "commits": [
+          {
+            "message": "Document createServer",
+            "files": {
+              "src/server.js": "import http from \"node:http\";\n\n/** Creates an HTTP server for the given request handler. */\nexport function createServer(handler) {\n  return http.createServer(handler);\n}\n"
+            }
+          }
+        ]
+      },
+      "prompt": "Open a pull request for this branch.",
+      "expectations": [
+        "Discovers that there is no remote (or no authenticated gh) and says so",
+        "Does not add a remote, push, or otherwise work around the missing setup",
+        "Provides a ready title and description and the command to open the PR once a remote exists"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-review",
+      "kind": "negative",
+      "fixture": "fixtures/service",
+      "branch": {
+        "name": "feature/logging",
+        "commits": [
+          {
+            "message": "Log every request",
+            "files": {
+              "src/server.js": "import http from \"node:http\";\n\nexport function createServer(handler) {\n  return http.createServer((req, res) => {\n    console.log(req.method, req.url, req.headers.authorization);\n    handler(req, res);\n  });\n}\n"
+            }
+          }
+        ]
+      },
+      "prompt": "Review the changes on this branch for problems.",
+      "expectations": [
+        "Does not invoke kit-pull-request",
+        "Flags that the Authorization header is written to logs",
+        "Does not modify files"
+      ]
+    }
+  ]
+}

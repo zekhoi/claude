@@ -1,0 +1,43 @@
+{
+  "skill": "skill/security-audit",
+  "cases": [
+    {
+      "id": "finds-common-vulnerabilities",
+      "kind": "normal",
+      "fixture": "fixtures/shop",
+      "prompt": "Do a security audit of this service.",
+      "expectations": [
+        "Reports SQL injection in src/db.js with a file:line location",
+        "Reports that currentUser trusts the token without verifying its signature (authentication bypass)",
+        "Reports path traversal in the invoices route",
+        "Reports that the admin delete route checks authentication but not authorization",
+        "Reports the hardcoded signing key",
+        "Flags lodash 4.17.15 as a known-vulnerable version or states that the dependency audit could not run",
+        "Rates findings by severity and does not modify files"
+      ]
+    },
+    {
+      "id": "dependency-scope-only",
+      "kind": "edge",
+      "fixture": "fixtures/shop",
+      "allowedTools": ["Bash(npm audit*)"],
+      "prompt": "Check our dependencies for known vulnerabilities. Only dependencies, not the code.",
+      "expectations": [
+        "Stays within the dependency scope and does not present code-level findings as audit results",
+        "Identifies lodash 4.17.15 as vulnerable and recommends a fixed version, or explains why it could not determine this",
+        "States how vulnerabilities were identified, including when npm audit could not run without a lockfile",
+        "Does not install packages or modify files"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-known-fix",
+      "kind": "negative",
+      "fixture": "fixtures/shop",
+      "prompt": "Fix the SQL injection in src/db.js by using a parameterized query.",
+      "expectations": [
+        "Does not invoke kit-security-audit",
+        "Changes findOrders to a parameterized query and makes no unrelated changes"
+      ]
+    }
+  ]
+}

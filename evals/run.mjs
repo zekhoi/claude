@@ -45,32 +45,52 @@ const ALLOWED_TOOLS = [
   "Bash(git status*)",
   "Bash(git log*)",
 ];
-const SKILLS = [
-  "skill/code-review",
-  "skill/debugging",
-  "skill/feature-implementation",
-  "skill/database-design",
-];
+// Every skill is installed in each case, so negative cases test real triggering.
+const SKILLS = JSON.parse(readFileSync(path.join(repo, "registry/index.json"), "utf8"))
+  .items.filter((i) => i.type === "skill")
+  .map((i) => i.id);
 
 const sh = (cmd, args, cwd) =>
   execFileSync(cmd, args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
 
-function setUpProject(skillDir, fixture) {
+/**
+ * Builds a git repository for a case: the fixture and agent-kit in an initial commit on `main`,
+ * then optional `history` commits, an optional `branch` with commits, and optional uncommitted
+ * `changes` (`staged: true` stages them).
+ */
+function setUpProject(skillDir, c) {
   const project = mkdtempSync(path.join(tmpdir(), "agent-kit-eval-project-"));
-  if (fixture) cpSync(path.join(skillDir, fixture), project, { recursive: true });
-  sh("git", ["init", "-q"], project);
+  if (c.fixture) cpSync(path.join(skillDir, c.fixture), project, { recursive: true });
+  const write = (files) => {
+    for (const [rel, content] of Object.entries(files ?? {})) {
+      mkdirSync(path.dirname(path.join(project, rel)), { recursive: true });
+      writeFileSync(path.join(project, rel), content);
+    }
+  };
+  sh("git", ["init", "-q", "-b", "main"], project);
   sh("git", ["config", "user.email", "eval@example.com"], project);
   sh("git", ["config", "user.name", "eval"], project);
-  sh("git", ["add", "-A"], project);
-  sh("git", ["commit", "-q", "--allow-empty", "-m", "fixture"], project);
   sh("node", [cli, "init", "--preset", "base", "--cwd", project], project);
   sh("node", [cli, "add", ...SKILLS, "--cwd", project], project);
   sh("git", ["add", "-A"], project);
-  sh("git", ["commit", "-q", "-m", "agent-kit"], project);
+  sh("git", ["commit", "-q", "-m", "Initial commit"], project);
+  for (const message of c.history ?? []) {
+    sh("git", ["commit", "-q", "--allow-empty", "-m", message], project);
+  }
+  if (c.branch) {
+    sh("git", ["switch", "-q", "-c", c.branch.name], project);
+    for (const commit of c.branch.commits) {
+      write(commit.files);
+      sh("git", ["add", "-A"], project);
+      sh("git", ["commit", "-q", "-m", commit.message], project);
+    }
+  }
+  write(c.changes);
+  if (c.staged) sh("git", ["add", "-A"], project);
   return project;
 }
 
-function runClaude(project, prompt) {
+function runClaude(project, prompt, extraTools = []) {
   const args = [
     "-p",
     prompt,
@@ -87,6 +107,7 @@ function runClaude(project, prompt) {
     "--verbose",
     "--allowedTools",
     ...ALLOWED_TOOLS,
+    ...extraTools,
   ];
   return new Promise((resolve) => {
     const child = spawn("claude", args, { cwd: project, stdio: ["ignore", "pipe", "pipe"] });
@@ -144,14 +165,20 @@ for (const skill of readdirSync(evalsDir).sort()) {
   for (const c of cases) {
     if (onlyCase && onlyCase !== c.id) continue;
     process.stderr.write(`running ${skill}/${c.id} ...\n`);
-    const project = setUpProject(skillDir, c.fixture);
-    const run = await runClaude(project, c.prompt);
+    const project = setUpProject(skillDir, c);
+    const run = await runClaude(project, c.prompt, c.allowedTools);
     const summary = summarize(run.stdout);
     const changedFiles = sh("git", ["status", "--porcelain"], project)
       .trim()
       .split("\n")
       .filter(Boolean);
-    const diff = sh("git", ["diff"], project).slice(0, 8000);
+    const diff = sh("git", ["diff", "HEAD"], project).slice(0, 8000);
+    const logAfter = sh("git", ["log", "--all", "--format=%h %s%n%b", "-6"], project).trim();
+    const committedFiles = sh(
+      "git",
+      ["show", "--name-status", "--format=", "HEAD"],
+      project,
+    ).trim();
     let tests;
     if (existsSync(path.join(project, "package.json"))) {
       try {
@@ -172,6 +199,8 @@ for (const skill of readdirSync(evalsDir).sort()) {
       ...summary,
       changedFiles,
       diff,
+      logAfter,
+      committedFiles,
       testsAfter: tests,
       project,
     };
