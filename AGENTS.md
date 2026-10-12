@@ -9,6 +9,7 @@ Instructions for agents working on this repository. Content installed into user 
 - Never weaken path validation, checksum checks, or conflict handling to make a test pass.
 - Write all distributed content and documentation in English.
 - Do not publish the package or change release configuration without an explicit instruction.
+- This repository uses its own catalog: `.claude/` and the block below are installed by the CLI. After changing an item in `registry/`, bump its version and run `pnpm -r run build && node packages/cli/dist/index.js update` so the installed copies match. Never edit files under `.claude/` directly.
 
 <!-- agent-kit:start -->
 
