@@ -1,0 +1,32 @@
+{
+  "name": "@yourname/agent-kit",
+  "version": "0.0.0",
+  "description": "Install engineering guidelines, rules, agents, and skills for Claude Code into a repository",
+  "type": "module",
+  "license": "UNLICENSED",
+  "bin": {
+    "agent-kit": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "!dist/scripts"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node dist/scripts/build-registry.js ../../registry dist/registry",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "commander": "15.0.0",
+    "yaml": "2.9.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}

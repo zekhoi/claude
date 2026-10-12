@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "schemaVersion": 1,
+      "id": "guideline/engineering",
+      "version": "1.0.0",
+      "type": "guideline",
+      "description": "Core engineering guidelines: inspect, follow conventions, implement, verify, report",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "guidelines/engineering.md",
+          "destination": "AGENTS.md",
+          "install": "managed-block"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "id": "preset/base",
+  "description": "Core engineering guidelines and the general-purpose skills and rules",
+  "items": ["guideline/engineering"]
+}
