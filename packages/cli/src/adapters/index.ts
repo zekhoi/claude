@@ -4,6 +4,15 @@ import type { InstallMode, PackagedItem } from "../core/schemas.js";
 import { parseFrontmatter, validateContent } from "./claude.js";
 import { renderCodex, validateCodexFile } from "./codex.js";
 
+/** `project` installs into a repository; `user` installs into the home directory. */
+export type Scope = "project" | "user";
+
+/** Where each agent reads user-level guidelines (relative to the home directory). */
+export const USER_GUIDELINES: Record<AgentId, string> = {
+  claude: ".claude/CLAUDE.md",
+  codex: ".codex/AGENTS.md",
+};
+
 /** Coding agents the CLI can install for. */
 export const AGENT_IDS = ["claude", "codex"] as const;
 export type AgentId = (typeof AGENT_IDS)[number];
@@ -27,20 +36,27 @@ function renderClaude(item: PackagedItem, contents: ReadonlyMap<string, string>)
 }
 
 /**
- * Renders an item for every agent, deduplicating shared destinations such as the AGENTS.md block.
- * The registry stores the canonical (Claude Code) layout; other agents derive from it.
+ * Renders an item for every agent, deduplicating shared destinations such as the project AGENTS.md
+ * block. The registry stores the canonical (Claude Code) project layout; other agents and the user
+ * scope derive from it. At user scope each agent reads guidelines from its own file.
  */
 export function renderItem(
   item: PackagedItem,
   contents: ReadonlyMap<string, string>,
   agents: readonly AgentId[],
+  scope: Scope = "project",
 ): RenderedFile[] {
   const files = new Map<string, RenderedFile>();
   for (const agent of AGENT_IDS.filter((a) => agents.includes(a))) {
     const rendered =
       agent === "claude" ? renderClaude(item, contents) : renderCodex(item, contents);
-    for (const file of rendered)
-      if (!files.has(file.destination)) files.set(file.destination, file);
+    for (const file of rendered) {
+      const placed =
+        scope === "user" && file.install === "managed-block"
+          ? { ...file, destination: USER_GUIDELINES[agent] }
+          : file;
+      if (!files.has(placed.destination)) files.set(placed.destination, placed);
+    }
   }
   return [...files.values()];
 }

@@ -8,12 +8,13 @@ npx @zekhoi/agent-kit@latest <command> [options]
 
 ## Common options
 
-| Option         | Commands                                                | Meaning                                                                                                    |
-| -------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `--cwd <path>` | all                                                     | Target directory (default: the current directory). It must exist.                                          |
-| `--json`       | all                                                     | Print exactly one JSON result on stdout; see [JSON output](#json-output).                                  |
-| `--dry-run`    | `init`, `add`, `update`, `remove`, `eject`, `uninstall` | Show the plan without creating, changing, or locking anything.                                             |
-| `--diff`       | `init`, `add`, `update`, `remove`, `eject`, `uninstall` | Add a unified diff of every planned write or deletion; combine with `--dry-run` to review before applying. |
+| Option         | Commands                                                | Meaning                                                                                                                                                                                         |
+| -------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--cwd <path>` | all                                                     | Target directory (default: the current directory). It must exist.                                                                                                                               |
+| `--global`     | all except `list`                                       | Operate on the user-level installation in your home directory, which applies to every project. Cannot be combined with `--cwd` or `--context`. See [Global installation](#global-installation). |
+| `--json`       | all                                                     | Print exactly one JSON result on stdout; see [JSON output](#json-output).                                                                                                                       |
+| `--dry-run`    | `init`, `add`, `update`, `remove`, `eject`, `uninstall` | Show the plan without creating, changing, or locking anything.                                                                                                                                  |
+| `--diff`       | `init`, `add`, `update`, `remove`, `eject`, `uninstall` | Add a unified diff of every planned write or deletion; combine with `--dry-run` to review before applying.                                                                                      |
 
 ## Commands
 
@@ -62,6 +63,21 @@ Read-only checks: malformed or missing managed blocks, a missing `CLAUDE.md` imp
 ### `uninstall`
 
 Removes every managed file and block, then the manifest. Your content outside the markers, an `@AGENTS.md` import you wrote, and the project context file are kept. Files and directories the CLI created are deleted once empty. Any edited managed content cancels the whole command. Without a manifest, `uninstall` succeeds without doing anything.
+
+## Global installation
+
+`--global` installs once for your user account instead of per repository. Every command accepts it, and a global installation keeps its own manifest in `~/.agent-kit/`. Commands refuse to mix scopes (`SCOPE_MISMATCH`), so a project installation and a global one are never confused.
+
+| Item       | Claude Code                            | Codex                                                       |
+| ---------- | -------------------------------------- | ----------------------------------------------------------- |
+| Guidelines | Managed block in `~/.claude/CLAUDE.md` | Managed block in `~/.codex/AGENTS.md`                       |
+| Skills     | `~/.claude/skills/kit-<name>/`         | `~/.agents/skills/kit-<name>/`                              |
+| Rules      | `~/.claude/rules/agent-kit/`           | `~/.agents/skills/kit-<name>-rules/`                        |
+| Subagents  | `~/.claude/agents/kit-<name>.md`       | `~/.codex/agents/kit-<name>.toml` (no project trust needed) |
+
+Project context templates and the `CLAUDE.md` import are project-only. If `CLAUDE_CONFIG_DIR` or `CODEX_HOME` moves an agent's directory away from your home directory, global installation for that agent is refused rather than writing to the wrong place.
+
+When an item is installed both globally and in a project, Claude Code prefers the **user-level skill** but the **project subagent**. Keep the two at the same version, or install each item in only one scope.
 
 ## Exit codes
 

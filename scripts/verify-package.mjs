@@ -151,6 +151,51 @@ try {
     "CLAUDE.md is restored exactly",
   );
 
+  // Global: install into a temporary home directory, check, and remove again.
+  const home = mkdtempSync(path.join(tmpdir(), "agent-kit-verify-home-"));
+  try {
+    // npm's own cache stays where it is, so only agent-kit's files land in the temporary home.
+    const npmCache = run("npm", ["config", "get", "cache"], project).trim();
+    const globalEnv = {
+      ...process.env,
+      HOME: home,
+      USERPROFILE: home,
+      CLAUDE_CONFIG_DIR: "",
+      CODEX_HOME: "",
+      npm_config_cache: npmCache,
+    };
+    const kitGlobal = (...args) => {
+      try {
+        execFileSync("npx", ["--no-install", "agent-kit", ...args, "--global"], {
+          cwd: project,
+          env: globalEnv,
+          stdio: "ignore",
+          shell: isWindows,
+        });
+        return 0;
+      } catch (e) {
+        return e.status ?? 1;
+      }
+    };
+    check(
+      kitGlobal("init", "--preset", "base", "--agent", "claude", "--agent", "codex") === 0,
+      "init --global exits 0",
+    );
+    check(
+      readFileSync(path.join(home, ".claude/CLAUDE.md"), "utf8").includes("agent-kit:start"),
+      "global Claude guidelines are installed",
+    );
+    check(kitGlobal("doctor") === 0, "doctor --global finds no problems");
+    check(kitGlobal("uninstall") === 0, "uninstall --global exits 0");
+    const left = readdirSync(home);
+    check(
+      left.length === 0,
+      `global uninstall leaves the home directory empty (${left.join(", ")})`,
+    );
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+
   // Codex: install, check, and remove again.
   check(
     kit("init", "--preset", "base", "--agent", "codex").code === 0,

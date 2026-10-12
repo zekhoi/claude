@@ -17,6 +17,8 @@ import type { ApplyHooks } from "../core/writer.js";
 
 interface Common {
   cwd: string;
+  /** Install into the user's home directory instead of a project. */
+  global?: boolean;
   json: boolean;
   dryRun: boolean;
   diff: boolean;
@@ -40,6 +42,7 @@ export function install(
     ) => Promise<string[] | Diagnostic>;
   },
 ): Promise<number> {
+  const scope = options.global ? ("user" as const) : ("project" as const);
   return mutate({
     ...options,
     prepare: async ({ registry, manifest, cliVersion }) => {
@@ -47,7 +50,12 @@ export function install(
       if (!Array.isArray(ids)) return [ids];
       const selection = resolveSelection(registry, ids);
       if (!selection.request) return selection.diagnostics;
-      const request = { ...selection.request, context: options.context, agents: options.agents };
+      const request = {
+        ...selection.request,
+        context: options.context,
+        agents: options.agents,
+        scope,
+      };
       const contextTemplate = request.context
         ? await readTemplate(registry, "agent-context.md")
         : "";
@@ -55,6 +63,7 @@ export function install(
         paths: requiredPaths(registry, manifest, request.items, {
           context: request.context,
           agents: request.agents,
+          scope,
         }),
         plan: (files) =>
           planInstall({ registry, manifest, files, cliVersion, request, contextTemplate }),

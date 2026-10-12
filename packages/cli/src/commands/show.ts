@@ -12,7 +12,8 @@ import { composeAgentsBody } from "../core/planner.js";
 import { loadPackagedRegistry } from "../core/registry.js";
 import { BUNDLED_REGISTRY_DIR } from "../core/runtime.js";
 import type { Manifest } from "../core/schemas.js";
-import { readTargetFile, resolveTarget } from "../core/target.js";
+import { checkScope, resolveWhere, scopeOf, type Where } from "../core/scope.js";
+import { readTargetFile } from "../core/target.js";
 
 interface ShowFile {
   destination: string;
@@ -100,7 +101,7 @@ function render(d: ShowData, options: { file?: string; diff: boolean }): string 
 /** Prints an item's bundled files, or how the target differs from them, for manual comparison. */
 export async function show(
   id: string,
-  options: { json: boolean; cwd: string; file?: string; diff: boolean },
+  options: Where & { json: boolean; file?: string; diff: boolean },
 ): Promise<number> {
   const done = (diagnostics: Diagnostic[], target: string | null, data?: ShowData) =>
     emit({ command: "show", target, diagnostics, ...(data ? { data } : {}) }, options.json, (d) =>
@@ -126,16 +127,19 @@ export async function show(
   let agents: readonly AgentId[] = AGENT_IDS;
   let manifest: Manifest | undefined;
   let target: string | null = null;
+  const scope = scopeOf(options);
   if (options.diff) {
-    const resolved = await resolveTarget(options.cwd);
+    const resolved = await resolveWhere(options);
     if (!resolved.root) return done(resolved.diagnostics, null);
     const read = await readManifest(resolved.root);
     if (read.diagnostics.length > 0) return done(read.diagnostics, resolved.root);
     manifest = read.manifest;
     agents = agentsFor(manifest);
+    const scopeDiagnostics = checkScope(manifest, scope, agents);
+    if (scopeDiagnostics.length > 0) return done(scopeDiagnostics, resolved.root);
     target = resolved.root;
   }
-  const rendered = renderItem(item, contents, agents);
+  const rendered = renderItem(item, contents, agents, scope);
   const selected =
     options.file === undefined ? rendered : rendered.filter((f) => f.destination === options.file);
   if (selected.length === 0) {

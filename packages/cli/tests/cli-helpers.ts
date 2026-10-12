@@ -44,3 +44,29 @@ export const codesOf = (result: { diagnostics: { code: string }[] }) =>
 
 /** True when the test-only hook terminated the CLI (SIGKILL, or exit code 86 on Windows). */
 export const wasKilled = (run: Run) => run.signal === "SIGKILL" || run.code === 86;
+
+/** Runs the built CLI with `--global` and a temporary home, so tests never touch the real one. */
+export async function kitGlobal(
+  home: string,
+  args: string[],
+  env: Record<string, string> = {},
+): Promise<Run> {
+  try {
+    const { stdout, stderr } = await execFileAsync(process.execPath, [bin, ...args, "--global"], {
+      cwd: home,
+      env: { ...process.env, ...homeEnv(home), ...env },
+    });
+    return { code: 0, stdout, stderr };
+  } catch (e) {
+    const err = e as { code?: number; stdout: string; stderr: string };
+    return { code: err.code ?? -1, stdout: err.stdout, stderr: err.stderr };
+  }
+}
+
+/** Points every home-directory lookup at `home` and clears agent directory relocations. */
+export const homeEnv = (home: string): Record<string, string> => ({
+  HOME: home,
+  USERPROFILE: home,
+  CLAUDE_CONFIG_DIR: "",
+  CODEX_HOME: "",
+});

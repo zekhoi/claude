@@ -37,6 +37,10 @@ Checked on 2026-10-12 with Claude Code 2.1.296 on macOS, in a scratch git reposi
 
 Rerun these checks with a new Claude Code version before widening the supported range.
 
+## User-level locations
+
+Global installation (`--global`) relies on these documented user-level paths: Claude Code reads `~/.claude/CLAUDE.md` (with `@` imports; there is no user-level `AGENTS.md`), `~/.claude/skills/`, `~/.claude/agents/`, and `~/.claude/rules/` ([memory](https://code.claude.com/docs/en/memory), [skills](https://code.claude.com/docs/en/skills), [subagents](https://code.claude.com/docs/en/sub-agents)); Codex reads `~/.codex/AGENTS.md`, `~/.agents/skills/`, and `~/.codex/agents/`. User-level skills override project skills with the same name in Claude Code, while project subagents override user-level ones.
+
 ## Codex
 
 Install with `agent-kit init --agent codex` (or `--agent claude --agent codex` for both). The registry stores the Claude Code layout; the Codex adapter derives its files from it.

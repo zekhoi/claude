@@ -14,6 +14,7 @@ First release. Published as `@zekhoi/agent-kit`.
 - Locked, staged writes with backups and rollback; the manifest is written last, and interrupted runs complete on rerun.
 - `show <item> --diff` compares installed files and blocks with the bundled version, and `--diff` on changing commands previews every planned write as a unified diff.
 - Codex support with `init --agent codex`: guidelines in `AGENTS.md`, skills in `.agents/skills/`, rules converted to skills, and subagents as `.codex/agents/*.toml`. Agents can be combined and added to an existing installation.
+- Global installation with `--global`: the catalog installed once for the user account, in Claude Code's and Codex's user-level directories.
 - Requires Node.js 22.12 or later.
 
 ### Catalog

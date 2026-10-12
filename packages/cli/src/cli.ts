@@ -15,6 +15,7 @@ import type { ApplyHooks } from "./core/writer.js";
 interface CommonOptions {
   cwd: string;
   json: boolean;
+  global?: boolean;
 }
 
 const presetId = (name: string) => (name.startsWith("preset/") ? name : `preset/${name}`);
@@ -60,6 +61,16 @@ async function promptPresets(registry: PackagedRegistry): Promise<string[] | Dia
   }
 }
 
+/** `--global` targets the user's home directory instead of a project. */
+function withGlobal(command: Command, conflicts: string[] = []): Command {
+  return command.addOption(
+    new Option(
+      "--global",
+      "operate on the user-level installation in your home directory (all projects)",
+    ).conflicts(["cwd", ...conflicts]),
+  );
+}
+
 function withCommon(command: Command): Command {
   return command
     .option("--cwd <path>", "target directory (default: current directory)", process.cwd())
@@ -81,7 +92,7 @@ export async function run(argv: string[]): Promise<number> {
       exitCode = await list(opts);
     });
 
-  withCommon(program.command("show"))
+  withGlobal(withCommon(program.command("show")))
     .description("Print an item's bundled files for comparison or manual restore")
     .argument("<type/name>", "item id, for example skill/code-review")
     .option("--file <destination>", "print only the file installed at this destination")
@@ -90,7 +101,7 @@ export async function run(argv: string[]): Promise<number> {
       exitCode = await show(id, opts);
     });
 
-  withCommon(program.command("init"))
+  withGlobal(withCommon(program.command("init")), ["context"])
     .description("Install presets and the core guidelines into the target")
     .addOption(
       new Option("--preset <name>", "preset to install (repeatable)").argParser(
@@ -127,6 +138,7 @@ export async function run(argv: string[]): Promise<number> {
           json: opts.json,
           dryRun: opts.dryRun,
           diff: opts.diff,
+          global: opts.global ?? false,
           context: opts.context,
           agents: opts.agent ?? [],
           // Adding agents to an existing installation needs no new presets.
@@ -145,7 +157,7 @@ export async function run(argv: string[]): Promise<number> {
       },
     );
 
-  withCommon(program.command("add"))
+  withGlobal(withCommon(program.command("add")))
     .description("Install items or presets (preset/<name>)")
     .argument("<ids...>", "item or preset ids, for example skill/code-review preset/node")
     .option("--dry-run", "show the planned changes without writing anything", false)
@@ -157,6 +169,7 @@ export async function run(argv: string[]): Promise<number> {
         json: opts.json,
         dryRun: opts.dryRun,
         diff: opts.diff,
+        global: opts.global ?? false,
         context: false,
         agents: [],
         select: async () => ids,
@@ -164,13 +177,13 @@ export async function run(argv: string[]): Promise<number> {
       });
     });
 
-  withCommon(program.command("status"))
+  withGlobal(withCommon(program.command("status")))
     .description("Show installed items, local changes, and missing files (read-only)")
     .action(async (opts: CommonOptions) => {
       exitCode = await status(opts);
     });
 
-  withCommon(program.command("update"))
+  withGlobal(withCommon(program.command("update")))
     .description("Update installed items; with no ids, update all and skip items with conflicts")
     .argument("[ids...]", "installed item ids to update")
     .option("--allow-major", "allow major version updates for the selected items", false)
@@ -189,7 +202,7 @@ export async function run(argv: string[]): Promise<number> {
     ["remove", "Delete installed items whose files have not been modified"],
     ["eject", "Stop managing items and keep their files as your own"],
   ] as const) {
-    withCommon(program.command(name))
+    withGlobal(withCommon(program.command(name)))
       .description(description)
       .argument("<ids...>", "installed item ids")
       .option("--dry-run", "show the planned changes without writing anything", false)
@@ -199,7 +212,7 @@ export async function run(argv: string[]): Promise<number> {
       });
   }
 
-  withCommon(program.command("uninstall"))
+  withGlobal(withCommon(program.command("uninstall")))
     .description("Remove every managed item and block; keeps your own content and project context")
     .option("--dry-run", "show the planned changes without writing anything", false)
     .option("--diff", "show a unified diff of each planned change", false)
@@ -207,7 +220,7 @@ export async function run(argv: string[]): Promise<number> {
       exitCode = await uninstall({ ...opts, ...withHooks() });
     });
 
-  withCommon(program.command("doctor"))
+  withGlobal(withCommon(program.command("doctor")))
     .description("Check the installation and report problems without changing anything")
     .action(async (opts: CommonOptions) => {
       exitCode = await doctor(opts);

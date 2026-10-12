@@ -5,7 +5,13 @@ import {
   hasAgentsImport,
   ownedDirs,
 } from "../adapters/claude.js";
-import { AGENT_IDS, renderItem, type AgentId, type RenderedFile } from "../adapters/index.js";
+import {
+  AGENT_IDS,
+  renderItem,
+  type AgentId,
+  type RenderedFile,
+  type Scope,
+} from "../adapters/index.js";
 import { parseBlock } from "./blocks.js";
 import { contentHash, normalizeContent } from "./content.js";
 import { error, warning, type Diagnostic } from "./diagnostics.js";
@@ -26,6 +32,8 @@ export interface InstallRequest {
   context: boolean;
   /** Agents to install for, in addition to those already recorded in the manifest. */
   agents: AgentId[];
+  /** Installation scope; an existing manifest's scope always wins. */
+  scope?: Scope;
 }
 
 interface PlanContext {
@@ -48,7 +56,10 @@ const NOT_INSTALLED_ACTION = "Run `agent-kit status` to see installed items";
 export function resolveSelection(
   registry: PackagedRegistry,
   ids: readonly string[],
-): { request?: Omit<InstallRequest, "context" | "agents">; diagnostics: Diagnostic[] } {
+): {
+  request?: Omit<InstallRequest, "context" | "agents" | "scope">;
+  diagnostics: Diagnostic[];
+} {
   const byId = new Map(registry.index.items.map((i) => [i.id, i]));
   const presetsById = new Map(registry.index.presets.map((p) => [p.id, p]));
   const items = new Map<string, PackagedItem>();
@@ -91,21 +102,25 @@ export function requiredPaths(
   registry: PackagedRegistry,
   manifest: Manifest | undefined,
   items: readonly PackagedItem[] = [],
-  options: { context?: boolean; agents?: readonly AgentId[] } = {},
+  options: { context?: boolean; agents?: readonly AgentId[]; scope?: Scope } = {},
 ): string[] {
   const agents = agentsFor(manifest, options.agents);
+  const scope = manifest?.scope ?? options.scope ?? "project";
   const context = options.context ?? false;
-  const paths = [AGENTS_MD, CLAUDE_MD];
+  const paths = scope === "project" ? [AGENTS_MD, CLAUDE_MD] : [];
+  paths.push(...Object.keys(manifest?.blocks ?? {}));
+  const rendered = (item: PackagedItem) =>
+    renderItem(item, registry.contents, agents, scope).map((f) => f.destination);
   for (const [id, entry] of Object.entries(manifest?.items ?? {})) {
     paths.push(...entry.files.map((f) => f.destination));
     // Installed items may gain files for newly selected agents.
     const item = registry.index.items.find((i) => i.id === id);
-    if (item) paths.push(...renderItem(item, registry.contents, agents).map((f) => f.destination));
+    if (item) paths.push(...rendered(item));
   }
-  for (const item of items) {
-    paths.push(...renderItem(item, registry.contents, agents).map((f) => f.destination));
+  for (const item of items) paths.push(...rendered(item));
+  if (scope === "project" && (context || manifest?.contextPath)) {
+    paths.push(manifest?.contextPath ?? CONTEXT_PATH);
   }
-  if (context || manifest?.contextPath) paths.push(manifest?.contextPath ?? CONTEXT_PATH);
   return [...new Set(paths)];
 }
 
@@ -120,38 +135,59 @@ export function composeAgentsBody(parts: readonly string[], contextPath?: string
   return sections.join("\n\n");
 }
 
-function blockFile(entry: { files: readonly { destination: string; install: string }[] }) {
-  return entry.files.find((f) => f.install === "managed-block" && f.destination === AGENTS_MD);
+type FileList = { files: readonly { destination: string; install: string }[] };
+
+/** Managed-block destinations an installed item contributes to. */
+function blockDestinations(entry: FileList): string[] {
+  return entry.files.filter((f) => f.install === "managed-block").map((f) => f.destination);
 }
 
 /**
- * Recomputes the AGENTS.md block from the items in the next manifest. `fresh` supplies content
- * for items changed by this plan; other items must match the bundled registry version.
+ * Recomputes every guidelines block from the items in the next manifest: the shared AGENTS.md
+ * block in a project, or one block per agent at user scope. Blocks no item contributes to any
+ * more are removed. `fresh` supplies content for items changed by this plan; other items must
+ * match the bundled registry version.
  */
-function syncAgentsBlock(
+function syncBlocks(
   b: PlanBuilder,
   registry: PackagedRegistry,
   fresh: ReadonlyMap<string, string>,
   itemId?: string,
 ): void {
-  const parts: string[] = [];
-  for (const [id, entry] of Object.entries(b.next.items).sort(([x], [y]) => x.localeCompare(y))) {
-    if (!blockFile(entry)) continue;
-    const content = fresh.get(id) ?? bundledBlockContent(registry, id, entry.version);
-    if (content === undefined) {
-      b.reject(
-        { destination: AGENTS_MD, kind: "managed-block", itemId: id },
-        "OUTDATED_ITEM",
-        `${id} must be updated before the AGENTS.md block can change`,
-        `Run \`agent-kit update ${id}\`, then rerun`,
-      );
-      return;
-    }
-    parts.push(content);
+  const project = b.next.scope === "project";
+  const destinations = new Set<string>();
+  for (const entry of Object.values(b.next.items)) {
+    for (const d of blockDestinations(entry)) destinations.add(d);
   }
-  const empty = parts.length === 0 && !b.next.contextPath;
-  b.block(AGENTS_MD, empty ? undefined : composeAgentsBody(parts, b.next.contextPath), itemId);
-  syncBridge(b);
+  // Blocks recorded before this plan (except the CLAUDE.md import) may need removing.
+  for (const d of Object.keys(b.manifest?.blocks ?? {})) {
+    if (!(project && d === CLAUDE_MD)) destinations.add(d);
+  }
+  if (project && b.next.contextPath) destinations.add(AGENTS_MD);
+
+  for (const destination of [...destinations].sort()) {
+    const parts: string[] = [];
+    let outdated: string | undefined;
+    for (const [id, entry] of Object.entries(b.next.items).sort(([x], [y]) => x.localeCompare(y))) {
+      if (!blockDestinations(entry).includes(destination)) continue;
+      const content = fresh.get(id) ?? bundledBlockContent(registry, id, entry.version);
+      if (content === undefined) outdated = id;
+      else parts.push(content);
+    }
+    if (outdated) {
+      b.reject(
+        { destination, kind: "managed-block", itemId: outdated },
+        "OUTDATED_ITEM",
+        `${outdated} must be updated before the ${destination} block can change`,
+        `Run \`agent-kit update ${outdated}\`, then rerun`,
+      );
+      continue;
+    }
+    const contextPath = project && destination === AGENTS_MD ? b.next.contextPath : undefined;
+    const empty = parts.length === 0 && !contextPath;
+    b.block(destination, empty ? undefined : composeAgentsBody(parts, contextPath), itemId);
+  }
+  if (project) syncBridge(b);
 }
 
 function bundledBlockContent(
@@ -160,9 +196,7 @@ function bundledBlockContent(
   version: string,
 ): string | undefined {
   const item = registry.index.items.find((i) => i.id === id);
-  const file = item?.files.find(
-    (f) => f.install === "managed-block" && f.destination === AGENTS_MD,
-  );
+  const file = item?.files.find((f) => f.install === "managed-block");
   return item?.version === version && file ? registry.contents.get(file.source) : undefined;
 }
 
@@ -216,7 +250,7 @@ function addAgentFiles(
   registry: PackagedRegistry,
   id: string,
   agents: readonly AgentId[],
-): void {
+): boolean {
   const entry = b.next.items[id]!;
   const item = registry.index.items.find((i) => i.id === id);
   if (!item) {
@@ -229,13 +263,15 @@ function addAgentFiles(
         },
       ),
     );
-    return;
+    return false;
   }
+  const scope = b.next.scope;
   const recorded = new Set(entry.files.map((f) => f.destination));
-  const missing = renderItem(item, registry.contents, agents).filter(
-    (f) => !recorded.has(f.destination) && f.install !== "managed-block",
+  // A shared project AGENTS.md block is already recorded; user-scope blocks are per agent.
+  const missing = renderItem(item, registry.contents, agents, scope).filter(
+    (f) => !recorded.has(f.destination),
   );
-  if (missing.length === 0) return;
+  if (missing.length === 0) return false;
   // The bundled version is the only one that can be rendered; older versions must update first.
   if (item.version !== entry.version) {
     b.reject(
@@ -244,10 +280,10 @@ function addAgentFiles(
       `${id} ${entry.version} must be updated to the bundled version before adding agents`,
       `Run \`agent-kit update ${id}\`, then rerun`,
     );
-    return;
+    return false;
   }
   for (const file of missing) {
-    placeNewFile(b, item, file.destination, file.content);
+    if (file.install !== "managed-block") placeNewFile(b, item, file.destination, file.content);
     entry.files.push({
       destination: file.destination,
       install: file.install,
@@ -255,12 +291,13 @@ function addAgentFiles(
     });
   }
   // Keep recorded files in rendering order so later comparisons are stable.
-  const order = renderItem(item, registry.contents, AGENT_IDS).map((f) => f.destination);
+  const order = renderItem(item, registry.contents, AGENT_IDS, scope).map((f) => f.destination);
   const rank = (destination: string) => {
     const index = order.indexOf(destination);
     return index === -1 ? order.length : index;
   };
   entry.files.sort((x, y) => rank(x.destination) - rank(y.destination));
+  return missing.some((f) => f.install === "managed-block");
 }
 
 /** Plans placing a registry file where no managed file was recorded. */
@@ -290,6 +327,7 @@ export function planInstall(input: PlanInput): Plan {
   const agents = agentsFor(manifest, request.agents);
   const addedAgents = agents.filter((a) => !(manifest?.agents ?? []).includes(a));
   b.next.agents = agents;
+  b.next.scope = manifest?.scope ?? request.scope ?? "project";
 
   for (const item of request.items) {
     const installed = manifest?.items[item.id];
@@ -315,7 +353,7 @@ export function planInstall(input: PlanInput): Plan {
       }
       continue;
     }
-    const files = renderItem(item, registry.contents, agents);
+    const files = renderItem(item, registry.contents, agents, b.next.scope);
     for (const file of files) {
       if (file.install === "managed-block") fresh.set(item.id, file.content);
       else placeNewFile(b, item, file.destination, file.content);
@@ -324,13 +362,15 @@ export function planInstall(input: PlanInput): Plan {
   }
 
   // Newly selected agents get files for everything already installed.
+  let blocksAdded = false;
   if (manifest && addedAgents.length > 0) {
-    for (const id of Object.keys(manifest.items).sort())
-      addAgentFiles(b, registry, id, addedAgents);
+    for (const id of Object.keys(manifest.items).sort()) {
+      blocksAdded = addAgentFiles(b, registry, id, addedAgents) || blocksAdded;
+    }
   }
 
   let contextAdded = false;
-  if (request.context && !b.next.contextPath) {
+  if (request.context && !b.next.contextPath && b.next.scope === "project") {
     const base = { destination: CONTEXT_PATH, kind: "context" as const };
     const state = b.stateOf(CONTEXT_PATH);
     if (state.state === "missing") {
@@ -348,9 +388,9 @@ export function planInstall(input: PlanInput): Plan {
     contextAdded = true;
   }
 
-  if (fresh.size > 0 || contextAdded) {
-    syncAgentsBlock(b, registry, fresh, fresh.keys().next().value);
-  } else if (addedAgents.includes("claude")) {
+  if (fresh.size > 0 || contextAdded || blocksAdded) {
+    syncBlocks(b, registry, fresh, fresh.keys().next().value);
+  } else if (addedAgents.includes("claude") && b.next.scope === "project") {
     syncBridge(b);
   }
   b.next.presets = [...new Set([...b.next.presets, ...request.presets])].sort();
@@ -420,10 +460,10 @@ function planItemUpdate(
     deleteManagedFile(b, item.id, old, versions);
   }
 
-  const hadBlock = blockFile(installed) !== undefined;
+  const hadBlock = blockDestinations(installed).length > 0;
   b.next.items[item.id] = manifestEntry(item, rendered);
   if (blockContent !== undefined || hadBlock) {
-    syncAgentsBlock(
+    syncBlocks(
       b,
       registry,
       blockContent === undefined ? new Map() : new Map([[item.id, blockContent]]),
@@ -492,7 +532,7 @@ export function planUpdate(input: UpdateInput): Plan {
       );
       continue;
     }
-    const rendered = renderItem(item, registry.contents, agentsFor(manifest));
+    const rendered = renderItem(item, registry.contents, agentsFor(manifest), manifest?.scope);
     const byDestination = (files: ManifestItem["files"]) =>
       JSON.stringify([...files].sort((x, y) => x.destination.localeCompare(y.destination)));
     const sameContent =
@@ -545,17 +585,17 @@ export function planRemove(input: SelectInput): Plan {
     for (const f of installed.files) {
       if (f.install === "file") deleteManagedFile(b, id, f, { fromVersion: installed.version });
     }
-    if (blockFile(installed)) blockChanged = true;
+    if (blockDestinations(installed).length > 0) blockChanged = true;
     delete b.next.items[id];
   }
-  if (blockChanged) syncAgentsBlock(b, input.registry, new Map());
+  if (blockChanged) syncBlocks(b, input.registry, new Map());
   return b.finish();
 }
 
 /** Plans `eject`: forgets the selected items and leaves their content in place as user-owned. */
 export function planEject(input: SelectInput): Plan {
   const b = new PlanBuilder(input.manifest, input.files, input.cliVersion);
-  let unwrap: string | undefined;
+  const unwrap = new Map<string, string>();
   for (const id of new Set(input.ids)) {
     const installed = input.manifest?.items[id];
     if (!installed) {
@@ -575,12 +615,14 @@ export function planEject(input: SelectInput): Plan {
         reason: "kept as your own file",
       });
     }
-    if (blockFile(installed)) unwrap = id;
+    for (const destination of blockDestinations(installed)) unwrap.set(destination, id);
     delete b.next.items[id];
   }
-  // The guidelines block also holds the context reference; ejecting keeps all of its text.
-  if (unwrap) {
-    b.unwrap(AGENTS_MD, unwrap);
+  // Guidelines blocks are unwrapped, keeping their text (including the context reference).
+  for (const [destination, id] of [...unwrap].sort(([x], [y]) => x.localeCompare(y))) {
+    b.unwrap(destination, id);
+  }
+  if (unwrap.has(AGENTS_MD) && b.next.scope === "project") {
     delete b.next.contextPath;
     if (b.next.claudeImport === "managed") b.unwrap(CLAUDE_MD);
     delete b.next.claudeImport;
