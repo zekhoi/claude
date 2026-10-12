@@ -10,6 +10,17 @@ Publishing requires an explicit decision by a maintainer. Pull requests and push
 4. In the GitHub repository settings, create an environment named `npm-publish` with required reviewers, and restrict it to the default branch.
 5. Protect the default branch: require pull requests and the status checks `checks` (CI) and every `test (...)` job (Compatibility).
 
+### First publish
+
+npm's documentation does not say whether a trusted publisher can be configured before the package exists. If npmjs.com does not offer trusted publishing for `@zekhoi/agent-kit` yet, publish 0.1.0 from the gated tarball instead of building one locally:
+
+1. Run the **Release** workflow for `0.1.0`. When it waits for approval on `npm-publish`, reject the deployment.
+2. Download the `release-package` artifact from that run; it is the tarball that passed every gate.
+3. Logged in to npm as `zekhoi`, run `npm publish zekhoi-agent-kit-0.1.0.tgz --access public`.
+4. Configure trusted publishing for the package, then run `node scripts/smoke-published.mjs 0.1.0`.
+
+Later releases use the workflow end to end. Trusted publishing generates provenance automatically and needs npm 11.5.1 or later, which the publish job's Node 24 provides.
+
 ## Each release
 
 1. Review content changes, evaluation results, compatibility notes, and provenance.
