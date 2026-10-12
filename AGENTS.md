@@ -10,7 +10,7 @@ Instructions for agents working on this repository. Content installed into user 
 - Write all distributed content and documentation in English.
 - Commit subjects and PR titles are capitalized and imperative, without a `type:` prefix or trailing period (see `docs/contributing.md`); the git hooks and CI enforce this. Never bypass the hooks with `--no-verify`.
 - Do not publish the package or change release configuration without an explicit instruction.
-- This repository uses its own catalog: `.claude/` and the block below are installed by the CLI. After changing an item in `registry/`, bump its version and run `pnpm -r run build && node packages/cli/dist/index.js update` so the installed copies match. Never edit files under `.claude/` directly.
+- This repository uses its own catalog: `.claude/` and the block below are installed by the CLI. After changing an item in `registry/`, bump its version, run `pnpm -r run build && pnpm build:plugin && node packages/cli/dist/index.js update` so the plugin and installed copies match, and commit `plugins/` and `.claude-plugin/` too. Never edit files under `.claude/` directly.
 
 <!-- agent-kit:start -->
 

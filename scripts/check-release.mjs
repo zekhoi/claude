@@ -22,6 +22,11 @@ if (pkg.license && pkg.license !== "UNLICENSED" && !existsSync(path.join(repo, "
   problems.push("LICENSE file is missing");
 }
 
+const plugin = JSON.parse(read("plugins/agent-kit/.claude-plugin/plugin.json"));
+if (plugin.version !== pkg.version) {
+  problems.push(`the plugin is ${plugin.version}; run pnpm build:plugin after bumping the version`);
+}
+
 const compatibility = read("docs/compatibility.md");
 // Only table rows declare ranges; the explanatory text mentions the marker itself.
 if (/^\|.*_provisional_.*\|$/m.test(compatibility)) {

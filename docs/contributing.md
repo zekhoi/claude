@@ -41,6 +41,7 @@ Registry content is installed into user projects. Write it in English, keep it c
 
 4. Items may join presets during development, but a release must not ship a skill without recorded evaluation results.
 5. Run the tests. Registry validation reports schema errors, unsafe paths, collisions, and frontmatter problems with file locations.
+6. Regenerate the Claude Code plugin with `pnpm -r run build && pnpm build:plugin` and commit `plugins/` and `.claude-plugin/` with your change. CI fails if they are out of date.
 
 ## Writing a skill
 

@@ -369,7 +369,7 @@ Complete when the packaged CLI installs content that Claude recognizes.
 - [ ] Add an upgrade migration framework before the first item rename, destination move, or manifest schema change.
 - [ ] Add item dependency resolution when an item genuinely requires another.
 - [ ] Add monorepo overlap scanning across ancestor and workspace package installations.
-- [ ] Add Claude plugin distribution if users need native integration.
+- [x] Add Claude plugin distribution (`plugins/agent-kit/`, generated from the registry, with a marketplace at the repository root).
 
 ## 12. Acceptance criteria
 
