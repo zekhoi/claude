@@ -63,11 +63,11 @@ External links are not fetched during validation, so checks stay deterministic. 
 
 ## Continuous integration
 
-| Workflow            | Runs on                            | Does                                                                                                                                                            |
-| ------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ci.yml`            | Pull requests and pushes to `main` | Format, lint, typecheck, build (registry validation), tests, and `scripts/verify-package.mjs`, which packs the CLI and exercises the tarball in a clean project |
-| `compatibility.yml` | Pull requests and pushes to `main` | Build, tests, and package verification on Ubuntu, macOS, and Windows with Node 22.12.0, 22, and 24                                                              |
-| `release.yml`       | Manual dispatch only               | Release gates, approval, publishing, and a smoke test; see [releasing.md](releasing.md)                                                                         |
+| Workflow            | Runs on                            | Does                                                                                                                                                                                                           |
+| ------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`            | Pull requests and pushes to `main` | Workflow lint (actionlint, checksum-verified), format, lint, typecheck, build (registry validation), tests, and `scripts/verify-package.mjs`, which packs the CLI and exercises the tarball in a clean project |
+| `compatibility.yml` | Pull requests and pushes to `main` | Build, tests, and package verification on Ubuntu, macOS, and Windows with Node 22.12.0, 22, and 24                                                                                                             |
+| `release.yml`       | Manual dispatch only               | Release gates, approval, publishing, and a smoke test; see [releasing.md](releasing.md)                                                                                                                        |
 
 Workflows default to read-only permissions, pin third-party actions to commit SHAs (update the SHA and the version comment together), and never receive publishing credentials on pull requests.
 
