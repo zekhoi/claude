@@ -5,6 +5,7 @@ import {
   hasAgentsImport,
   ownedDirs,
 } from "../adapters/claude.js";
+import { AGENT_IDS, renderItem, type AgentId, type RenderedFile } from "../adapters/index.js";
 import { parseBlock } from "./blocks.js";
 import { contentHash, normalizeContent } from "./content.js";
 import { error, warning, type Diagnostic } from "./diagnostics.js";
@@ -23,6 +24,8 @@ export interface InstallRequest {
   items: PackagedItem[];
   presets: string[];
   context: boolean;
+  /** Agents to install for, in addition to those already recorded in the manifest. */
+  agents: AgentId[];
 }
 
 interface PlanContext {
@@ -45,7 +48,7 @@ const NOT_INSTALLED_ACTION = "Run `agent-kit status` to see installed items";
 export function resolveSelection(
   registry: PackagedRegistry,
   ids: readonly string[],
-): { request?: Omit<InstallRequest, "context">; diagnostics: Diagnostic[] } {
+): { request?: Omit<InstallRequest, "context" | "agents">; diagnostics: Diagnostic[] } {
   const byId = new Map(registry.index.items.map((i) => [i.id, i]));
   const presetsById = new Map(registry.index.presets.map((p) => [p.id, p]));
   const items = new Map<string, PackagedItem>();
@@ -73,17 +76,35 @@ export function resolveSelection(
     : { request: { items: [...items.values()], presets }, diagnostics };
 }
 
+/** Agents recorded in the manifest plus `extra`, in a stable order. */
+export function agentsFor(
+  manifest: Manifest | undefined,
+  extra: readonly AgentId[] = [],
+): AgentId[] {
+  const selected = new Set<AgentId>([...(manifest?.agents ?? []), ...extra]);
+  if (selected.size === 0) selected.add("claude");
+  return AGENT_IDS.filter((a) => selected.has(a));
+}
+
 /** Every target path that planning against `manifest` and these items may read or write. */
 export function requiredPaths(
+  registry: PackagedRegistry,
   manifest: Manifest | undefined,
   items: readonly PackagedItem[] = [],
-  context = false,
+  options: { context?: boolean; agents?: readonly AgentId[] } = {},
 ): string[] {
+  const agents = agentsFor(manifest, options.agents);
+  const context = options.context ?? false;
   const paths = [AGENTS_MD, CLAUDE_MD];
-  for (const entry of Object.values(manifest?.items ?? {})) {
+  for (const [id, entry] of Object.entries(manifest?.items ?? {})) {
     paths.push(...entry.files.map((f) => f.destination));
+    // Installed items may gain files for newly selected agents.
+    const item = registry.index.items.find((i) => i.id === id);
+    if (item) paths.push(...renderItem(item, registry.contents, agents).map((f) => f.destination));
   }
-  for (const item of items) paths.push(...item.files.map((f) => f.destination));
+  for (const item of items) {
+    paths.push(...renderItem(item, registry.contents, agents).map((f) => f.destination));
+  }
   if (context || manifest?.contextPath) paths.push(manifest?.contextPath ?? CONTEXT_PATH);
   return [...new Set(paths)];
 }
@@ -145,9 +166,12 @@ function bundledBlockContent(
   return item?.version === version && file ? registry.contents.get(file.source) : undefined;
 }
 
-/** Keeps the CLAUDE.md → AGENTS.md import in step with whether the AGENTS.md block exists. */
+/**
+ * Keeps the CLAUDE.md → AGENTS.md import in step with whether the AGENTS.md block exists.
+ * Only Claude Code needs the import; other agents read AGENTS.md natively.
+ */
 function syncBridge(b: PlanBuilder): void {
-  const hasAgentsBlock = b.next.blocks[AGENTS_MD] !== undefined;
+  const hasAgentsBlock = b.next.blocks[AGENTS_MD] !== undefined && b.next.agents.includes("claude");
   if (hasAgentsBlock && b.next.claudeImport === undefined) {
     const state = b.stateOf(CLAUDE_MD);
     const parsed = state.state === "file" ? parseBlock(state.text) : undefined;
@@ -175,11 +199,45 @@ function syncBridge(b: PlanBuilder): void {
   }
 }
 
-function manifestEntry(item: PackagedItem): ManifestItem {
+function manifestEntry(item: PackagedItem, files: readonly RenderedFile[]): ManifestItem {
   return {
     version: item.version,
-    files: item.files.map(({ destination, install, sha256 }) => ({ destination, install, sha256 })),
+    files: files.map(({ destination, install, content }) => ({
+      destination,
+      install,
+      sha256: contentHash(content),
+    })),
   };
+}
+
+/** Adds the files an installed item needs for newly selected agents. */
+function addAgentFiles(
+  b: PlanBuilder,
+  registry: PackagedRegistry,
+  id: string,
+  agents: readonly AgentId[],
+): void {
+  const entry = b.next.items[id]!;
+  const item = registry.index.items.find((i) => i.id === id);
+  if (!item || item.version !== entry.version) {
+    b.reject(
+      { destination: id, kind: "file", itemId: id },
+      "OUTDATED_ITEM",
+      `${id} ${entry.version} must be updated to the bundled version before adding agents`,
+      `Run \`agent-kit update ${id}\`, then rerun`,
+    );
+    return;
+  }
+  const recorded = new Set(entry.files.map((f) => f.destination));
+  for (const file of renderItem(item, registry.contents, agents)) {
+    if (recorded.has(file.destination) || file.install === "managed-block") continue;
+    placeNewFile(b, item, file.destination, file.content);
+    entry.files.push({
+      destination: file.destination,
+      install: file.install,
+      sha256: contentHash(file.content),
+    });
+  }
 }
 
 /** Plans placing a registry file where no managed file was recorded. */
@@ -206,6 +264,9 @@ export function planInstall(input: PlanInput): Plan {
   const { registry, manifest, request } = input;
   const b = new PlanBuilder(manifest, input.files, input.cliVersion);
   const fresh = new Map<string, string>();
+  const agents = agentsFor(manifest, request.agents);
+  const addedAgents = agents.filter((a) => !(manifest?.agents ?? []).includes(a));
+  b.next.agents = agents;
 
   for (const item of request.items) {
     const installed = manifest?.items[item.id];
@@ -231,12 +292,18 @@ export function planInstall(input: PlanInput): Plan {
       }
       continue;
     }
-    for (const file of item.files) {
-      const content = registry.contents.get(file.source)!;
-      if (file.install === "managed-block") fresh.set(item.id, content);
-      else placeNewFile(b, item, file.destination, content);
+    const files = renderItem(item, registry.contents, agents);
+    for (const file of files) {
+      if (file.install === "managed-block") fresh.set(item.id, file.content);
+      else placeNewFile(b, item, file.destination, file.content);
     }
-    b.next.items[item.id] = manifestEntry(item);
+    b.next.items[item.id] = manifestEntry(item, files);
+  }
+
+  // Newly selected agents get files for everything already installed.
+  if (manifest && addedAgents.length > 0) {
+    for (const id of Object.keys(manifest.items).sort())
+      addAgentFiles(b, registry, id, addedAgents);
   }
 
   let contextAdded = false;
@@ -260,6 +327,8 @@ export function planInstall(input: PlanInput): Plan {
 
   if (fresh.size > 0 || contextAdded) {
     syncAgentsBlock(b, registry, fresh, fresh.keys().next().value);
+  } else if (addedAgents.includes("claude")) {
+    syncBridge(b);
   }
   b.next.presets = [...new Set([...b.next.presets, ...request.presets])].sort();
   return b.finish();
@@ -275,13 +344,15 @@ function planItemUpdate(
   registry: PackagedRegistry,
   installed: ManifestItem,
   item: PackagedItem,
+  rendered: readonly RenderedFile[],
 ): void {
   const recorded = new Map(installed.files.map((f) => [f.destination, f]));
   const versions = { itemId: item.id, fromVersion: installed.version, toVersion: item.version };
   let blockContent: string | undefined;
 
-  for (const file of item.files) {
-    const content = registry.contents.get(file.source)!;
+  for (const file of rendered) {
+    const content = file.content;
+    const sha256 = contentHash(content);
     if (file.install === "managed-block") {
       blockContent = content;
       continue;
@@ -304,8 +375,8 @@ function planItemUpdate(
       );
     } else {
       const current = contentHash(state.text);
-      if (current === file.sha256) {
-        b.change({ ...base, action: old.sha256 === file.sha256 ? "unchanged" : "adopt" });
+      if (current === sha256) {
+        b.change({ ...base, action: old.sha256 === sha256 ? "unchanged" : "adopt" });
       } else if (current === old.sha256) {
         b.write(file.destination, content, { ...base, action: "update" });
       } else {
@@ -320,14 +391,14 @@ function planItemUpdate(
   }
 
   // Files the new version no longer ships are deleted only if unmodified.
-  const current = new Set(item.files.map((f) => f.destination));
+  const current = new Set(rendered.map((f) => f.destination));
   for (const old of installed.files) {
     if (old.install !== "file" || current.has(old.destination)) continue;
     deleteManagedFile(b, item.id, old, versions);
   }
 
   const hadBlock = blockFile(installed) !== undefined;
-  b.next.items[item.id] = manifestEntry(item);
+  b.next.items[item.id] = manifestEntry(item, rendered);
   if (blockContent !== undefined || hadBlock) {
     syncAgentsBlock(
       b,
@@ -398,9 +469,10 @@ export function planUpdate(input: UpdateInput): Plan {
       );
       continue;
     }
+    const rendered = renderItem(item, registry.contents, agentsFor(manifest));
     const sameContent =
       installed.version === item.version &&
-      JSON.stringify(installed.files) === JSON.stringify(manifestEntry(item).files);
+      JSON.stringify(installed.files) === JSON.stringify(manifestEntry(item, rendered).files);
     if (sameContent) continue;
 
     if (major(item.version) > major(installed.version) && !input.allowMajor) {
@@ -416,7 +488,7 @@ export function planUpdate(input: UpdateInput): Plan {
 
     const mark = b.checkpoint();
     const before = b.conflictCount();
-    planItemUpdate(b, registry, installed, item);
+    planItemUpdate(b, registry, installed, item, rendered);
     if (!named && b.conflictCount() > before) {
       const conflicts = b.rollback(mark);
       skipped.changes.push(...conflicts.changes);

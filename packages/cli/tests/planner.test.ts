@@ -31,7 +31,7 @@ const file = (text: string): FileState => ({ state: "file", text, rawHash: rawHa
 const block = (body: string) => `${BLOCK_START}\n\n${body}\n\n${BLOCK_END}\n`;
 
 function request(ids: string[] = ["preset/base"], context = false): InstallRequest {
-  return { ...resolveSelection(registry, ids).request!, context };
+  return { ...resolveSelection(registry, ids).request!, context, agents: [] };
 }
 
 function plan(

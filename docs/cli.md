@@ -25,7 +25,9 @@ Shows every item and preset bundled with this CLI version. Content is bundled in
 
 Prints an item's bundled files. With `--diff`, compares what the target holds (the file, or the managed block body) with the bundled version and prints a unified diff per file; files that match are reported as identical, and missing files as missing. With `--file`, prints exactly the content that would be installed at that destination, suitable for redirecting: `agent-kit show skill/code-review --file .claude/skills/kit-code-review/SKILL.md > .claude/skills/kit-code-review/SKILL.md`.
 
-### `init [--preset <name>]... [--context]`
+### `init [--preset <name>]... [--agent <name>]... [--context]`
+
+Installs presets for one or more coding agents: `--agent claude` (the default) and `--agent codex`. Run `init --agent <name>` on an existing installation to add an agent; every installed item gets that agent's files, and no preset is needed. See [compatibility.md](compatibility.md#codex) for where Codex files go.
 
 Installs presets. On an interactive terminal it asks which presets to install (default `base`); otherwise `--preset` is required. `--context` creates `docs/agent-context.md`, a project-owned template, and references it from the `AGENTS.md` block. Running `init` again with additional presets installs only what is new.
 

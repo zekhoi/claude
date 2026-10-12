@@ -4,14 +4,14 @@ Agent Kit copies files into your project. You own your repository: you can edit 
 
 ## Ownership
 
-| Content                                                                                             | Owner                              | What Agent Kit does                                              |
-| --------------------------------------------------------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------- |
-| Files under `.claude/skills/kit-*`, `.claude/agents/kit-*`, `.claude/rules/agent-kit/`              | Agent Kit, until you edit them     | Updates and removes them only while they match what it installed |
-| Text between `<!-- agent-kit:start -->` and `<!-- agent-kit:end -->` in `AGENTS.md` and `CLAUDE.md` | Agent Kit, until you edit it       | Same as above                                                    |
-| Everything outside those markers                                                                    | You                                | Never modified                                                   |
-| An `@AGENTS.md` import you wrote yourself in `CLAUDE.md`                                            | You                                | Never modified or removed                                        |
-| `docs/agent-context.md`                                                                             | You, from the moment it is created | Never updated or removed                                         |
-| `.agent-kit/manifest.json`                                                                          | Agent Kit                          | Bookkeeping; commit it, do not edit it                           |
+| Content                                                                                                                                                     | Owner                              | What Agent Kit does                                              |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------- |
+| Files under `.claude/skills/kit-*`, `.claude/agents/kit-*`, `.claude/rules/agent-kit/`, and for Codex `.agents/skills/kit-*` and `.codex/agents/kit-*.toml` | Agent Kit, until you edit them     | Updates and removes them only while they match what it installed |
+| Text between `<!-- agent-kit:start -->` and `<!-- agent-kit:end -->` in `AGENTS.md` and `CLAUDE.md`                                                         | Agent Kit, until you edit it       | Same as above                                                    |
+| Everything outside those markers                                                                                                                            | You                                | Never modified                                                   |
+| An `@AGENTS.md` import you wrote yourself in `CLAUDE.md`                                                                                                    | You                                | Never modified or removed                                        |
+| `docs/agent-context.md`                                                                                                                                     | You, from the moment it is created | Never updated or removed                                         |
+| `.agent-kit/manifest.json`                                                                                                                                  | Agent Kit                          | Bookkeeping; commit it, do not edit it                           |
 
 Agent Kit compares content after normalizing line endings, so a checkout with Windows line endings or a Markdown formatter adjusting blank lines inside the markers is not treated as an edit.
 

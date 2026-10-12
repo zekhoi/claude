@@ -36,3 +36,27 @@ Checked on 2026-10-12 with Claude Code 2.1.296 on macOS, in a scratch git reposi
 | `/kit-code-review` invocation     | Pass: findings with severity, `file:line`, scenario, and fix; no files modified                           |
 
 Rerun these checks with a new Claude Code version before widening the supported range.
+
+## Codex
+
+Install with `agent-kit init --agent codex` (or `--agent claude --agent codex` for both). The registry stores the Claude Code layout; the Codex adapter derives its files from it.
+
+| Item       | Codex location                             | Notes                                                                                                                                                                                                                                                                    |
+| ---------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Guidelines | `AGENTS.md` managed block                  | Read natively ([AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md)); no `CLAUDE.md` is written unless Claude Code is also selected. Codex stops reading project instructions after `project_doc_max_bytes` (32 KiB by default) across all levels.  |
+| Skills     | `.agents/skills/kit-<name>/`               | Same `SKILL.md` format ([skills](https://learn.chatgpt.com/docs/build-skills)); names are limited to 64 characters, and descriptions are kept under 1,024. Loaded without project trust.                                                                                 |
+| Rules      | `.agents/skills/kit-<name>-rules/SKILL.md` | Codex has no path-scoped instruction rules (its `.rules` files govern shell commands), so each rule becomes a skill whose description names the file globs it applies to. Skills trigger on relevance rather than deterministically.                                     |
+| Subagents  | `.codex/agents/kit-<name>.toml`            | TOML with `name`, `description`, and `developer_instructions` ([subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents)). A Claude Code agent whose tools exclude editing tools gets `sandbox_mode = "read-only"`. **Loaded only in trusted projects.** |
+
+### Verified in Codex
+
+Checked on 2026-10-13 with codex-cli 0.162.1 on macOS, in a scratch git repository after `agent-kit init --preset node --agent codex` and `agent-kit add agent/reviewer agent/debugger`, using `codex exec` with the user configuration ignored.
+
+| Check                                      | Result                                                                                                                                                                                                                                       |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md` guidelines block               | Pass: quoted verbatim                                                                                                                                                                                                                        |
+| Skill discovery, including converted rules | Pass: all seven `kit-` skills listed (`kit-testing-rules` and `kit-typescript-rules` included) in an untrusted project                                                                                                                       |
+| Subagents                                  | Pass in a trusted project: `spawn_agent` with `agent_type: "kit-reviewer"` started a subagent thread with role `kit-reviewer`, which reviewed using the code-review skill. In an untrusted project the roles are not offered, as documented. |
+| Read-only sandbox for `kit-reviewer`       | Not independently verified: the parent session was already read-only                                                                                                                                                                         |
+
+Trust is recorded by Codex itself (`[projects."<path>"] trust_level = "trusted"` in `~/.codex/config.toml`) when the user approves a project; a `-c projects....trust_level` command-line override did not enable project configuration in 0.162.1.

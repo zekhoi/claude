@@ -1,14 +1,17 @@
 import path from "node:path";
 import { AGENTS_MD } from "../adapters/claude.js";
+import { AGENT_IDS, renderItem, type AgentId, type RenderedFile } from "../adapters/index.js";
+import { contentHash } from "../core/content.js";
 import { parseBlock } from "../core/blocks.js";
 import { error, type Diagnostic } from "../core/diagnostics.js";
 import { unifiedDiff } from "../core/diff.js";
 import { readManifest } from "../core/manifest.js";
+import { agentsFor } from "../core/planner.js";
 import { emit } from "../core/output.js";
 import { composeAgentsBody } from "../core/planner.js";
 import { loadPackagedRegistry } from "../core/registry.js";
 import { BUNDLED_REGISTRY_DIR } from "../core/runtime.js";
-import type { PackagedItem } from "../core/schemas.js";
+import type { Manifest } from "../core/schemas.js";
 import { readTargetFile, resolveTarget } from "../core/target.js";
 
 interface ShowFile {
@@ -42,25 +45,21 @@ async function localContent(
   return parsed.kind === "block" ? { text: parsed.body, state: "present" } : { state: "missing" };
 }
 
-/** Compares an item's installed files with the bundled version. */
+/** Compares an item's installed files with what this CLI would install. */
 async function diffItem(
-  cwd: string,
-  item: PackagedItem,
-  contents: ReadonlyMap<string, string>,
+  root: string,
+  manifest: Manifest | undefined,
+  rendered: readonly RenderedFile[],
+  version: string,
   files: ShowFile[],
-): Promise<Diagnostic[]> {
-  const { root, diagnostics } = await resolveTarget(cwd);
-  if (!root) return diagnostics;
-  const { manifest, diagnostics: manifestDiagnostics } = await readManifest(root);
-  if (manifestDiagnostics.length > 0) return manifestDiagnostics;
-
+): Promise<void> {
   for (const file of files) {
-    const entry = item.files.find((f) => f.destination === file.destination)!;
-    let bundled = contents.get(entry.source)!;
+    const entry = rendered.find((f) => f.destination === file.destination)!;
     // The AGENTS.md block also carries the project context reference when one is configured.
-    if (entry.install === "managed-block" && entry.destination === AGENTS_MD) {
-      bundled = composeAgentsBody([bundled], manifest?.contextPath);
-    }
+    const bundled =
+      entry.install === "managed-block" && entry.destination === AGENTS_MD
+        ? composeAgentsBody([entry.content], manifest?.contextPath)
+        : entry.content;
     const local = await localContent(root, entry.destination, entry.install);
     if (local.state === "unsafe") {
       file.local = "unsafe";
@@ -72,12 +71,11 @@ async function diffItem(
         : entry.destination;
     file.diff = unifiedDiff(local.text ?? "", bundled, {
       from: local.state === "missing" ? `${where} (missing)` : `${where} (yours)`,
-      to: `${where} (bundled ${item.version})`,
+      to: `${where} (bundled ${version})`,
     });
     file.local =
       local.state === "missing" ? "missing" : file.diff === "" ? "identical" : "different";
   }
-  return [];
 }
 
 function render(d: ShowData, options: { file?: string; diff: boolean }): string {
@@ -95,7 +93,7 @@ function render(d: ShowData, options: { file?: string; diff: boolean }): string 
   if (options.file !== undefined) return (d.files[0]?.content ?? "").replace(/\n$/, "");
   return [
     `${d.id}@${d.version}  ${d.description}`,
-    ...d.files.map((f) => `  ${f.destination}\n    bundled at ${f.packagedPath}`),
+    ...d.files.map((f) => `  ${f.destination}\n    source: ${f.packagedPath}`),
   ].join("\n");
 }
 
@@ -124,26 +122,38 @@ export async function show(
       null,
     );
   }
+  // Diffs cover the agents installed in the target; listings show every agent's files.
+  let agents: readonly AgentId[] = AGENT_IDS;
+  let manifest: Manifest | undefined;
+  let target: string | null = null;
+  if (options.diff) {
+    const resolved = await resolveTarget(options.cwd);
+    if (!resolved.root) return done(resolved.diagnostics, null);
+    const read = await readManifest(resolved.root);
+    if (read.diagnostics.length > 0) return done(read.diagnostics, resolved.root);
+    manifest = read.manifest;
+    agents = agentsFor(manifest);
+    target = resolved.root;
+  }
+  const rendered = renderItem(item, contents, agents);
   const selected =
-    options.file === undefined
-      ? item.files
-      : item.files.filter((f) => f.destination === options.file);
+    options.file === undefined ? rendered : rendered.filter((f) => f.destination === options.file);
   if (selected.length === 0) {
     return done(
       [
         error("UNKNOWN_ITEM", `${id} has no file with destination ${options.file}`, {
-          action: `Use one of: ${item.files.map((f) => f.destination).join(", ")}`,
+          action: `Use one of: ${rendered.map((f) => f.destination).join(", ")}`,
         }),
       ],
-      null,
+      target,
     );
   }
   const files: ShowFile[] = selected.map((f) => ({
     destination: f.destination,
     packagedPath: path.join(root, ...f.source.split("/")),
-    sha256: f.sha256,
+    sha256: contentHash(f.content),
     ...((options.file !== undefined || options.json) && !options.diff
-      ? { content: contents.get(f.source)! }
+      ? { content: f.content }
       : {}),
   }));
   const data: ShowData = {
@@ -152,9 +162,7 @@ export async function show(
     description: item.description,
     files,
   };
-
-  if (!options.diff) return done([], null, data);
-  const diagnostics = await diffItem(options.cwd, item, contents, files);
-  const target = path.resolve(options.cwd);
-  return diagnostics.length > 0 ? done(diagnostics, target) : done([], target, data);
+  if (!options.diff || target === null) return done([], target, data);
+  await diffItem(target, manifest, rendered, item.version, files);
+  return done([], target, data);
 }

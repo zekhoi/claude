@@ -1,6 +1,7 @@
 import path from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { BLOCK_START } from "../src/core/blocks.js";
+import type { AgentId } from "../src/adapters/index.js";
 import type { Plan } from "../src/core/plan-builder.js";
 import {
   CONTEXT_PATH,
@@ -93,12 +94,16 @@ function apply(files: Record<string, FileState>, plan: Plan): Record<string, Fil
   return next;
 }
 
-function installV1(initial: Record<string, FileState> = {}, context = false) {
+function installV1(
+  initial: Record<string, FileState> = {},
+  context = false,
+  agents: AgentId[] = [],
+) {
   const plan = planInstall({
     registry: v1,
     manifest: undefined,
     files: new Map(Object.entries(initial)),
-    request: { ...resolveSelection(v1, ["preset/base"]).request!, context },
+    request: { ...resolveSelection(v1, ["preset/base"]).request!, context, agents },
     cliVersion: "1.0.0",
     contextTemplate: "# Context\n",
   });
@@ -337,5 +342,79 @@ describe("planUninstall", () => {
     const p = planUninstall(ctx(undefined, {}));
     expect(p.writes).toEqual([]);
     expect(p.manifestChanged).toBe(false);
+  });
+});
+
+describe("multiple agents", () => {
+  const CODEX_SKILL = ".agents/skills/kit-review/SKILL.md";
+  const addAgents = (manifest: Manifest, files: Record<string, FileState>, agents: AgentId[]) =>
+    planInstall({
+      ...ctx(manifest, files),
+      request: { items: [], presets: [], context: false, agents },
+      contextTemplate: "",
+    });
+
+  it("installs for Codex only without touching CLAUDE.md", () => {
+    const { manifest, files } = installV1({}, false, ["codex"]);
+    expect(Object.keys(files).sort()).toEqual([CODEX_SKILL, "AGENTS.md"]);
+    expect(manifest.agents).toEqual(["codex"]);
+    expect(manifest.claudeImport).toBeUndefined();
+  });
+
+  it("installs for both agents with one shared AGENTS.md block", () => {
+    const { manifest, files } = installV1({}, false, ["claude", "codex"]);
+    expect(Object.keys(files).sort()).toEqual([CODEX_SKILL, SKILL, "AGENTS.md", "CLAUDE.md"]);
+    expect(manifest.items["skill/review"]!.files.map((f) => f.destination)).toEqual([
+      SKILL,
+      CODEX_SKILL,
+    ]);
+  });
+
+  it("adds Codex files for everything already installed", () => {
+    const { manifest, files } = installV1();
+    const p = addAgents(manifest, files, ["codex"]);
+    expect(actions(p)).toEqual([`create ${CODEX_SKILL}`]);
+    expect(p.manifest!.agents).toEqual(["claude", "codex"]);
+    expect(p.manifest!.items["skill/review"]!.files.map((f) => f.destination)).toEqual([
+      SKILL,
+      CODEX_SKILL,
+    ]);
+  });
+
+  it("adds the CLAUDE.md import when Claude Code joins a Codex installation", () => {
+    const { manifest, files } = installV1({}, false, ["codex"]);
+    const p = addAgents(manifest, files, ["claude"]);
+    expect(actions(p).sort()).toEqual([`create ${SKILL}`, "create CLAUDE.md"]);
+    expect(p.manifest!.claudeImport).toBe("managed");
+  });
+
+  it("requires outdated items to be updated before adding an agent", () => {
+    const { manifest, files } = installV1();
+    manifest.items["skill/review"]!.version = "0.9.0";
+    expect(codes(addAgents(manifest, files, ["codex"]))).toEqual(["OUTDATED_ITEM"]);
+  });
+
+  it("updates and removes every agent's copy", () => {
+    const { manifest, files } = installV1({}, false, ["claude", "codex"]);
+    const updated = planUpdate({
+      ...ctx(manifest, files, v1_1),
+      ids: ["skill/review"],
+      allowMajor: false,
+    });
+    expect(actions(updated)).toEqual(
+      expect.arrayContaining([`update ${SKILL}`, `update ${CODEX_SKILL}`, `create ${REF}`]),
+    );
+    expect(actions(updated)).toContain("create .agents/skills/kit-review/references/checks.md");
+
+    const removed = planRemove({ ...ctx(manifest, files), ids: ["skill/review"] });
+    expect(actions(removed).sort()).toEqual([`delete ${CODEX_SKILL}`, `delete ${SKILL}`]);
+    expect(removed.pruneDirs).toEqual(
+      expect.arrayContaining([".claude/skills/kit-review", ".agents/skills/kit-review"]),
+    );
+  });
+
+  it("uninstalls a two-agent installation completely", () => {
+    const { manifest, files } = installV1({}, false, ["claude", "codex"]);
+    expect(apply(files, planUninstall(ctx(manifest, files)))).toEqual({});
   });
 });

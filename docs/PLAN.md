@@ -361,7 +361,7 @@ Complete when the packaged CLI installs content that Claude recognizes.
 
 ### Phase 5 — Future development
 
-- [ ] Add Codex and other agent adapters using their respective documentation.
+- [x] Add a Codex adapter (`init --agent codex`), verified with codex-cli 0.162.1. Other agents remain future work.
 - [ ] Add explicitly selected global installation scope.
 - [ ] Add a remote registry with version pinning, integrity verification, and caching.
 - [x] Add diff previews and conflict resolution assistance (`show --diff`, `--diff` on changing commands, conflict guidance that points to them).
