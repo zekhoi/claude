@@ -226,7 +226,7 @@ Do not modify code unless requested.
 Avoid generic advice and unsupported assumptions.
 ```
 
-Candidate custom skills: Kysely query review, Fastify API implementation, database migrations, debugging, merge request review, and feature implementation. Add them incrementally as their workflows and evaluations become reliable.
+Candidate custom skills: Kysely query review, Fastify API implementation, database migrations, and merge request review. Shipped since the initial catalog: commit, pull and merge requests (`pull-request`), and security audit. Add them incrementally as their workflows and evaluations become reliable.
 
 Anthropic's `skill-creator` can optionally assist with drafting and evaluation. It is an authoring aid, not a required runtime dependency or an automatically bundled third-party skill.
 

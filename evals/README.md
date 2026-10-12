@@ -53,6 +53,10 @@ evals/<skill-id>/
 | `fixture`      | Path relative to the skill's eval directory, or a pinned external reference. Optional for negative cases.                                  |
 | `prompt`       | What the user says to the agent.                                                                                                           |
 | `expectations` | Observable outcomes judged by a reviewer. Describe behavior, not exact wording.                                                            |
+| `history`      | Optional commit messages created on `main` after the initial commit, for example to establish a message convention.                        |
+| `branch`       | Optional `{ "name", "commits": [{ "message", "files" }] }` checked out with real commits, for branch-based skills.                         |
+| `changes`      | Optional `{ path: content }` written after setup and left uncommitted; add `"staged": true` to stage them.                                 |
+| `allowedTools` | Optional extra Claude Code tool permissions for the case, such as `Bash(git commit*)`.                                                     |
 
 ## Running cases
 

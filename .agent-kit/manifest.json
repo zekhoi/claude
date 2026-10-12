@@ -85,6 +85,36 @@
           "sha256": "ef2bb16ff4f508c1e18118cf611f657ebc67e7d2f718fbb8f34e2c6bef784232"
         }
       ]
+    },
+    "skill/commit": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": ".claude/skills/kit-commit/SKILL.md",
+          "install": "file",
+          "sha256": "103d305f95d1f481c65cc7913e8c58e7469983ce7b0548e666bd6e37197bc384"
+        }
+      ]
+    },
+    "skill/pull-request": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": ".claude/skills/kit-pull-request/SKILL.md",
+          "install": "file",
+          "sha256": "6b69454c2ea101cd60befdad4285c58095349f27334d9468c76bea957ffc394e"
+        }
+      ]
+    },
+    "skill/security-audit": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": ".claude/skills/kit-security-audit/SKILL.md",
+          "install": "file",
+          "sha256": "f226ab3a9eda01310433affc839ccd6fbc805291adb69fe1dac82559bc5c2118"
+        }
+      ]
     }
   },
   "blocks": {
@@ -99,8 +129,11 @@
     ".claude/rules/agent-kit",
     ".claude/skills",
     ".claude/skills/kit-code-review",
+    ".claude/skills/kit-commit",
     ".claude/skills/kit-debugging",
-    ".claude/skills/kit-feature-implementation"
+    ".claude/skills/kit-feature-implementation",
+    ".claude/skills/kit-pull-request",
+    ".claude/skills/kit-security-audit"
   ],
   "claudeImport": "user-owned"
 }

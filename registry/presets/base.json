@@ -1,12 +1,14 @@
 {
   "schemaVersion": 1,
   "id": "preset/base",
-  "description": "Core engineering guidelines, code review, debugging, feature implementation, and testing rules",
+  "description": "Core engineering guidelines, code review, debugging, feature implementation, commits, pull and merge requests, and testing rules",
   "items": [
     "guideline/engineering",
     "skill/code-review",
     "skill/debugging",
     "skill/feature-implementation",
+    "skill/commit",
+    "skill/pull-request",
     "rule/testing"
   ]
 }

@@ -7,6 +7,8 @@
     "skill/code-review",
     "skill/debugging",
     "skill/feature-implementation",
+    "skill/commit",
+    "skill/pull-request",
     "rule/testing",
     "rule/typescript"
   ]
