@@ -57,6 +57,7 @@ evals/<skill-id>/
 | `branch`       | Optional `{ "name", "commits": [{ "message", "files" }] }` checked out with real commits, for branch-based skills.                         |
 | `changes`      | Optional `{ path: content }` written after setup and left uncommitted; add `"staged": true` to stage them.                                 |
 | `allowedTools` | Optional extra Claude Code tool permissions for the case, such as `Bash(git commit*)`.                                                     |
+| `install`      | Optional `true` to run `npm install --ignore-scripts` in the fixture before the case, for fixtures whose tests need real dependencies.     |
 
 ## Running cases
 

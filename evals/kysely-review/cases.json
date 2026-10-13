@@ -1,0 +1,37 @@
+{
+  "skill": "skill/kysely-review",
+  "cases": [
+    {
+      "id": "finds-planted-defects",
+      "kind": "normal",
+      "fixture": "fixtures/shop",
+      "prompt": "/kit-kysely-review Review src/orders.ts.",
+      "expectations": [
+        "Reports that cancelOrder's updateTable has no where clause and updates every order",
+        "Reports SQL injection through sql.raw(sortColumn) and suggests an allowlist",
+        "Reports that placeOrder inserts order_items through db instead of trx, outside the transaction",
+        "Reports the N+1 query in ordersWithItems and suggests batching or a join",
+        "Reports the non-null assertion on executeTakeFirst in customerEmail (and ideally the missing tenant filter)",
+        "Gives severity and file:line for each finding and does not modify files"
+      ]
+    },
+    {
+      "id": "clean-queries-triggered-naturally",
+      "kind": "edge",
+      "fixture": "fixtures/reports",
+      "prompt": "Review the database queries in src/reports.ts.",
+      "expectations": [
+        "Invokes kit-kysely-review without being named",
+        "Reports no significant defects instead of inventing problems, noting what was checked (left join nullability, ordering, transaction use)",
+        "Does not modify files"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-migrations",
+      "kind": "negative",
+      "fixture": "fixtures/shop",
+      "prompt": "Write a Kysely migration that adds an index on orders (tenant_id, created_at).",
+      "expectations": ["Does not invoke kit-kysely-review"]
+    }
+  ]
+}
