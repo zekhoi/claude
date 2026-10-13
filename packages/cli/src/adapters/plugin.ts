@@ -24,12 +24,29 @@ function itemName(item: PackagedItem): string {
   return item.id.slice(item.id.indexOf("/") + 1);
 }
 
-/** Rewrites references to catalog names into plugin names, then sets the frontmatter `name`. */
-function retarget(content: string, name: string, catalogNames: readonly string[]): string {
-  const references = new RegExp(`\\b${NAME_PREFIX}(${catalogNames.join("|")})\\b(?!-)`, "g");
-  const rewritten =
-    catalogNames.length > 0 ? content.replace(references, `${PLUGIN_NAME}:$1`) : content;
-  return rewritten.replace(/^(---\r?\n[\s\S]*?^name:[ \t]*).*$/m, `$1${name}`);
+/**
+ * Rewrites standalone references to catalog names (`kit-code-review`) into plugin names
+ * (`agent-kit:code-review`). Paths and longer identifiers such as `agent-kit-commit`,
+ * `.claude/skills/kit-code-review/`, or `kit-commits` are left alone. Names are limited to
+ * lowercase letters, digits, and hyphens by the registry schema, so they need no escaping.
+ */
+function rewriteReferences(content: string, catalogNames: readonly string[]): string {
+  if (catalogNames.length === 0) return content;
+  const references = new RegExp(
+    `(?<![\\w./-])${NAME_PREFIX}(${catalogNames.join("|")})(?![\\w-])`,
+    "g",
+  );
+  return content.replace(references, `${PLUGIN_NAME}:$1`);
+}
+
+/** Sets `name` inside a leading frontmatter block only; content without one is unchanged. */
+function setFrontmatterName(content: string, name: string): string {
+  const block = /^---\r?\n[\s\S]*?\r?\n---(?=\r?\n|$)/.exec(content);
+  if (!block) return content;
+  const updated = /^name:/m.test(block[0])
+    ? block[0].replace(/^name:[ \t]*.*$/m, `name: ${name}`)
+    : block[0].replace(/^---(\r?\n)/, `---$1name: ${name}$1`);
+  return updated + content.slice(block[0].length);
 }
 
 /**
@@ -42,7 +59,7 @@ export function renderPlugin(
   catalogNames: readonly string[],
 ): PluginFile[] {
   const name = itemName(item);
-  return item.files.map((file) => {
+  const files = item.files.map((file): PluginFile => {
     const content = contents.get(file.source)!;
     switch (item.type) {
       case "guideline": {
@@ -52,11 +69,11 @@ export function renderPlugin(
       }
       case "skill": {
         const rest = file.destination.slice(`.claude/skills/${NAME_PREFIX}${name}/`.length);
-        const text = rest === "SKILL.md" ? retarget(content, name, catalogNames) : content;
+        const text = rest === "SKILL.md" ? setFrontmatterName(content, name) : content;
         return { path: `skills/${name}/${rest}`, content: text };
       }
       case "agent":
-        return { path: `agents/${name}.md`, content: retarget(content, name, catalogNames) };
+        return { path: `agents/${name}.md`, content: setFrontmatterName(content, name) };
       case "rule":
         return {
           path: `skills/${name}-rules/SKILL.md`,
@@ -64,4 +81,5 @@ export function renderPlugin(
         };
     }
   });
+  return files.map((f) => ({ ...f, content: rewriteReferences(f.content, catalogNames) }));
 }

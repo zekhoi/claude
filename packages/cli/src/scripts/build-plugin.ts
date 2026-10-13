@@ -28,9 +28,14 @@ const description =
   "Engineering guidelines, skills, rules, and subagents for code review, debugging, feature work, commits, pull requests, security audits, and database design.";
 
 const items = [...registry.index.items].sort((a, b) => a.id.localeCompare(b.id));
-const catalogNames = items
-  .filter((i) => i.type === "skill" || i.type === "agent")
-  .map((i) => i.id.slice(i.id.indexOf("/") + 1));
+const catalogNames = items.flatMap((i) => {
+  const name = i.id.slice(i.id.indexOf("/") + 1);
+  return i.type === "rule"
+    ? [`${name}-rules`]
+    : i.type === "skill" || i.type === "agent"
+      ? [name]
+      : [];
+});
 const files = items.flatMap((item) => renderPlugin(item, registry.contents, catalogNames));
 
 const skills = files
