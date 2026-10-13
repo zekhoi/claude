@@ -29,7 +29,7 @@ describe("renderPlugin", () => {
         "s.md",
         "---\nname: kit-pull-request\ndescription: Open PRs. Do not use for reviews (use kit-code-review).\n---\n\nUse kit-code-review, not kit-code-reviewer or the agent-kit CLI.\n",
       ],
-      ["r.md", "kit-code-review stays as written in references"],
+      ["r.md", "See kit-code-review for reviews."],
     ]);
     const [main, ref] = renderPlugin(skill, contents, ["pull-request", "code-review"]);
     expect(main!.path).toBe("skills/pull-request/SKILL.md");
@@ -41,7 +41,7 @@ describe("renderPlugin", () => {
     );
     expect(ref).toEqual({
       path: "skills/pull-request/references/r.md",
-      content: "kit-code-review stays as written in references",
+      content: "See agent-kit:code-review for reviews.",
     });
   });
 

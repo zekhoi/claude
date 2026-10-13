@@ -66,7 +66,7 @@ Removes every managed file and block, then the manifest. Your content outside th
 
 ## Global installation
 
-`--global` installs once for your user account instead of per repository. Every command accepts it, and a global installation keeps its own manifest in `~/.agent-kit/`. Commands refuse to mix scopes (`SCOPE_MISMATCH`), so a project installation and a global one are never confused.
+`--global` installs once for your user account instead of per repository. Every command except `list` accepts it, and a global installation keeps its own manifest in `~/.agent-kit/`. Commands refuse to mix scopes (`SCOPE_MISMATCH`), so a project installation and a global one are never confused.
 
 | Item       | Claude Code                            | Codex                                                       |
 | ---------- | -------------------------------------- | ----------------------------------------------------------- |

@@ -21,7 +21,7 @@ export interface Inspection {
 /** Loads everything read-only commands need. Never writes, locks, or creates directories. */
 export async function inspectTarget(
   where: Where,
-): Promise<Inspection | { diagnostics: Diagnostic[]; root?: string }> {
+): Promise<Inspection | { diagnostics: Diagnostic[]; root?: string; manifest?: Manifest }> {
   const loaded = await loadPackagedRegistry(BUNDLED_REGISTRY_DIR);
   if (!loaded.value || loaded.diagnostics.length > 0) return { diagnostics: loaded.diagnostics };
   const { root, scope, diagnostics } = await resolveWhere(where);
@@ -56,7 +56,9 @@ export async function inspectTarget(
   }
   if (!read.manifest) return { root, registry: loaded.value, diagnostics: lockDiagnostics };
   const scopeDiagnostics = checkScope(read.manifest, scope, read.manifest.agents);
-  if (scopeDiagnostics.length > 0) return { root, diagnostics: scopeDiagnostics };
+  if (scopeDiagnostics.length > 0) {
+    return { root, manifest: read.manifest, diagnostics: scopeDiagnostics };
+  }
   const files = await readTargetFiles(root, requiredPaths(loaded.value, read.manifest));
   return {
     root,
