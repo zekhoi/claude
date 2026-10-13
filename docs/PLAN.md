@@ -368,7 +368,7 @@ Complete when the packaged CLI installs content that Claude recognizes.
 - [ ] Add a persisted transaction journal and `recover` command if staged writes prove insufficient (see section 15).
 - [ ] Add an upgrade migration framework before the first item rename, destination move, or manifest schema change.
 - [ ] Add item dependency resolution when an item genuinely requires another.
-- [ ] Add monorepo overlap scanning across ancestor and workspace package installations.
+- [ ] Add monorepo overlap scanning across ancestor and workspace package installations. (Ancestors up to the git root are covered by `doctor`; scanning sibling workspace packages from the root is not.)
 - [x] Add Claude plugin distribution (`plugins/agent-kit/`, generated from the registry, with a marketplace at the repository root).
 
 ## 12. Acceptance criteria

@@ -1,4 +1,4 @@
-import { readdir, realpath } from "node:fs/promises";
+import { readdir, realpath, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
 import { CLAUDE_MD, NAME_PREFIX } from "../adapters/claude.js";
@@ -122,6 +122,55 @@ async function scopeOverlap(root: string, manifest: Manifest): Promise<Diagnosti
   return diagnostics;
 }
 
+/**
+ * Items also installed by a project installation in an ancestor directory, such as a monorepo
+ * root above a package. The scan stops at the git root (inclusive) and never looks into sibling
+ * packages; the home directory is covered by `scopeOverlap`. Which nested copy an agent prefers
+ * is not documented, so the warning does not guess.
+ */
+async function ancestorOverlap(root: string, manifest: Manifest): Promise<Diagnostic[]> {
+  if (manifest.scope !== "project") return [];
+  const isGitRoot = (dir: string) =>
+    stat(path.join(dir, ".git")).then(
+      () => true,
+      () => false,
+    );
+  if (await isGitRoot(root)) return [];
+  const home = await realpath(homedir()).catch(() => undefined);
+  const diagnostics: Diagnostic[] = [];
+  for (
+    let dir = path.dirname(root);
+    dir !== path.dirname(dir) && dir !== home;
+    dir = path.dirname(dir)
+  ) {
+    const { manifest: other } = await readManifest(dir).catch(() => ({ manifest: undefined }));
+    if (other?.scope === "project") {
+      const where = path.relative(root, dir).split(path.sep).join("/");
+      for (const [id, entry] of Object.entries(manifest.items).sort(([a], [b]) =>
+        a.localeCompare(b),
+      )) {
+        const outer = other.items[id];
+        if (!outer) continue;
+        const versions =
+          entry.version === outer.version
+            ? `both at ${entry.version}`
+            : `${entry.version} here, ${outer.version} in ${where}`;
+        diagnostics.push(
+          warning(
+            "SCOPE_OVERLAP",
+            `${id} is installed here and in the enclosing project ${where} (${versions}); agents working here can discover both copies, and which one they use is not documented`,
+            {
+              action: `Keep one: run \`agent-kit remove ${id}\` here, or \`agent-kit remove ${id} --cwd ${where}\``,
+            },
+          ),
+        );
+      }
+    }
+    if (await isGitRoot(dir)) break;
+  }
+  return diagnostics;
+}
+
 async function checkInstallation(inspection: Inspection): Promise<Diagnostic[]> {
   const { root, manifest, status } = inspection;
   if (!manifest || !status) return [];
@@ -232,6 +281,7 @@ async function checkInstallation(inspection: Inspection): Promise<Diagnostic[]> 
   }
   diagnostics.push(...(await nameCollisions(root, manifest)));
   diagnostics.push(...(await scopeOverlap(root, manifest)));
+  diagnostics.push(...(await ancestorOverlap(root, manifest)));
   return diagnostics;
 }
 
