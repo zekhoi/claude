@@ -24,7 +24,7 @@ Later releases use the workflow end to end. Trusted publishing generates provena
 ## Each release
 
 1. Review content changes, evaluation results, compatibility notes, and provenance.
-2. Bump item versions in `registry/index.json` following the [versioning rules](PLAN.md#content-versioning), and bump `packages/cli/package.json`.
+2. Bump item versions in `registry/index.json` following the [versioning rules](PLAN.md#content-versioning), bump `packages/cli/package.json`, and regenerate the Claude Code plugin with `pnpm -r run build && pnpm build:plugin` so its version matches. The plugin marketplace serves `main`, so plugin users receive the new version once it is merged.
 3. Move the `Unreleased` changelog entries under `## <version>` and add migration notes for anything users must do.
 4. Make sure every shipped skill has an evaluation record for its current version in `evals/<skill>/results/` (see [evals/README.md](../evals/README.md)).
 5. Run `node scripts/check-release.mjs <version>` locally; it lists anything missing.

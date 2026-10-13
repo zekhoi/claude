@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "id": "preset/review",
+  "description": "Add-on: security audits and an independent read-only reviewer subagent",
+  "items": ["skill/security-audit", "agent/reviewer"]
+}
