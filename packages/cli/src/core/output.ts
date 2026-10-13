@@ -21,11 +21,12 @@ export function exitCodeFor(diagnostics: readonly Diagnostic[]): number {
 const STATUS = { [EXIT_OK]: "ok", [EXIT_ERROR]: "error", [EXIT_CONFLICT]: "conflict" } as const;
 
 // eslint-disable-next-line no-control-regex
-const CONTROL_CHARACTERS = /[\u0000-\u0008\u000b-\u001f\u007f-\u009f]/g;
+const CONTROL_CHARACTERS = /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/g;
 
 /**
- * Escapes terminal control characters (C0 except newline and tab, DEL, and C1) so text from an
- * untrusted manifest or file cannot rewrite the terminal, hide lines, or change its title.
+ * Escapes terminal control characters (C0 except newline and tab, DEL, and C1) and bidirectional
+ * overrides so text from an untrusted manifest or file cannot rewrite the terminal, hide lines,
+ * change its title, or visually reorder a path.
  */
 export function escapeControls(text: string): string {
   return text.replace(

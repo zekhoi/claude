@@ -1,5 +1,5 @@
 import { lstat } from "node:fs/promises";
-import { BLOCK_FILES, isManagedDestination, isManagedDirectory } from "../adapters/index.js";
+import { BLOCK_FILES, isItemDestination, isManagedDirectory } from "../adapters/index.js";
 import { isSafeRelativePath } from "./paths.js";
 import { readRegularFile } from "./safe-read.js";
 import { error, type Diagnostic } from "./diagnostics.js";
@@ -107,11 +107,11 @@ export async function readManifest(
  */
 export function unmanagedPaths(manifest: Manifest): string[] {
   const bad: string[] = [];
-  for (const entry of Object.values(manifest.items)) {
+  for (const [id, entry] of Object.entries(manifest.items)) {
     for (const file of entry.files) {
       if (
         !isSafeRelativePath(file.destination) ||
-        !isManagedDestination(file.destination, file.install)
+        !isItemDestination(id, file.destination, file.install)
       ) {
         bad.push(file.destination);
       }

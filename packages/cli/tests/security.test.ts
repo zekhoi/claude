@@ -160,3 +160,48 @@ describe("security finding 7: terminal control characters are escaped in human o
     expect(run.stdout).toContain("\\u001b");
   });
 });
+
+describe("security re-check: residual findings", () => {
+  it("rejects an item listing a path outside its own slot", async () => {
+    const root = await installed();
+    await mkdir(path.join(root, ".claude/agents"), { recursive: true });
+    await writeFile(path.join(root, ".claude/agents/kit-mine.md"), "mine");
+    await tamper(
+      root,
+      (m) => (m.items["rule/testing"]!.files[0]!.destination = ".claude/agents/kit-mine.md"),
+    );
+    const run = await json(root, ["uninstall"]);
+    expect(run.code).toBe(1);
+    expect(run.result.diagnostics[0].code).toBe("MANIFEST_INVALID");
+    expect(await readFile(path.join(root, ".claude/agents/kit-mine.md"), "utf8")).toBe("mine");
+  });
+
+  it("scans large trees with many workspace patterns quickly", async () => {
+    const files: Record<string, string | object> = {};
+    const walk = (prefix: string, depth: number) => {
+      if (depth === 5) return;
+      for (const c of ["a", "b", "c", "d"]) {
+        const dir = prefix ? `${prefix}/${c}` : c;
+        files[`${dir}/.keep`] = "";
+        walk(dir, depth + 1);
+      }
+    };
+    walk("", 0);
+    const segments = Array.from({ length: 14 }, (_, i) => (i % 2 === 0 ? "**" : "*"));
+    files["package.json"] = {
+      workspaces: Array.from({ length: 64 }, (_, i) => `${segments.join("/")}/x${i}`),
+    };
+    const root = await writeTree(files);
+    const start = Date.now();
+    await workspacePackages(root);
+    expect(Date.now() - start).toBeLessThan(5000);
+  }, 60_000);
+
+  it("escapes bidirectional text controls", async () => {
+    const root = await installed();
+    await tamper(root, (m) => (m.cliVersion = "1.0‮gnp.exe"));
+    const run = await kit(root, ["status"]);
+    expect(run.stdout).not.toContain("‮");
+    expect(run.stdout).toContain("\\u202e");
+  });
+});

@@ -158,6 +158,33 @@ export function isManagedDestination(destination: string, install: InstallMode):
     : MANAGED_FILES.some((pattern) => pattern.test(destination));
 }
 
+/**
+ * True when `destination` is a slot the given item itself can occupy, so one item's manifest
+ * entry can never claim another item's (or the user's) file. `id` must be a validated item id.
+ */
+export function isItemDestination(id: string, destination: string, install: InstallMode): boolean {
+  if (!isManagedDestination(destination, install)) return false;
+  const [type, name] = id.split("/") as [string, string];
+  const skill = `kit-${name}`;
+  switch (type) {
+    case "guideline":
+      return install === "managed-block";
+    case "skill":
+      return [".claude/skills/", ".agents/skills/"].some((dir) =>
+        destination.startsWith(`${dir}${skill}/`),
+      );
+    case "agent":
+      return [`.claude/agents/${skill}.md`, `.codex/agents/${skill}.toml`].includes(destination);
+    case "rule":
+      return [
+        `.claude/rules/agent-kit/${name}.md`,
+        `.agents/skills/${skill}-rules/SKILL.md`,
+      ].includes(destination);
+    default:
+      return false;
+  }
+}
+
 /** True for a directory agent-kit can have created. */
 export function isManagedDirectory(dir: string): boolean {
   return !hasGitSegment(dir) && MANAGED_DIRS.some((pattern) => pattern.test(dir));
