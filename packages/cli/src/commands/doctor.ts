@@ -1,9 +1,10 @@
-import { readdir } from "node:fs/promises";
+import { readdir, realpath } from "node:fs/promises";
+import { homedir } from "node:os";
 import path from "node:path";
 import { CLAUDE_MD, NAME_PREFIX } from "../adapters/claude.js";
 import { invocationName, validateInstalledFile } from "../adapters/index.js";
 import { error, warning, type Diagnostic } from "../core/diagnostics.js";
-import { MANIFEST_PATH } from "../core/manifest.js";
+import { MANIFEST_PATH, readManifest } from "../core/manifest.js";
 import { emit } from "../core/output.js";
 import { requiredPaths } from "../core/planner.js";
 import type { PackagedRegistry } from "../core/registry.js";
@@ -80,6 +81,43 @@ async function leftovers(
         }),
       );
     }
+  }
+  return diagnostics;
+}
+
+/**
+ * Items installed both in this project and globally. Claude Code prefers the user-level copy of
+ * a skill but the project copy of a subagent, and loads both copies of rules and guidelines.
+ */
+async function scopeOverlap(root: string, manifest: Manifest): Promise<Diagnostic[]> {
+  if (manifest.scope !== "project") return [];
+  const home = await realpath(homedir()).catch(() => undefined);
+  if (!home || home === root) return [];
+  const { manifest: global } = await readManifest(home);
+  if (!global || global.scope !== "user") return [];
+
+  const claude = manifest.agents.includes("claude") && global.agents.includes("claude");
+  const diagnostics: Diagnostic[] = [];
+  for (const [id, entry] of Object.entries(manifest.items).sort(([a], [b]) => a.localeCompare(b))) {
+    const globalEntry = global.items[id];
+    if (!globalEntry) continue;
+    const type = id.slice(0, id.indexOf("/"));
+    const versions =
+      entry.version === globalEntry.version
+        ? `both at ${entry.version}`
+        : `${entry.version} here, ${globalEntry.version} globally`;
+    const effect = !claude
+      ? "both copies load"
+      : type === "skill"
+        ? "Claude Code uses the global copy, so this project's copy and any edits to it are ignored"
+        : type === "agent"
+          ? "Claude Code uses this project's copy and ignores the global one"
+          : "Claude Code loads both copies, so the same instructions apply twice";
+    diagnostics.push(
+      warning("SCOPE_OVERLAP", `${id} is installed here and globally (${versions}); ${effect}`, {
+        action: `Keep one: run \`agent-kit remove ${id}\` here, or \`agent-kit remove ${id} --global\``,
+      }),
+    );
   }
   return diagnostics;
 }
@@ -193,6 +231,7 @@ async function checkInstallation(inspection: Inspection): Promise<Diagnostic[]> 
     );
   }
   diagnostics.push(...(await nameCollisions(root, manifest)));
+  diagnostics.push(...(await scopeOverlap(root, manifest)));
   return diagnostics;
 }
 

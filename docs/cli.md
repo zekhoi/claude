@@ -58,7 +58,7 @@ Stops managing items and leaves their files exactly as they are, edited or not. 
 
 ### `doctor`
 
-Read-only checks: malformed or missing managed blocks, a missing `CLAUDE.md` import, frontmatter that would keep Claude Code from recognizing an installed skill or agent, other project skills or agents that reuse an installed `kit-` name, local edits and missing files, leftover temporary files from interrupted runs, held locks, and items no longer in the catalog. Exits `1` when it finds an error; warnings alone exit `0`. Detection is limited to this target's `.claude/` directory and does not cover user-level or plugin skills.
+Read-only checks: malformed or missing managed blocks, a missing `CLAUDE.md` import, frontmatter that would keep Claude Code from recognizing an installed skill or agent, other project skills or agents that reuse an installed `kit-` name, local edits and missing files, leftover temporary files from interrupted runs, held locks, items no longer in the catalog, and items also installed globally. Exits `1` when it finds an error; warnings alone exit `0`. Detection is limited to this target's `.claude/` directory and does not cover user-level or plugin skills.
 
 ### `uninstall`
 
@@ -77,7 +77,7 @@ Removes every managed file and block, then the manifest. Your content outside th
 
 Project context templates and the `CLAUDE.md` import are project-only. If `CLAUDE_CONFIG_DIR` or `CODEX_HOME` moves an agent's directory away from your home directory, global installation for that agent is refused rather than writing to the wrong place.
 
-When an item is installed both globally and in a project, Claude Code prefers the **user-level skill** but the **project subagent**. Keep the two at the same version, or install each item in only one scope.
+When an item is installed both globally and in a project, Claude Code prefers the **user-level skill** but the **project subagent**, and loads both copies of rules and guidelines. Install each item in only one scope; `agent-kit doctor` in a project reports overlapping items (`SCOPE_OVERLAP`).
 
 ## Exit codes
 
@@ -140,6 +140,8 @@ With `--json`, stdout contains one object and nothing else; prompts are disabled
 | `UNSUPPORTED_SCHEMA`      | A manifest or registry was written by a newer version. Nothing is changed.                                    |
 | `MANIFEST_INVALID`        | `.agent-kit/manifest.json` is unreadable. Restore it from version control.                                    |
 | `TARGET_INVALID`          | The target directory does not exist or is not a directory.                                                    |
+| `SCOPE_MISMATCH`          | The command's scope (`--global` or not) does not match the installation it found.                             |
+| `SCOPE_OVERLAP`           | An item is installed both in this project and globally; the warning explains which copy each agent uses.      |
 | `INPUT_REQUIRED`          | A choice is needed, for example `--preset` in a noninteractive run.                                           |
 | `UNKNOWN_ITEM`            | The item or preset is not in the bundled catalog.                                                             |
 | `NOT_INSTALLED`           | The item, or Agent Kit itself, is not installed in this target.                                               |
