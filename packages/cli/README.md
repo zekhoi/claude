@@ -36,18 +36,18 @@ It does not launch any agent, need an API key, or change agent settings such as 
 
 ## Commands
 
-| Command                                                     | Purpose                                                                                                           |
-| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `list`                                                      | Show the bundled catalog                                                                                          |
-| `show <item> [--file <path>]`                               | Print an item's bundled content                                                                                   |
-| `init [--preset <name>]... [--agent <name>]... [--context]` | Install presets (`base`, `node`, `python`) for `claude` and/or `codex`, and optionally a project context template |
-| `add <item or preset>...`                                   | Install more items                                                                                                |
-| `status`                                                    | Show installed items, local edits, and available updates                                                          |
-| `update [item]... [--allow-major]`                          | Update items you have not edited                                                                                  |
-| `remove <item>...`                                          | Delete unedited items                                                                                             |
-| `eject <item>...`                                           | Keep an item's files as your own and stop managing them                                                           |
-| `doctor`                                                    | Check the installation without changing anything                                                                  |
-| `uninstall`                                                 | Remove everything agent-kit manages                                                                               |
+| Command                                                     | Purpose                                                                                                                                           |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list`                                                      | Show the bundled catalog                                                                                                                          |
+| `show <item> [--file <path>]`                               | Print an item's bundled content                                                                                                                   |
+| `init [--preset <name>]... [--agent <name>]... [--context]` | Install presets (`base`, `node`, `python`, add-ons `quality` and `review`) for `claude` and/or `codex`, and optionally a project context template |
+| `add <item or preset>...`                                   | Install more items                                                                                                                                |
+| `status`                                                    | Show installed items, local edits, and available updates                                                                                          |
+| `update [item]... [--allow-major]`                          | Update items you have not edited                                                                                                                  |
+| `remove <item>...`                                          | Delete unedited items                                                                                                                             |
+| `eject <item>...`                                           | Keep an item's files as your own and stop managing them                                                                                           |
+| `doctor`                                                    | Check the installation without changing anything                                                                                                  |
+| `uninstall`                                                 | Remove everything agent-kit manages                                                                                                               |
 
 Every command accepts `--cwd <path>` (or `--global` for the user-level installation) and `--json`; commands that change files accept `--dry-run`. Exit codes: `0` success, `1` error, `2` conflict that needs your decision.
 

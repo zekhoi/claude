@@ -29,6 +29,6 @@ First release. Published as `@zekhoi/agent-kit`.
 | `skill/refactoring`, `skill/test-writing`, `skill/documentation`                                | 1.0.0   |
 | `skill/kysely-review`, `skill/fastify-api`                                                      | 1.0.0   |
 | `agent/reviewer`, `agent/debugger`                                                              | 1.0.0   |
-| Presets `base`, `node`, `python`                                                                | —       |
+| Presets `base`, `node`, `python`, and add-ons `quality`, `review`                               | —       |
 
 All twelve skills were evaluated with Claude Code 2.1.296 (Sonnet) against normal, edge, and negative cases; see `evals/*/results/`. The `base`, `node`, and `python` presets include `commit` and `pull-request`, and `node` adds `kysely-review` and `fastify-api`; `security-audit`, `database-design`, `refactoring`, `test-writing`, and `documentation` are optional. The `debugging` description now also covers intermittent and production-only problems after an evaluation showed it did not trigger for them.

@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "id": "preset/quality",
+  "description": "Add-on: refactoring, test writing, and documentation skills",
+  "items": ["skill/refactoring", "skill/test-writing", "skill/documentation"]
+}

@@ -13,6 +13,8 @@ Agent Kit copies files into your project. You own your repository: you can edit 
 | `docs/agent-context.md`                                                                                                                                     | You, from the moment it is created | Never updated or removed                                         |
 | `.agent-kit/manifest.json`                                                                                                                                  | Agent Kit                          | Bookkeeping; commit it, do not edit it                           |
 
+The same rules apply to a global installation (`--global`), with the paths under your home directory; see [Global installation](cli.md#global-installation). The Claude Code plugin is different: Claude Code manages its files, so edit nothing inside it and use the CLI if you want to customize items.
+
 Agent Kit compares content after normalizing line endings, so a checkout with Windows line endings or a Markdown formatter adjusting blank lines inside the markers is not treated as an edit.
 
 ## When you edit an installed file

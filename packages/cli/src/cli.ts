@@ -73,7 +73,9 @@ function withGlobal(command: Command, conflicts: string[] = []): Command {
 
 function withCommon(command: Command): Command {
   return command
-    .option("--cwd <path>", "target directory (default: current directory)", process.cwd())
+    .addOption(
+      new Option("--cwd <path>", "target directory").default(process.cwd(), "current directory"),
+    )
     .option("--json", "emit one machine-readable JSON result on stdout", false);
 }
 
