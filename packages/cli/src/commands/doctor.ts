@@ -11,6 +11,7 @@ import type { PackagedRegistry } from "../core/registry.js";
 import type { Manifest, RegistryItem } from "../core/schemas.js";
 import { readTargetFile, resolveIn } from "../core/target.js";
 import type { Where } from "../core/scope.js";
+import { workspacePackages } from "../core/workspaces.js";
 import { inspectTarget, type Inspection } from "./status.js";
 
 /** Other project skills and agents that claim one of our installed names, per tool. */
@@ -171,6 +172,41 @@ async function ancestorOverlap(root: string, manifest: Manifest): Promise<Diagno
   return diagnostics;
 }
 
+/**
+ * Items also installed by workspace packages below this installation, for a monorepo root.
+ * Only packages declared in pnpm-workspace.yaml or package.json `workspaces` are checked.
+ */
+async function workspaceOverlap(root: string, manifest: Manifest): Promise<Diagnostic[]> {
+  if (manifest.scope !== "project") return [];
+  const diagnostics: Diagnostic[] = [];
+  for (const pkg of await workspacePackages(root)) {
+    const { manifest: inner } = await readManifest(path.join(root, ...pkg.split("/"))).catch(
+      () => ({ manifest: undefined }),
+    );
+    if (inner?.scope !== "project") continue;
+    for (const [id, entry] of Object.entries(manifest.items).sort(([a], [b]) =>
+      a.localeCompare(b),
+    )) {
+      const other = inner.items[id];
+      if (!other) continue;
+      const versions =
+        entry.version === other.version
+          ? `both at ${entry.version}`
+          : `${entry.version} here, ${other.version} in ${pkg}`;
+      diagnostics.push(
+        warning(
+          "SCOPE_OVERLAP",
+          `${id} is installed here and in the workspace package ${pkg} (${versions}); agents working in that package can discover both copies, and which one they use is not documented`,
+          {
+            action: `Keep one: run \`agent-kit remove ${id}\` here, or \`agent-kit remove ${id} --cwd ${pkg}\``,
+          },
+        ),
+      );
+    }
+  }
+  return diagnostics;
+}
+
 async function checkInstallation(inspection: Inspection): Promise<Diagnostic[]> {
   const { root, manifest, status } = inspection;
   if (!manifest || !status) return [];
@@ -282,6 +318,7 @@ async function checkInstallation(inspection: Inspection): Promise<Diagnostic[]> 
   diagnostics.push(...(await nameCollisions(root, manifest)));
   diagnostics.push(...(await scopeOverlap(root, manifest)));
   diagnostics.push(...(await ancestorOverlap(root, manifest)));
+  diagnostics.push(...(await workspaceOverlap(root, manifest)));
   return diagnostics;
 }
 
