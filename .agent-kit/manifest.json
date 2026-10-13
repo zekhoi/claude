@@ -1,6 +1,7 @@
 {
   "manifestSchemaVersion": 1,
   "cliVersion": "0.1.0",
+  "scope": "project",
   "agents": [
     "claude",
     "codex"
@@ -168,6 +169,51 @@
           "sha256": "f226ab3a9eda01310433affc839ccd6fbc805291adb69fe1dac82559bc5c2118"
         }
       ]
+    },
+    "skill/refactoring": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": ".claude/skills/kit-refactoring/SKILL.md",
+          "install": "file",
+          "sha256": "f3711e0e4f5d6b8e73c2079ce2ff223d82d5f4ad7753fc732e58b41fbed6f939"
+        },
+        {
+          "destination": ".agents/skills/kit-refactoring/SKILL.md",
+          "install": "file",
+          "sha256": "f3711e0e4f5d6b8e73c2079ce2ff223d82d5f4ad7753fc732e58b41fbed6f939"
+        }
+      ]
+    },
+    "skill/test-writing": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": ".claude/skills/kit-test-writing/SKILL.md",
+          "install": "file",
+          "sha256": "e93b272de93bbaa1adc15e1c816d69cfe8376668e72025b9f9e6c353ec613caa"
+        },
+        {
+          "destination": ".agents/skills/kit-test-writing/SKILL.md",
+          "install": "file",
+          "sha256": "e93b272de93bbaa1adc15e1c816d69cfe8376668e72025b9f9e6c353ec613caa"
+        }
+      ]
+    },
+    "skill/documentation": {
+      "version": "1.0.0",
+      "files": [
+        {
+          "destination": ".claude/skills/kit-documentation/SKILL.md",
+          "install": "file",
+          "sha256": "41f62e12a1ad345f790da3e5009eaa53915d10e577b85fc0fa23eef9128d1ff0"
+        },
+        {
+          "destination": ".agents/skills/kit-documentation/SKILL.md",
+          "install": "file",
+          "sha256": "41f62e12a1ad345f790da3e5009eaa53915d10e577b85fc0fa23eef9128d1ff0"
+        }
+      ]
     }
   },
   "blocks": {
@@ -182,9 +228,12 @@
     ".agents/skills/kit-code-review",
     ".agents/skills/kit-commit",
     ".agents/skills/kit-debugging",
+    ".agents/skills/kit-documentation",
     ".agents/skills/kit-feature-implementation",
     ".agents/skills/kit-pull-request",
+    ".agents/skills/kit-refactoring",
     ".agents/skills/kit-security-audit",
+    ".agents/skills/kit-test-writing",
     ".agents/skills/kit-testing-rules",
     ".agents/skills/kit-typescript-rules",
     ".claude/agents",
@@ -194,9 +243,12 @@
     ".claude/skills/kit-code-review",
     ".claude/skills/kit-commit",
     ".claude/skills/kit-debugging",
+    ".claude/skills/kit-documentation",
     ".claude/skills/kit-feature-implementation",
     ".claude/skills/kit-pull-request",
+    ".claude/skills/kit-refactoring",
     ".claude/skills/kit-security-audit",
+    ".claude/skills/kit-test-writing",
     ".codex",
     ".codex/agents"
   ],

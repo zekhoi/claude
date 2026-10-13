@@ -1,0 +1,40 @@
+{
+  "skill": "skill/documentation",
+  "cases": [
+    {
+      "id": "fixes-an-outdated-readme",
+      "kind": "normal",
+      "fixture": "fixtures/greeter",
+      "allowedTools": ["Bash(node src/cli.js*)"],
+      "prompt": "Update the README so it matches what the tool actually does.",
+      "expectations": [
+        "Replaces the nonexistent --who and --loud flags with the real --name and --shout",
+        "Corrects the Node.js requirement to match engines (22 or later)",
+        "Runs the documented commands to verify their output",
+        "Does not invent options, output, or behavior"
+      ]
+    },
+    {
+      "id": "writes-a-missing-readme",
+      "kind": "edge",
+      "fixture": "fixtures/greeter-no-readme",
+      "allowedTools": ["Bash(node src/cli.js*)"],
+      "prompt": "Write a README for this project.",
+      "expectations": [
+        "Documents installation or running, the --name and --shout options with their defaults, and the Node.js requirement",
+        "Uses commands and example output verified by running them",
+        "States anything it could not verify instead of presenting it as fact"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-explanations",
+      "kind": "negative",
+      "fixture": "fixtures/greeter",
+      "prompt": "Explain what src/cli.js does.",
+      "expectations": [
+        "Does not invoke kit-documentation",
+        "Answers in chat without modifying files"
+      ]
+    }
+  ]
+}

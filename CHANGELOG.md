@@ -26,7 +26,8 @@ First release. Published as `@zekhoi/agent-kit`.
 | `rule/testing`, `rule/typescript`, `rule/python`                                                | 1.0.0   |
 | `skill/code-review`, `skill/debugging`, `skill/feature-implementation`, `skill/database-design` | 1.0.0   |
 | `skill/commit`, `skill/pull-request`, `skill/security-audit`                                    | 1.0.0   |
+| `skill/refactoring`, `skill/test-writing`, `skill/documentation`                                | 1.0.0   |
 | `agent/reviewer`, `agent/debugger`                                                              | 1.0.0   |
 | Presets `base`, `node`, `python`                                                                | —       |
 
-All seven skills were evaluated with Claude Code 2.1.296 (Sonnet) against normal, edge, and negative cases; see `evals/*/results/`. The `base`, `node`, and `python` presets include `commit` and `pull-request`; `security-audit` and `database-design` are optional. The `debugging` description now also covers intermittent and production-only problems after an evaluation showed it did not trigger for them.
+All ten skills were evaluated with Claude Code 2.1.296 (Sonnet) against normal, edge, and negative cases; see `evals/*/results/`. The `base`, `node`, and `python` presets include `commit` and `pull-request`; `security-audit`, `database-design`, `refactoring`, `test-writing`, and `documentation` are optional. The `debugging` description now also covers intermittent and production-only problems after an evaluation showed it did not trigger for them.

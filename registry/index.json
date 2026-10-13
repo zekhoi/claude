@@ -183,6 +183,48 @@
           "destination": ".claude/skills/kit-security-audit/SKILL.md"
         }
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/refactoring",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Behavior-preserving refactoring protected by tests run before and after",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/refactoring/SKILL.md",
+          "destination": ".claude/skills/kit-refactoring/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/test-writing",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Tests for existing code in the project's framework, covering edge cases and failure paths",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/test-writing/SKILL.md",
+          "destination": ".claude/skills/kit-test-writing/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/documentation",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Documentation that matches the code, with every command and example verified",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/documentation/SKILL.md",
+          "destination": ".claude/skills/kit-documentation/SKILL.md"
+        }
+      ]
     }
   ]
 }
