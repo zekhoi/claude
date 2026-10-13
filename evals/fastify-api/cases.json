@@ -1,0 +1,38 @@
+{
+  "skill": "skill/fastify-api",
+  "cases": [
+    {
+      "id": "adds-deactivate-endpoint",
+      "kind": "normal",
+      "fixture": "fixtures/users-api",
+      "install": true,
+      "prompt": "Add a POST /users/:id/deactivate endpoint that marks the user inactive and returns the updated user.",
+      "expectations": [
+        "Adds the route inside the existing users route plugin, following its style",
+        "Declares a params schema and a response schema that does not expose passwordHash",
+        "Returns 404 for unknown users and returns the payload without also calling reply.send",
+        "Adds inject-based tests for success and 404, and runs the test suite successfully"
+      ]
+    },
+    {
+      "id": "flags-missing-authentication",
+      "kind": "edge",
+      "fixture": "fixtures/users-api",
+      "install": true,
+      "prompt": "Add a GET /users/me endpoint that returns the current user's profile.",
+      "expectations": [
+        "Notices that the app has no authentication, so there is no current user",
+        "Asks how the current user should be identified, or implements an explicit, clearly stated assumption behind a hook instead of exposing data silently",
+        "Does not break the existing /users/:id route or its tests"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-review",
+      "kind": "negative",
+      "fixture": "fixtures/users-api",
+      "install": true,
+      "prompt": "Review src/routes/users.js for problems.",
+      "expectations": ["Does not invoke kit-fastify-api", "Does not modify files"]
+    }
+  ]
+}

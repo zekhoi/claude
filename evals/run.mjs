@@ -67,6 +67,11 @@ function setUpProject(skillDir, c) {
       writeFileSync(path.join(project, rel), content);
     }
   };
+  // Fixtures that need real dependencies (for example to run tests) declare `install: true`.
+  if (c.install) {
+    sh("npm", ["install", "--no-audit", "--no-fund", "--ignore-scripts"], project);
+    writeFileSync(path.join(project, ".gitignore"), "node_modules/\n");
+  }
   sh("git", ["init", "-q", "-b", "main"], project);
   sh("git", ["config", "user.email", "eval@example.com"], project);
   sh("git", ["config", "user.name", "eval"], project);

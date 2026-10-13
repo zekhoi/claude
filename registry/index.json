@@ -225,6 +225,34 @@
           "destination": ".claude/skills/kit-documentation/SKILL.md"
         }
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/kysely-review",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Review of Kysely query code for correctness, injection, transactions, and N+1 queries",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/kysely-review/SKILL.md",
+          "destination": ".claude/skills/kit-kysely-review/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/fastify-api",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Fastify endpoints with JSON schemas, correct async replies, error handling, and inject tests",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/fastify-api/SKILL.md",
+          "destination": ".claude/skills/kit-fastify-api/SKILL.md"
+        }
+      ]
     }
   ]
 }
