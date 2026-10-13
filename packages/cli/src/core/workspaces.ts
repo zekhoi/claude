@@ -1,14 +1,20 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
+import { readRegularFile } from "./safe-read.js";
 
 /** `**` matches at most this many directory levels, to keep scans bounded. */
 const MAX_DEPTH = 5;
+/** Hostile workspace files cannot make the scan arbitrarily large. */
+const MAX_PATTERNS = 64;
+const MAX_SEGMENTS = 16;
 
 async function declaredPatterns(root: string): Promise<string[]> {
   const patterns: string[] = [];
   try {
-    const pnpm = parseYaml(await readFile(path.join(root, "pnpm-workspace.yaml"), "utf8")) as {
+    const read = await readRegularFile(path.join(root, "pnpm-workspace.yaml"));
+    if (read.state !== "file") throw new Error("no workspace file");
+    const pnpm = parseYaml(read.text) as {
       packages?: unknown;
     } | null;
     if (Array.isArray(pnpm?.packages)) patterns.push(...pnpm.packages.map(String));
@@ -16,7 +22,9 @@ async function declaredPatterns(root: string): Promise<string[]> {
     // No pnpm workspace file, or one that does not parse.
   }
   try {
-    const pkg = JSON.parse(await readFile(path.join(root, "package.json"), "utf8")) as {
+    const read = await readRegularFile(path.join(root, "package.json"));
+    if (read.state !== "file") throw new Error("no package.json");
+    const pkg = JSON.parse(read.text) as {
       workspaces?: unknown;
     };
     const ws = pkg.workspaces;
@@ -25,7 +33,7 @@ async function declaredPatterns(root: string): Promise<string[]> {
   } catch {
     // No package.json, or no workspaces field.
   }
-  return patterns;
+  return patterns.slice(0, MAX_PATTERNS);
 }
 
 async function subdirectories(root: string, rel: string): Promise<string[]> {
@@ -38,19 +46,29 @@ async function subdirectories(root: string, rel: string): Promise<string[]> {
 }
 
 async function expand(root: string, pattern: string): Promise<string[]> {
-  const segments = pattern.replace(/^\.\//, "").replace(/\/+$/, "").split("/").filter(Boolean);
-  if (segments.some((s) => s === "..")) return [];
-  const results: string[] = [];
-  const walk = async (rel: string, rest: string[], depth: number): Promise<void> => {
-    if (rest.length === 0) {
-      if (rel) results.push(rel);
+  const segments = pattern
+    .replace(/^\.\//, "")
+    .replace(/\/+$/, "")
+    .split("/")
+    .filter(Boolean)
+    // Consecutive `**` segments match the same directories as one.
+    .filter((s, i, all) => !(s === "**" && all[i - 1] === "**"));
+  if (segments.length > MAX_SEGMENTS || segments.some((s) => s === "..")) return [];
+  const results = new Set<string>();
+  const visited = new Set<string>();
+  const walk = async (rel: string, index: number, depth: number): Promise<void> => {
+    const key = `${rel}\0${index}\0${depth}`;
+    if (visited.has(key)) return;
+    visited.add(key);
+    if (index === segments.length) {
+      if (rel) results.add(rel);
       return;
     }
-    const [segment, ...tail] = rest as [string, ...string[]];
+    const segment = segments[index]!;
     if (segment === "**") {
-      await walk(rel, tail, depth);
+      await walk(rel, index + 1, depth);
       if (depth >= MAX_DEPTH) return;
-      for (const dir of await subdirectories(root, rel)) await walk(dir, rest, depth + 1);
+      for (const dir of await subdirectories(root, rel)) await walk(dir, index, depth + 1);
     } else if (segment.includes("*")) {
       const matcher = new RegExp(
         `^${segment
@@ -59,15 +77,15 @@ async function expand(root: string, pattern: string): Promise<string[]> {
           .join("[^/]*")}$`,
       );
       for (const dir of await subdirectories(root, rel)) {
-        if (matcher.test(path.posix.basename(dir))) await walk(dir, tail, depth);
+        if (matcher.test(path.posix.basename(dir))) await walk(dir, index + 1, depth);
       }
     } else {
       const next = rel ? `${rel}/${segment}` : segment;
-      if ((await subdirectories(root, rel)).includes(next)) await walk(next, tail, depth);
+      if ((await subdirectories(root, rel)).includes(next)) await walk(next, index + 1, depth);
     }
   };
-  await walk("", segments, 0);
-  return results;
+  await walk("", 0, 0);
+  return [...results];
 }
 
 /**

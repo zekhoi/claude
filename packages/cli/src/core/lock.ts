@@ -1,8 +1,10 @@
-import { mkdir, open, readFile, rmdir, unlink } from "node:fs/promises";
+import { constants } from "node:fs";
+import { mkdir, open, realpath, rmdir, unlink } from "node:fs/promises";
 import { hostname } from "node:os";
 import path from "node:path";
-import { conflict, type Diagnostic } from "./diagnostics.js";
-import { LOCK_PATH, STATE_DIR } from "./manifest.js";
+import { conflict, error, type Diagnostic } from "./diagnostics.js";
+import { checkStateDir, LOCK_PATH, STATE_DIR } from "./manifest.js";
+import { readRegularFile } from "./safe-read.js";
 import { resolveIn } from "./target.js";
 
 export interface LockInfo {
@@ -32,9 +34,10 @@ export async function inspectLock(
   root: string,
 ): Promise<{ holder: LockInfo | undefined; alive: boolean | undefined } | null> {
   const file = resolveIn(root, LOCK_PATH);
-  try {
-    await readFile(file);
-  } catch {
+  if (
+    (await readRegularFile(file, 64 * 1024).catch(() => ({ state: "missing" as const }))).state ===
+    "missing"
+  ) {
     return null;
   }
   const holder = await readLock(file);
@@ -44,7 +47,8 @@ export async function inspectLock(
 
 async function readLock(file: string): Promise<LockInfo | undefined> {
   try {
-    return JSON.parse(await readFile(file, "utf8")) as LockInfo;
+    const read = await readRegularFile(file, 64 * 1024);
+    return read.state === "file" ? (JSON.parse(read.text) as LockInfo) : undefined;
   } catch {
     return undefined;
   }
@@ -71,7 +75,19 @@ export async function acquireLock(
 ): Promise<{ lock?: Lock; diagnostics: Diagnostic[] }> {
   const dir = resolveIn(root, STATE_DIR);
   const file = resolveIn(root, LOCK_PATH);
+  const unsafe = await checkStateDir(root);
+  if (unsafe) return { diagnostics: [unsafe] };
   const createdDir = (await mkdir(dir, { recursive: true })) !== undefined;
+  // Re-check after creating: the directory must resolve inside the target.
+  const real = await realpath(dir);
+  const relative = path.relative(await realpath(root), real);
+  if (relative.startsWith("..") || path.isAbsolute(relative) || (await checkStateDir(root))) {
+    return {
+      diagnostics: [
+        error("UNSAFE_PATH", `${STATE_DIR} resolves outside the target`, { path: STATE_DIR }),
+      ],
+    };
+  }
   const info: LockInfo = {
     pid: process.pid,
     host: hostname(),
@@ -82,7 +98,12 @@ export async function acquireLock(
   let takenOverFrom: number | undefined;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const handle = await open(file, "wx");
+      // Exclusive create that never follows a symlink planted at the lock path.
+      const handle = await open(
+        file,
+        constants.O_CREAT | constants.O_EXCL | constants.O_WRONLY | (constants.O_NOFOLLOW ?? 0),
+        0o644,
+      );
       await handle.writeFile(`${JSON.stringify(info)}\n`);
       await handle.close();
       return {

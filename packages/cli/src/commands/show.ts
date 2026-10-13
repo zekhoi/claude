@@ -104,8 +104,11 @@ export async function show(
   options: Where & { json: boolean; file?: string; diff: boolean },
 ): Promise<number> {
   const done = (diagnostics: Diagnostic[], target: string | null, data?: ShowData) =>
-    emit({ command: "show", target, diagnostics, ...(data ? { data } : {}) }, options.json, (d) =>
-      render(d, options),
+    emit(
+      { command: "show", target, diagnostics, ...(data ? { data } : {}) },
+      options.json,
+      (d) => render(d, options),
+      { raw: options.file !== undefined && !options.diff },
     );
 
   const loaded = await loadPackagedRegistry(BUNDLED_REGISTRY_DIR);

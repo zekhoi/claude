@@ -11,6 +11,9 @@ export type FileState =
   | { state: "file"; text: string; rawHash: string }
   | { state: "unsafe"; reason: string };
 
+/** Instruction and skill files are small; larger files are refused rather than parsed. */
+export const TARGET_FILE_MAX = 4 * 1024 * 1024;
+
 export function rawHash(text: string): string {
   return createHash("sha256").update(text, "utf8").digest("hex");
 }
@@ -78,6 +81,9 @@ export async function readTargetFile(root: string, rel: string): Promise<FileSta
   }
   if (info.isSymbolicLink()) return { state: "unsafe", reason: "destination is a symlink" };
   if (!info.isFile()) return { state: "unsafe", reason: "destination is not a regular file" };
+  if (info.size > TARGET_FILE_MAX) {
+    return { state: "unsafe", reason: `file is larger than ${TARGET_FILE_MAX / 1024 / 1024} MiB` };
+  }
 
   const text = decodeUtf8(await readFile(abs));
   if (text === undefined) return { state: "unsafe", reason: "file is not valid UTF-8" };

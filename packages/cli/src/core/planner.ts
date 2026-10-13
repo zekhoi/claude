@@ -15,7 +15,7 @@ import {
 import { parseBlock } from "./blocks.js";
 import { contentHash, normalizeContent } from "./content.js";
 import { error, warning, type Diagnostic } from "./diagnostics.js";
-import { MANIFEST_PATH } from "./manifest.js";
+import { CONTEXT_FILE, MANIFEST_PATH } from "./manifest.js";
 import { PlanBuilder, type Plan } from "./plan-builder.js";
 import type { PackagedRegistry } from "./registry.js";
 import type { Manifest, PackagedItem } from "./schemas.js";
@@ -24,7 +24,7 @@ import type { FileState } from "./target.js";
 export type { Plan, WriteOp } from "./plan-builder.js";
 
 /** Project-owned context file created from the bundled template by `init --context`. */
-export const CONTEXT_PATH = "docs/agent-context.md";
+export const CONTEXT_PATH = CONTEXT_FILE;
 
 export interface InstallRequest {
   items: PackagedItem[];
