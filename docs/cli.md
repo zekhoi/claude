@@ -58,7 +58,7 @@ Stops managing items and leaves their files exactly as they are, edited or not. 
 
 ### `doctor`
 
-Read-only checks: malformed or missing managed blocks, a missing `CLAUDE.md` import, frontmatter that would keep Claude Code from recognizing an installed skill or agent, other project skills or agents that reuse an installed `kit-` name, local edits and missing files, leftover temporary files from interrupted runs, held locks, items no longer in the catalog, and items also installed globally or by an enclosing project installation (for example a monorepo root above a package; the scan stops at the git root and does not look into other packages). Exits `1` when it finds an error; warnings alone exit `0`. Detection is limited to this target's `.claude/` directory and does not cover user-level or plugin skills.
+Read-only checks: malformed or missing managed blocks, a missing `CLAUDE.md` import, frontmatter that would keep Claude Code from recognizing an installed skill or agent, other project skills or agents that reuse an installed `kit-` name, local edits and missing files, leftover temporary files from interrupted runs, held locks, items no longer in the catalog, and items also installed globally or by another installation in the same monorepo: an enclosing project up to the git root, or, at a monorepo root, the workspace packages declared in `pnpm-workspace.yaml` or `package.json` `workspaces`. Other directories are not scanned. Exits `1` when it finds an error; warnings alone exit `0`. Detection is limited to this target's `.claude/` directory and does not cover user-level or plugin skills.
 
 ### `uninstall`
 
