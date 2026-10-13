@@ -3,7 +3,7 @@
 A CLI that installs engineering guidelines, rules, subagents, and skills for Claude Code and Codex into a repository.
 
 > Status: preparing the first release, `@zekhoi/agent-kit` 0.1.0. It is not published yet.
-> See [docs/PLAN.md](docs/PLAN.md) for the design and roadmap.
+> See [docs/PLAN.md](docs/PLAN.md) for the design and roadmap, and [SECURITY.md](SECURITY.md) for the threat model and how to report vulnerabilities.
 
 ## Development
 

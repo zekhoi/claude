@@ -123,3 +123,69 @@ export function validateInstalledFile(
   }
   return [];
 }
+
+/** Files that can hold a guidelines block, and the CLAUDE.md import block. */
+export const GUIDELINE_BLOCK_FILES = ["AGENTS.md", USER_GUIDELINES.claude, USER_GUIDELINES.codex];
+export const BLOCK_FILES = [...GUIDELINE_BLOCK_FILES, "CLAUDE.md"];
+
+const NAME = "kit-[a-z0-9]+(?:-[a-z0-9]+)*";
+const SUPPORT = "(?:references|scripts|assets)";
+/** Every file location an installed item can occupy, for any agent and scope. */
+const MANAGED_FILES = [
+  new RegExp(`^\\.claude/skills/${NAME}/(?:SKILL\\.md|${SUPPORT}/.+)$`),
+  new RegExp(`^\\.agents/skills/${NAME}/(?:SKILL\\.md|${SUPPORT}/.+)$`),
+  new RegExp(`^\\.claude/agents/${NAME}\\.md$`),
+  new RegExp(`^\\.codex/agents/${NAME}\\.toml$`),
+  /^\.claude\/rules\/agent-kit\/[a-z0-9]+(?:-[a-z0-9]+)*\.md$/,
+];
+/** Every directory agent-kit can create, so only those are ever pruned. */
+const MANAGED_DIRS = [
+  new RegExp(
+    `^\\.claude(?:/(?:skills(?:/${NAME}(?:/${SUPPORT}(?:/[^/]+)*)?)?|agents|rules(?:/agent-kit)?))?$`,
+  ),
+  new RegExp(`^\\.agents(?:/skills(?:/${NAME}(?:/${SUPPORT}(?:/[^/]+)*)?)?)?$`),
+  /^\.codex(?:\/agents)?$/,
+  /^docs$/,
+];
+
+const hasGitSegment = (p: string) => p.split("/").some((s) => s.toLowerCase() === ".git");
+
+/** True for a destination agent-kit can manage with the given install mode. */
+export function isManagedDestination(destination: string, install: InstallMode): boolean {
+  if (hasGitSegment(destination)) return false;
+  return install === "managed-block"
+    ? GUIDELINE_BLOCK_FILES.includes(destination)
+    : MANAGED_FILES.some((pattern) => pattern.test(destination));
+}
+
+/**
+ * True when `destination` is a slot the given item itself can occupy, so one item's manifest
+ * entry can never claim another item's (or the user's) file. `id` must be a validated item id.
+ */
+export function isItemDestination(id: string, destination: string, install: InstallMode): boolean {
+  if (!isManagedDestination(destination, install)) return false;
+  const [type, name] = id.split("/") as [string, string];
+  const skill = `kit-${name}`;
+  switch (type) {
+    case "guideline":
+      return install === "managed-block";
+    case "skill":
+      return [".claude/skills/", ".agents/skills/"].some((dir) =>
+        destination.startsWith(`${dir}${skill}/`),
+      );
+    case "agent":
+      return [`.claude/agents/${skill}.md`, `.codex/agents/${skill}.toml`].includes(destination);
+    case "rule":
+      return [
+        `.claude/rules/agent-kit/${name}.md`,
+        `.agents/skills/${skill}-rules/SKILL.md`,
+      ].includes(destination);
+    default:
+      return false;
+  }
+}
+
+/** True for a directory agent-kit can have created. */
+export function isManagedDirectory(dir: string): boolean {
+  return !hasGitSegment(dir) && MANAGED_DIRS.some((pattern) => pattern.test(dir));
+}

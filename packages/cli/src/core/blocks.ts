@@ -28,12 +28,16 @@ export function parseBlock(text: string): BlockParse {
   if (end < start) return { kind: "malformed", reason: "end marker precedes start marker" };
 
   // Blank lines at the body's edges are layout, not content: formatters commonly add or remove them.
-  const body = lines
-    .slice(start + 1, end)
+  // Trimmed line by line (not with `+$` regexes, which are quadratic on hostile input).
+  const bodyLines = lines.slice(start + 1, end);
+  let first = 0;
+  let last = bodyLines.length;
+  while (first < last && bodyLines[first]!.trim() === "") first++;
+  while (last > first && bodyLines[last - 1]!.trim() === "") last--;
+  const body = bodyLines
+    .slice(first, last)
     .join("")
-    .replace(/^(?:[ \t]*\r?\n)+/, "")
-    .replace(/(?:\r?\n[ \t]*)+$/, "")
-    .replace(/^[ \t]*$/, "");
+    .replace(/\r?\n$/, "");
   return {
     kind: "block",
     before: lines.slice(0, start).join(""),
@@ -72,8 +76,10 @@ export function removeBlock(text: string): string {
   const parsed = parseBlock(text);
   if (parsed.kind !== "block") return text;
   const eol = eolOf(text);
-  const before =
-    parsed.after === "" ? parsed.before.replace(new RegExp(`(?:${eol})+$`), eol) : parsed.before;
+  // Collapse trailing line endings to one, scanning backwards (linear on hostile input).
+  let cut = parsed.before.length;
+  while (cut >= 2 * eol.length && parsed.before.endsWith(eol + eol, cut)) cut -= eol.length;
+  const before = parsed.after === "" ? parsed.before.slice(0, cut) : parsed.before;
   return (before.trim() === "" && parsed.after === "" ? "" : before) + parsed.after;
 }
 

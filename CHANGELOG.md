@@ -16,6 +16,7 @@ First release. Published as `@zekhoi/agent-kit`.
 - Codex support with `init --agent codex`: guidelines in `AGENTS.md`, skills in `.agents/skills/`, rules converted to skills, and subagents as `.codex/agents/*.toml`. Agents can be combined and added to an existing installation.
 - Global installation with `--global`: the catalog installed once for the user account, in Claude Code's and Codex's user-level directories. `doctor` warns when an item is installed both globally and in a project, or by another installation in the same monorepo (an enclosing project, or declared workspace packages from the root).
 - A Claude Code plugin generated from the catalog: `/plugin marketplace add zekhoi/claude`, then `/plugin install agent-kit@agent-kit`.
+- Hardened against hostile repositories: manifest paths are limited to what agent-kit manages, `.agent-kit` and state files must be real and small, parsing is bounded, and terminal control characters are escaped. See `SECURITY.md`.
 - Requires Node.js 22.12 or later.
 
 ### Catalog

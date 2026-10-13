@@ -1,7 +1,8 @@
 import { constants } from "node:fs";
-import { copyFile, mkdir, rename, rm, rmdir, unlink, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, realpath, rename, rm, rmdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { MANIFEST_PATH } from "./manifest.js";
+import { isSafeRelativePath } from "./paths.js";
 import type { WriteOp } from "./plan-builder.js";
 import { readTargetFile, resolveIn } from "./target.js";
 
@@ -91,6 +92,7 @@ export async function applyWrites(
     if (input.manifest !== undefined) {
       step("manifest");
       const current = await readTargetFile(root, MANIFEST_PATH);
+      if (current.state === "unsafe") throw new TargetChangedError(MANIFEST_PATH);
       manifestEntry = {
         op: {
           destination: MANIFEST_PATH,
@@ -121,7 +123,9 @@ export async function applyWrites(
     if (entry.backup) await unlink(entry.backup).catch(() => undefined);
   }
   for (const dir of input.pruneDirs ?? []) {
-    await rmdir(resolveIn(root, dir)).catch(() => undefined);
+    if (await isContainedDirectory(root, dir)) {
+      await rmdir(resolveIn(root, dir)).catch(() => undefined);
+    }
   }
 }
 
@@ -147,9 +151,22 @@ export async function removeLeftovers(
   pid: number,
 ): Promise<void> {
   for (const destination of new Set(destinations)) {
+    if (!isSafeRelativePath(destination)) continue;
     const abs = resolveIn(root, destination);
     for (const ext of ["tmp", "bak"]) {
       await unlink(`${abs}.agent-kit-${pid}.${ext}`).catch(() => undefined);
     }
+  }
+}
+
+/** True when `dir` is a safe relative path whose real location is inside the target. */
+async function isContainedDirectory(root: string, dir: string): Promise<boolean> {
+  if (!isSafeRelativePath(dir)) return false;
+  try {
+    const realRoot = await realpath(root);
+    const relative = path.relative(realRoot, await realpath(resolveIn(root, dir)));
+    return relative !== "" && !relative.startsWith("..") && !path.isAbsolute(relative);
+  } catch {
+    return false;
   }
 }

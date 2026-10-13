@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Formats-checks and lints the files staged for commit. Run by .githooks/pre-commit.
+// Formats-checks and lints the files staged for commit. File names follow `--`, so a staged
+// file named like an option (`--config=x.mjs`) cannot change how the tools run. Run by .githooks/pre-commit.
 import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -40,10 +41,10 @@ const run = (pkg, args) => {
   return result.status ?? 1;
 };
 
-let failed = run("prettier", ["--check", "--ignore-unknown", ...staged]) !== 0;
+let failed = run("prettier", ["--check", "--ignore-unknown", "--", ...staged]) !== 0;
 const lintable = staged.filter((f) => /\.(c|m)?[jt]s$/.test(f));
 if (lintable.length > 0) {
-  failed = run("eslint", ["--no-warn-ignored", ...lintable]) !== 0 || failed;
+  failed = run("eslint", ["--no-warn-ignored", "--", ...lintable]) !== 0 || failed;
 }
 
 if (failed) {
