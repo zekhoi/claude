@@ -58,7 +58,7 @@ Stops managing items and leaves their files exactly as they are, edited or not. 
 
 ### `doctor`
 
-Read-only checks: malformed or missing managed blocks, a missing `CLAUDE.md` import, frontmatter that would keep Claude Code from recognizing an installed skill or agent, other project skills or agents that reuse an installed `kit-` name, local edits and missing files, leftover temporary files from interrupted runs, held locks, items no longer in the catalog, and items also installed globally. Exits `1` when it finds an error; warnings alone exit `0`. Detection is limited to this target's `.claude/` directory and does not cover user-level or plugin skills.
+Read-only checks: malformed or missing managed blocks, a missing `CLAUDE.md` import, frontmatter that would keep Claude Code from recognizing an installed skill or agent, other project skills or agents that reuse an installed `kit-` name, local edits and missing files, leftover temporary files from interrupted runs, held locks, items no longer in the catalog, and items also installed globally or by an enclosing project installation (for example a monorepo root above a package; the scan stops at the git root and does not look into other packages). Exits `1` when it finds an error; warnings alone exit `0`. Detection is limited to this target's `.claude/` directory and does not cover user-level or plugin skills.
 
 ### `uninstall`
 
@@ -134,34 +134,34 @@ With `--json`, stdout contains one object and nothing else; prompts are disabled
 
 ## Diagnostic codes
 
-| Code                      | Meaning                                                                                                       |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `UNSUPPORTED_RUNTIME`     | Node.js is older than the supported minimum.                                                                  |
-| `UNSUPPORTED_SCHEMA`      | A manifest or registry was written by a newer version. Nothing is changed.                                    |
-| `MANIFEST_INVALID`        | `.agent-kit/manifest.json` is unreadable. Restore it from version control.                                    |
-| `TARGET_INVALID`          | The target directory does not exist or is not a directory.                                                    |
-| `SCOPE_MISMATCH`          | The command's scope (`--global` or not) does not match the installation it found.                             |
-| `SCOPE_OVERLAP`           | An item is installed both in this project and globally; the warning explains which copy each agent uses.      |
-| `INPUT_REQUIRED`          | A choice is needed, for example `--preset` in a noninteractive run.                                           |
-| `UNKNOWN_ITEM`            | The item or preset is not in the bundled catalog.                                                             |
-| `NOT_INSTALLED`           | The item, or Agent Kit itself, is not installed in this target.                                               |
-| `LOCK_HELD`               | Another Agent Kit command is running, or left a lock behind.                                                  |
-| `LOCAL_EDIT_CONFLICT`     | A managed file or block was edited.                                                                           |
-| `MISSING_FILE`            | A managed file was deleted.                                                                                   |
-| `UNMANAGED_FILE_CONFLICT` | A file Agent Kit does not manage occupies a destination.                                                      |
-| `MALFORMED_BLOCK`         | `agent-kit` markers are missing, repeated, or out of order.                                                   |
-| `UNSAFE_PATH`             | A destination is a symlink, not a regular file, not UTF-8, or reached through a directory outside the target. |
-| `OUTDATED_ITEM`           | An item must be updated before a shared block can change.                                                     |
-| `MAJOR_UPDATE`            | A major update needs `--allow-major`.                                                                         |
-| `UPDATE_AVAILABLE`        | A newer version of an installed item is bundled.                                                              |
-| `ITEM_RETIRED`            | An installed item is no longer in the catalog.                                                                |
-| `TARGET_CHANGED`          | A file changed while the command ran; everything was rolled back.                                             |
-| `WRITE_FAILED`            | Writing failed; everything was rolled back.                                                                   |
-| `IMPORT_MISSING`          | `CLAUDE.md` no longer imports `AGENTS.md`.                                                                    |
-| `NAME_COLLISION`          | Another project skill or agent declares an installed `kit-` name.                                             |
-| `INVALID_FRONTMATTER`     | Frontmatter that Claude Code needs is missing or wrong.                                                       |
-| `CONTEXT_MISSING`         | The referenced project context file is missing.                                                               |
-| `LEFTOVER_FILE`           | A temporary file from an interrupted run remains.                                                             |
-| `CHECKSUM_MISMATCH`       | A bundled file does not match its checksum. Reinstall the CLI.                                                |
+| Code                      | Meaning                                                                                                                                                           |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `UNSUPPORTED_RUNTIME`     | Node.js is older than the supported minimum.                                                                                                                      |
+| `UNSUPPORTED_SCHEMA`      | A manifest or registry was written by a newer version. Nothing is changed.                                                                                        |
+| `MANIFEST_INVALID`        | `.agent-kit/manifest.json` is unreadable. Restore it from version control.                                                                                        |
+| `TARGET_INVALID`          | The target directory does not exist or is not a directory.                                                                                                        |
+| `SCOPE_MISMATCH`          | The command's scope (`--global` or not) does not match the installation it found.                                                                                 |
+| `SCOPE_OVERLAP`           | An item is also installed globally or by an enclosing project (such as a monorepo root); the warning explains which copy an agent uses, where that is documented. |
+| `INPUT_REQUIRED`          | A choice is needed, for example `--preset` in a noninteractive run.                                                                                               |
+| `UNKNOWN_ITEM`            | The item or preset is not in the bundled catalog.                                                                                                                 |
+| `NOT_INSTALLED`           | The item, or Agent Kit itself, is not installed in this target.                                                                                                   |
+| `LOCK_HELD`               | Another Agent Kit command is running, or left a lock behind.                                                                                                      |
+| `LOCAL_EDIT_CONFLICT`     | A managed file or block was edited.                                                                                                                               |
+| `MISSING_FILE`            | A managed file was deleted.                                                                                                                                       |
+| `UNMANAGED_FILE_CONFLICT` | A file Agent Kit does not manage occupies a destination.                                                                                                          |
+| `MALFORMED_BLOCK`         | `agent-kit` markers are missing, repeated, or out of order.                                                                                                       |
+| `UNSAFE_PATH`             | A destination is a symlink, not a regular file, not UTF-8, or reached through a directory outside the target.                                                     |
+| `OUTDATED_ITEM`           | An item must be updated before a shared block can change.                                                                                                         |
+| `MAJOR_UPDATE`            | A major update needs `--allow-major`.                                                                                                                             |
+| `UPDATE_AVAILABLE`        | A newer version of an installed item is bundled.                                                                                                                  |
+| `ITEM_RETIRED`            | An installed item is no longer in the catalog.                                                                                                                    |
+| `TARGET_CHANGED`          | A file changed while the command ran; everything was rolled back.                                                                                                 |
+| `WRITE_FAILED`            | Writing failed; everything was rolled back.                                                                                                                       |
+| `IMPORT_MISSING`          | `CLAUDE.md` no longer imports `AGENTS.md`.                                                                                                                        |
+| `NAME_COLLISION`          | Another project skill or agent declares an installed `kit-` name.                                                                                                 |
+| `INVALID_FRONTMATTER`     | Frontmatter that Claude Code needs is missing or wrong.                                                                                                           |
+| `CONTEXT_MISSING`         | The referenced project context file is missing.                                                                                                                   |
+| `LEFTOVER_FILE`           | A temporary file from an interrupted run remains.                                                                                                                 |
+| `CHECKSUM_MISMATCH`       | A bundled file does not match its checksum. Reinstall the CLI.                                                                                                    |
 
 Registry validation codes (`SCHEMA_INVALID`, `DUPLICATE_ID`, `ID_TYPE_MISMATCH`, `MISSING_SOURCE`, `INVALID_ENCODING`, `DESTINATION_NOT_ALLOWED`, `DESTINATION_COLLISION`, `UNSUPPORTED_DEPENDENCIES`, `UNKNOWN_PRESET_ITEM`, `PLACEHOLDER`, `BROKEN_REFERENCE`, `TRIGGER_UNCLEAR`) are reported when building the catalog and are covered in [contributing.md](contributing.md).

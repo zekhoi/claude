@@ -181,3 +181,40 @@ describe("doctor and overlapping scopes", () => {
     expect((await global(home, ["doctor"])).code).toBe(0);
   });
 });
+
+describe("doctor in a monorepo", () => {
+  it("warns about items also installed at the repository root, up to the git root only", async () => {
+    const home = await tempDir();
+    const outer = await tempDir();
+    const repo = path.join(outer, "repo");
+    const pkg = path.join(repo, "packages/api");
+    const { mkdir } = await import("node:fs/promises");
+    await mkdir(path.join(repo, ".git"), { recursive: true });
+    await mkdir(pkg, { recursive: true });
+    // An installation above the git root belongs to another repository and is ignored.
+    await kit(outer, ["add", "skill/refactoring"], homeEnv(home));
+    await kit(repo, ["init", "--preset", "base"], homeEnv(home));
+    await kit(
+      pkg,
+      ["add", "skill/code-review", "skill/debugging", "skill/refactoring"],
+      homeEnv(home),
+    );
+
+    const run = await kit(pkg, ["doctor", "--json"], homeEnv(home));
+    expect(run.code).toBe(0);
+    const overlap = (
+      JSON.parse(run.stdout).diagnostics as { code: string; message: string; action: string }[]
+    ).filter((d) => d.code === "SCOPE_OVERLAP");
+    expect(overlap.map((d) => d.message.split(" ")[0])).toEqual([
+      "skill/code-review",
+      "skill/debugging",
+    ]);
+    expect(overlap[0]!.message).toContain("enclosing project ../..");
+    expect(overlap[0]!.action).toContain("agent-kit remove skill/code-review --cwd ../..");
+
+    // The root installation does not scan into packages.
+    expect(
+      JSON.parse((await kit(repo, ["doctor", "--json"], homeEnv(home))).stdout).diagnostics,
+    ).toEqual([]);
+  });
+});
