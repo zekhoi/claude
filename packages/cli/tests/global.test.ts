@@ -144,3 +144,40 @@ describe("global installation", () => {
     expect(sameDir.code, sameDir.stderr).toBe(0);
   });
 });
+
+describe("doctor and overlapping scopes", () => {
+  it("warns about items installed both in a project and globally", async () => {
+    const home = await tempDir();
+    await global(home, ["init", "--preset", "base"]);
+    const project = await tempDir();
+    await kit(project, ["init", "--preset", "base"], homeEnv(home));
+    await kit(project, ["add", "agent/reviewer"], homeEnv(home));
+    await global(home, ["add", "agent/reviewer"]);
+
+    const run = await kit(project, ["doctor", "--json"], homeEnv(home));
+    expect(run.code).toBe(0);
+    const diagnostics = JSON.parse(run.stdout).diagnostics as {
+      code: string;
+      message: string;
+      action: string;
+    }[];
+    const overlap = diagnostics.filter((d) => d.code === "SCOPE_OVERLAP");
+    const byId = (id: string) => overlap.find((d) => d.message.startsWith(id))!;
+    expect(byId("skill/code-review").message).toContain("uses the global copy");
+    expect(byId("agent/reviewer").message).toContain("uses this project's copy");
+    expect(byId("rule/testing").message).toContain("apply twice");
+    expect(byId("guideline/engineering").action).toContain(
+      "agent-kit remove guideline/engineering --global",
+    );
+  });
+
+  it("reports nothing when the scopes do not overlap", async () => {
+    const home = await tempDir();
+    await global(home, ["add", "skill/database-design"]);
+    const project = await tempDir();
+    await kit(project, ["init", "--preset", "base"], homeEnv(home));
+    const run = await kit(project, ["doctor", "--json"], homeEnv(home));
+    expect(JSON.parse(run.stdout).diagnostics).toEqual([]);
+    expect((await global(home, ["doctor"])).code).toBe(0);
+  });
+});

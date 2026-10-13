@@ -37,6 +37,7 @@ export const DIAGNOSTIC_CODES = [
   "BROKEN_REFERENCE",
   "TRIGGER_UNCLEAR",
   "SCOPE_MISMATCH",
+  "SCOPE_OVERLAP",
 ] as const;
 
 export type DiagnosticCode = (typeof DIAGNOSTIC_CODES)[number];
