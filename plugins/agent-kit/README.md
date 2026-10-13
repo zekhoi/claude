@@ -13,7 +13,7 @@ This plugin is generated from the [agent-kit](https://github.com/zekhoi/claude) 
 
 ## Contents
 
-Skills: `agent-kit:engineering-guidelines`, `agent-kit:python-rules`, `agent-kit:testing-rules`, `agent-kit:typescript-rules`, `agent-kit:code-review`, `agent-kit:commit`, `agent-kit:database-design`, `agent-kit:debugging`, `agent-kit:feature-implementation`, `agent-kit:pull-request`, `agent-kit:security-audit`.
+Skills: `agent-kit:engineering-guidelines`, `agent-kit:python-rules`, `agent-kit:testing-rules`, `agent-kit:typescript-rules`, `agent-kit:code-review`, `agent-kit:commit`, `agent-kit:database-design`, `agent-kit:debugging`, `agent-kit:documentation`, `agent-kit:feature-implementation`, `agent-kit:pull-request`, `agent-kit:refactoring`, `agent-kit:security-audit`, `agent-kit:test-writing`.
 
 Subagents: `agent-kit:debugger`, `agent-kit:reviewer`.
 

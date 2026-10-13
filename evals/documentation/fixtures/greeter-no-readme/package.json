@@ -1,0 +1,15 @@
+{
+  "name": "greeter",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "greeter": "src/cli.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

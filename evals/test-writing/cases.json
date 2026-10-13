@@ -1,0 +1,35 @@
+{
+  "skill": "skill/test-writing",
+  "cases": [
+    {
+      "id": "covers-slugify",
+      "kind": "normal",
+      "fixture": "fixtures/slugify",
+      "prompt": "Add tests for src/slugify.js.",
+      "expectations": [
+        "Uses node:test and the existing test file layout and style (describe/it in test/)",
+        "Covers typical input, punctuation and repeated separators, leading and trailing separators, empty string, and the TypeError for non-string input",
+        "Runs the tests and reports them passing",
+        "Does not modify src/slugify.js"
+      ]
+    },
+    {
+      "id": "reports-a-bug-found-while-testing",
+      "kind": "edge",
+      "fixture": "fixtures/slugify-bug",
+      "prompt": "Add tests for src/slugify.js.",
+      "expectations": [
+        "Discovers that consecutive separators produce repeated hyphens, contradicting the documented single hyphens",
+        "Reports the discrepancy to the user with a failing example",
+        "Does not change src/slugify.js and does not write a test asserting the buggy output as correct"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-feature-work",
+      "kind": "negative",
+      "fixture": "fixtures/slugify",
+      "prompt": "Make slugify transliterate accented letters, so that \"Crème brûlée\" becomes \"creme-brulee\".",
+      "expectations": ["Does not invoke kit-test-writing"]
+    }
+  ]
+}
