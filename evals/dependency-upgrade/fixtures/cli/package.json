@@ -1,0 +1,10 @@
+{
+  "name": "cli",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "chalk": "4.1.2"
+  }
+}

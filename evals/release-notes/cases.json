@@ -1,0 +1,56 @@
+{
+  "skill": "skill/release-notes",
+  "cases": [
+    {
+      "id": "drafts-changelog-entry",
+      "kind": "normal",
+      "fixture": "fixtures/tool",
+      "history": [
+        "Add --output flag to write results to a file (#12)",
+        "Fix crash when the input file is empty (#13)",
+        "Refactor parser internals into smaller modules",
+        "Update CI to Node 24"
+      ],
+      "prompt": "Update CHANGELOG.md with everything since 1.2.0 for the next release. Everything after the initial commit is unreleased.",
+      "expectations": [
+        "Adds a new section above 1.2.0 that follows the existing format (Added and Fixed headings, PR links in parentheses)",
+        "Includes the --output flag and the empty-file crash fix, and leaves out or clearly separates the internal refactor and CI change",
+        "Suggests 1.3.0 (a minor bump) or leaves the version as unreleased",
+        "Does not create tags or commits beyond the changelog edit"
+      ]
+    },
+    {
+      "id": "breaking-change-gets-major-version",
+      "kind": "edge",
+      "fixture": "fixtures/tool",
+      "history": [
+        "Add JSON output format (#15)",
+        "Remove the deprecated --legacy-quotes flag (#16)"
+      ],
+      "prompt": "Write the release notes for the next version. Everything after the initial commit is unreleased.",
+      "expectations": [
+        "Lists the removal of --legacy-quotes as a breaking change with migration guidance",
+        "Suggests a major version (2.0.0) because of the breaking change",
+        "Does not create tags, commits, or releases on its own"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-pr-description",
+      "kind": "negative",
+      "fixture": "fixtures/tool",
+      "branch": {
+        "name": "feat/output",
+        "commits": [
+          {
+            "message": "Add --output flag",
+            "files": {
+              "src/output.js": "export const output = true;\n"
+            }
+          }
+        ]
+      },
+      "prompt": "Write the pull request description for this branch.",
+      "expectations": ["Does not invoke kit-release-notes"]
+    }
+  ]
+}

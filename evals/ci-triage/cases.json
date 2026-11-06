@@ -1,0 +1,34 @@
+{
+  "skill": "skill/ci-triage",
+  "cases": [
+    {
+      "id": "fixes-code-defect",
+      "kind": "normal",
+      "fixture": "fixtures/defect",
+      "prompt": "CI is failing on main. The GitHub Actions log is in ci-log.txt.",
+      "expectations": [
+        "Reads the log and identifies the failing assertion in applyDiscount (0 !== 900)",
+        "Classifies it as a code defect, reproduces it locally with node --test, and fixes the divisor (percent / 100)",
+        "Runs the tests successfully after the fix and reports the classification and evidence"
+      ]
+    },
+    {
+      "id": "classifies-flaky-network-test",
+      "kind": "edge",
+      "fixture": "fixtures/flaky",
+      "prompt": "The test job keeps failing randomly on main. Logs from two runs of the same commit are in ci-log.txt. Fix it.",
+      "expectations": [
+        "Classifies the failure as flaky or environment-dependent: the live network test timed out on one run and passed on a rerun of the same commit",
+        "Fixes the nondeterminism by stubbing fetch, or moving the live test out of the default suite, instead of only raising the timeout or adding retries",
+        "Keeps the stubbed test passing"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-local-bug",
+      "kind": "negative",
+      "fixture": "fixtures/defect",
+      "prompt": "applyDiscount(1000, 10) returns 0 on my machine instead of 900. Fix it.",
+      "expectations": ["Does not invoke kit-ci-triage"]
+    }
+  ]
+}

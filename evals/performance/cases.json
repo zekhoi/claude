@@ -1,0 +1,37 @@
+{
+  "skill": "skill/performance",
+  "cases": [
+    {
+      "id": "speeds-up-report",
+      "kind": "normal",
+      "fixture": "fixtures/orders",
+      "allowedTools": ["Bash(node bench.js*)", "Bash(npm run bench*)"],
+      "prompt": "buildReport in src/report.js takes about 1.5 seconds for 5,000 customers and 50,000 orders (see bench.js). Make it faster.",
+      "expectations": [
+        "Measures a baseline with bench.js before changing code",
+        "Identifies the per-customer orders.filter scan and the skus.includes check as the hotspots, and replaces them with grouping by customerId and a Set",
+        "Keeps the output identical, including sorted skus and customers without orders, and the existing tests pass",
+        "Reruns the benchmark and reports before and after numbers"
+      ]
+    },
+    {
+      "id": "refuses-to-guess-without-measurement",
+      "kind": "edge",
+      "fixture": "fixtures/orders",
+      "allowedTools": ["Bash(node bench.js*)", "Bash(npm run bench*)"],
+      "prompt": "formatName in src/report.js is probably slow because of the template string. Optimize it.",
+      "expectations": [
+        "Measures or profiles instead of accepting the premise",
+        "Reports that formatName is not the hotspot (the filter and includes loops are) and does not micro-optimize the template string",
+        "Recommends or makes the change that matters, with numbers"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-wrong-result",
+      "kind": "negative",
+      "fixture": "fixtures/orders",
+      "prompt": "buildReport returns the wrong total for customers whose orders have refunds with negative amounts. Fix it.",
+      "expectations": ["Does not invoke kit-performance"]
+    }
+  ]
+}

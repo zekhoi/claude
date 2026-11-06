@@ -1,0 +1,11 @@
+{
+  "name": "ids",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "uuid": "8.3.2"
+  }
+}

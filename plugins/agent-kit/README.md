@@ -13,7 +13,7 @@ This plugin is generated from the [agent-kit](https://github.com/zekhoi/claude) 
 
 ## Contents
 
-Skills: `agent-kit:engineering-guidelines`, `agent-kit:go-rules`, `agent-kit:python-rules`, `agent-kit:testing-rules`, `agent-kit:typescript-rules`, `agent-kit:code-review`, `agent-kit:commit`, `agent-kit:database-design`, `agent-kit:debugging`, `agent-kit:documentation`, `agent-kit:drizzle-review`, `agent-kit:fastapi-api`, `agent-kit:fastify-api`, `agent-kit:feature-implementation`, `agent-kit:go-http-api`, `agent-kit:go-review`, `agent-kit:go-sql-review`, `agent-kit:kysely-review`, `agent-kit:prisma-review`, `agent-kit:pull-request`, `agent-kit:react-component`, `agent-kit:refactoring`, `agent-kit:security-audit`, `agent-kit:sqlalchemy-review`, `agent-kit:test-writing`.
+Skills: `agent-kit:engineering-guidelines`, `agent-kit:go-rules`, `agent-kit:python-rules`, `agent-kit:testing-rules`, `agent-kit:typescript-rules`, `agent-kit:ci-triage`, `agent-kit:code-review`, `agent-kit:commit`, `agent-kit:database-design`, `agent-kit:debugging`, `agent-kit:dependency-upgrade`, `agent-kit:documentation`, `agent-kit:drizzle-review`, `agent-kit:fastapi-api`, `agent-kit:fastify-api`, `agent-kit:feature-implementation`, `agent-kit:go-http-api`, `agent-kit:go-review`, `agent-kit:go-sql-review`, `agent-kit:kysely-review`, `agent-kit:performance`, `agent-kit:prisma-review`, `agent-kit:pull-request`, `agent-kit:react-component`, `agent-kit:refactoring`, `agent-kit:release-notes`, `agent-kit:security-audit`, `agent-kit:sqlalchemy-review`, `agent-kit:test-writing`.
 
 Subagents: `agent-kit:debugger`, `agent-kit:reviewer`.
 
