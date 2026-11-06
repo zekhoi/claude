@@ -14,6 +14,16 @@
       ]
     },
     {
+      "id": "fixes-failing-tests-unnamed",
+      "kind": "normal",
+      "fixture": "../debugging/fixtures/off-by-one",
+      "prompt": "The pagination tests are failing. Please fix it.",
+      "expectations": [
+        "Fixes the off-by-one in paginate.js at its root cause, with a regression test or existing failing tests that cover it, and the tests pass",
+        "Record whether the work was delegated to kit-debugger or done by the main agent (with or without kit-debugging); either is acceptable"
+      ]
+    },
+    {
       "id": "cannot-reproduce",
       "kind": "edge",
       "fixture": "../debugging/fixtures/paginate-correct",
