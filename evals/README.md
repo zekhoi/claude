@@ -69,6 +69,12 @@ Subagents are evaluated the same way, in directories named `agent-<id>` whose `c
 
 Each case runs in a fresh git repository containing the fixture, with what a user of the skill would install: the `base` preset plus every preset that contains the skill (or the skill alone if no preset does). `--all-skills` installs the whole catalog instead, which is the worst case for skill selection. Sessions load only the project's configuration. Judging the expectations remains a review step: read the summaries and record the outcome.
 
+## Trigger check
+
+`node evals/check-triggers.mjs` runs the cases listed in `triggers.json` once each and checks only whether the skill or subagent was picked: no negative case may pick its item, and at least `minTriggered` of the other cases must. It prints a table and exits non-zero on a problem. Options: `--jobs <n>` (default 4) and `--out <dir>`. The baseline on 2026-11-06 (Claude Code 2.1.319, Sonnet) was 17 of 17 picked and no negative case triggered; the minimum of 14 leaves room for run-to-run variation.
+
+The `Trigger check` workflow (`.github/workflows/trigger-check.yml`) runs it every Monday and on manual dispatch, with the latest Claude Code or a version given at dispatch. It needs an `ANTHROPIC_API_KEY` repository secret and skips without one; a run costs about $2. Update `triggers.json` and its baseline when cases or skills change.
+
 ## Result records
 
 Each run is a Markdown file under `results/` recording:
