@@ -194,7 +194,8 @@ describe("security re-check: residual findings", () => {
     const root = await writeTree(files);
     const start = Date.now();
     await workspacePackages(root);
-    expect(Date.now() - start).toBeLessThan(5000);
+    // Catastrophic backtracking takes minutes; 15 s leaves room for loaded CI and laptops.
+    expect(Date.now() - start).toBeLessThan(15_000);
   }, 60_000);
 
   it("escapes bidirectional text controls", async () => {
