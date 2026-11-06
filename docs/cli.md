@@ -37,7 +37,7 @@ Installs one or more presets for one or more coding agents: `--agent claude` (th
 | `python`   | `base` plus Python rules and the `fastapi-api` and `sqlalchemy-review` skills                                                                                                |
 | `go`       | `base` plus Go rules and the `go-http-api`, `go-sql-review`, and `go-review` skills                                                                                          |
 | `quality`  | Add-on: `refactoring`, `test-writing`, `documentation`, `performance`, `dependency-upgrade`, `release-notes`, and `ci-triage` skills                                         |
-| `review`   | Add-on: `security-audit` skill and the read-only `reviewer` subagent                                                                                                         |
+| `review`   | Add-on: `security-audit`, `design-review`, and `overengineering-review` skills and the read-only `reviewer` and `architect` subagents                                        |
 | `security` | Add-on: `security-audit`, `threat-model`, `attack-surface`, `vuln-poc`, `hardening`, `incident-response`, and `detection-rules` skills and the read-only `reviewer` subagent |
 | `infra`    | Add-on: `terraform`, `kubernetes`, `dockerfile`, `ci-pipeline`, `observability`, and `hardening` skills and the read-only `infra` subagent                                   |
 
