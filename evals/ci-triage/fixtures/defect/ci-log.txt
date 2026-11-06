@@ -1,0 +1,14 @@
+2026-11-05T10:12:01.112Z ##[group]Run npm test
+2026-11-05T10:12:01.540Z > pricing@ test
+2026-11-05T10:12:01.540Z > node --test
+2026-11-05T10:12:02.031Z ✔ keeps the amount without a discount (0.41ms)
+2026-11-05T10:12:02.033Z ✖ applies a percentage discount (1.02ms)
+2026-11-05T10:12:02.033Z   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+2026-11-05T10:12:02.033Z
+2026-11-05T10:12:02.033Z   0 !== 900
+2026-11-05T10:12:02.033Z
+2026-11-05T10:12:02.033Z       at TestContext.<anonymous> (file:///home/runner/work/pricing/pricing/test/price.test.js:7:10)
+2026-11-05T10:12:02.040Z ℹ tests 2
+2026-11-05T10:12:02.040Z ℹ pass 1
+2026-11-05T10:12:02.040Z ℹ fail 1
+2026-11-05T10:12:02.051Z ##[error]Process completed with exit code 1.

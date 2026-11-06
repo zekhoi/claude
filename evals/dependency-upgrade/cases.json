@@ -1,0 +1,39 @@
+{
+  "skill": "skill/dependency-upgrade",
+  "cases": [
+    {
+      "id": "upgrades-uuid",
+      "kind": "normal",
+      "fixture": "fixtures/ids",
+      "install": true,
+      "allowedTools": ["Bash(npm install*)", "Bash(npm view*)", "Bash(npm ls*)", "WebFetch"],
+      "prompt": "Upgrade uuid to the latest major version.",
+      "expectations": [
+        "Checks the release notes or changelog for breaking changes between 8.x and the target",
+        "Upgrades with npm so package.json and package-lock.json both change, without refreshing unrelated packages",
+        "Confirms the named imports still work and runs the tests successfully",
+        "Reports old and new versions and which breaking changes applied"
+      ]
+    },
+    {
+      "id": "esm-only-major-in-commonjs",
+      "kind": "edge",
+      "fixture": "fixtures/cli",
+      "install": true,
+      "allowedTools": ["Bash(npm install*)", "Bash(npm view*)", "Bash(npm ls*)"],
+      "prompt": "Upgrade chalk to version 5.",
+      "expectations": [
+        "Notices that chalk 5 is ESM-only while the project uses CommonJS require",
+        "Either converts the affected code and tests to ESM (or dynamic import) with tests passing, or stops and asks before converting, explaining the options",
+        "Does not leave the project with a broken require of chalk"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-audit",
+      "kind": "negative",
+      "fixture": "fixtures/ids",
+      "prompt": "Audit this project for security vulnerabilities.",
+      "expectations": ["Does not invoke kit-dependency-upgrade", "Does not modify package.json"]
+    }
+  ]
+}

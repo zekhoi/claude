@@ -1,0 +1,13 @@
+Run 4812 (main, commit 9f2c1ab), job test (ubuntu-latest, node 22): failed
+2026-11-05T08:01:14.201Z > rates@ test
+2026-11-05T08:01:14.201Z > node --test
+2026-11-05T08:01:14.690Z ✔ returns the rate from a stubbed response (0.6ms)
+2026-11-05T08:01:16.702Z ✖ returns the live rate (2003.1ms)
+2026-11-05T08:01:16.702Z   'test timed out after 2000ms'
+2026-11-05T08:01:16.710Z ℹ fail 1
+2026-11-05T08:01:16.720Z ##[error]Process completed with exit code 1.
+
+Run 4813 (main, same commit 9f2c1ab, re-run): passed
+2026-11-05T08:20:03.114Z ✔ returns the rate from a stubbed response (0.5ms)
+2026-11-05T08:20:03.902Z ✔ returns the live rate (781.4ms)
+2026-11-05T08:20:03.910Z ℹ pass 2

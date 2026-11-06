@@ -379,6 +379,62 @@
           "destination": ".claude/skills/kit-go-review/SKILL.md"
         }
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/performance",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Measure-first performance work: baseline, profile, fix the hotspot, and re-measure",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/performance/SKILL.md",
+          "destination": ".claude/skills/kit-performance/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/dependency-upgrade",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Upgrade dependencies with changelog review, lockfile updates, code adaptation, and verification",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/dependency-upgrade/SKILL.md",
+          "destination": ".claude/skills/kit-dependency-upgrade/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/release-notes",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Release notes and changelog entries from commits since the previous release; never tags or publishes",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/release-notes/SKILL.md",
+          "destination": ".claude/skills/kit-release-notes/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/ci-triage",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Diagnose failing CI runs from logs: code defect, flaky test, environment, or infrastructure",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/ci-triage/SKILL.md",
+          "destination": ".claude/skills/kit-ci-triage/SKILL.md"
+        }
+      ]
     }
   ]
 }
