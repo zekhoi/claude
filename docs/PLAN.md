@@ -164,7 +164,7 @@ Source metadata never contains checksums. The build computes a `sha256` for each
 
 `dependencies` is reserved for future use. The initial release requires it to be empty, because the initial catalog consists of independent Markdown items; dependency resolution, cycle detection, and dependent-blocking removal are deferred until an item genuinely needs another. The adapter validates the destination paths declared by registry items against a fixed allowlist. A future adapter may supply its own mapping; the initial registry destinations are Claude-specific.
 
-Presets reference collections of items instead of duplicating content. Initial presets: `base`, `node`, and `python`. `init` installs `base`; users can explicitly select additional presets.
+Presets reference collections of items instead of duplicating content. Initial presets: `base`, `node`, and `python`; `go` was added later. `init` installs `base`; users can explicitly select additional presets.
 
 ## 7. Initial catalog
 
@@ -226,7 +226,7 @@ Do not modify code unless requested.
 Avoid generic advice and unsupported assumptions.
 ```
 
-Candidate custom skills: database migrations and merge request review. Shipped since the initial catalog: commit, pull and merge requests (`pull-request`), security audit, Kysely query review, Fastify API implementation, the Python FastAPI and SQLAlchemy skills, and the TypeScript Prisma, Drizzle, and React skills. Add them incrementally as their workflows and evaluations become reliable.
+Candidate custom skills: database migrations and merge request review. Shipped since the initial catalog: commit, pull and merge requests (`pull-request`), security audit, Kysely query review, Fastify API implementation, the Python FastAPI and SQLAlchemy skills, the TypeScript Prisma, Drizzle, and React skills, and the Go HTTP API, SQL review, and review skills. Add them incrementally as their workflows and evaluations become reliable.
 
 Anthropic's `skill-creator` can optionally assist with drafting and evaluation. It is an authoring aid, not a required runtime dependency or an automatically bundled third-party skill.
 
@@ -472,6 +472,7 @@ Keep the default installation small. Presets reference existing registry items; 
 | `base` | Core engineering guidelines, code-review, debugging, feature-implementation, and testing rules |
 | `node` | `base` plus TypeScript rules and the evaluated Fastify, Kysely, Prisma, Drizzle, and React skills (React with a recorded triggering caveat) |
 | `python` | `base` plus Python rules and the FastAPI and SQLAlchemy skills |
+| `go` | `base` plus Go rules and the evaluated Go HTTP API, Go SQL review, and Go review skills |
 
 Database-design and specialist agents remain optional items initially. Do not list planned skills as installable until their content and evaluations are ready. Support explicit selection through `init --preset <name>`, repeated `--preset` flags, and `add preset/<name>`; default to `base`. Detecting stack files may suggest presets but must not silently install them.
 

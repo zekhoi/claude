@@ -66,17 +66,17 @@
       ]
     },
     "rule/testing": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "files": [
         {
           "destination": ".claude/rules/agent-kit/testing.md",
           "install": "file",
-          "sha256": "a04f16e127b4304f6a88e5ed1225e09b3ad700c91f7b17b16260e7c001761e26"
+          "sha256": "15f7f0b08062657f794fb9ce03be157854af793980037a8a56504c3a051fdf54"
         },
         {
           "destination": ".agents/skills/kit-testing-rules/SKILL.md",
           "install": "file",
-          "sha256": "f88e798843b6cf79fb2e782191a5978ab672f83c17847628f0c39529a57e7a35"
+          "sha256": "3153657d6a44643f161b9ef4850f9fa0dd15930b60374b6a6c65779c048d83d3"
         }
       ]
     },

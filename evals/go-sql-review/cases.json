@@ -1,0 +1,37 @@
+{
+  "skill": "skill/go-sql-review",
+  "cases": [
+    {
+      "id": "finds-planted-defects",
+      "kind": "normal",
+      "fixture": "fixtures/shop",
+      "prompt": "/kit-go-sql-review Review store/orders.go.",
+      "expectations": [
+        "Reports that CancelOrders' UPDATE has no WHERE and cancels every tenant's orders",
+        "Reports SQL injection through fmt.Sprintf with sortColumn and suggests an allowlist",
+        "Reports that ListOrders never closes rows or checks rows.Err",
+        "Reports that PlaceOrder inserts items through s.db instead of tx and has no deferred Rollback, so an error leaves the transaction open",
+        "Reports the N+1 query in ItemCounts and that CustomerNickname scans a nullable column into a string (and ideally the missing tenant filter)",
+        "Gives severity and file:line for each finding and does not modify files"
+      ]
+    },
+    {
+      "id": "clean-queries-triggered-naturally",
+      "kind": "edge",
+      "fixture": "fixtures/reports",
+      "prompt": "Review the database code in store/reports.go.",
+      "expectations": [
+        "Invokes kit-go-sql-review without being named",
+        "Reports no significant defects instead of inventing problems, noting what was checked (rows.Close and rows.Err, deferred Rollback, ErrNoRows, NullString, tenant filters)",
+        "Does not modify files"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-migrations",
+      "kind": "negative",
+      "fixture": "fixtures/shop",
+      "prompt": "Write a SQL migration file that adds a shipped_at column to the orders table.",
+      "expectations": ["Does not invoke kit-go-sql-review"]
+    }
+  ]
+}

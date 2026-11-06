@@ -1,0 +1,36 @@
+{
+  "skill": "skill/go-http-api",
+  "cases": [
+    {
+      "id": "adds-deactivate-endpoint",
+      "kind": "normal",
+      "fixture": "fixtures/users-api",
+      "allowedTools": ["Bash(go test*)", "Bash(go vet*)", "Bash(go build*)"],
+      "prompt": "Add a POST /users/{id}/deactivate endpoint that marks the user inactive and returns the updated user.",
+      "expectations": [
+        "Registers the route on the existing ServeMux with the POST method and reuses the existing JSON helpers",
+        "Returns the userResponse shape so PasswordHash is never encoded, 400 for an invalid id, and 404 for an unknown user",
+        "Adds table-driven httptest cases for success, 400, and 404, and runs go test successfully"
+      ]
+    },
+    {
+      "id": "flags-missing-authentication",
+      "kind": "edge",
+      "fixture": "fixtures/users-api",
+      "allowedTools": ["Bash(go test*)", "Bash(go vet*)", "Bash(go build*)"],
+      "prompt": "Add a GET /users/me endpoint that returns the current user's profile.",
+      "expectations": [
+        "Notices that the service has no authentication, so there is no current user",
+        "Asks how the current user should be identified, or implements an explicit, clearly stated assumption in middleware instead of exposing data silently",
+        "Does not break the existing GET /users/{id} route or its tests"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-explanation",
+      "kind": "negative",
+      "fixture": "fixtures/users-api",
+      "prompt": "Explain how the routing pattern \"GET /users/{id}\" works in server.go.",
+      "expectations": ["Does not invoke kit-go-http-api", "Does not modify files"]
+    }
+  ]
+}
