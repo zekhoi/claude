@@ -11,7 +11,7 @@ Report findings without modifying code unless the user asks for fixes.
 
 - Identify the workspace tool and list the packages, modules, or crates with their manifests (`package.json`, `go.mod`, `pyproject.toml`, `Cargo.toml`).
 - For each package, record its declared internal and external dependencies, and its actual imports of other workspace packages (search for package names, module paths, and relative paths that leave the package directory).
-- Use tool graphs when available (`pnpm ls -r --depth 0`, `nx graph --file`, `go list -deps`, `uv tree`, `cargo tree`), and confirm by reading code.
+- Use tool graphs when available (`pnpm ls -r --depth 0`, `nx graph --file=graph.json`, `go list -deps`, `uv tree`, `cargo tree`), and confirm by reading code.
 
 ## 2. Check
 
@@ -24,7 +24,7 @@ Report findings without modifying code unless the user asks for fixes.
 
 ## 3. Verify and report
 
-Confirm each finding by reading the import and the manifests; run the repo's dependency or boundary checks when available (`nx lint` with module boundaries, `pnpm -r why`, `go vet`, `cargo tree -d`). Report findings ordered by severity (critical, high, medium, low) with `file:line`, the problem, why it matters (build order, hoisting breakage, release coupling), and a fix. If there are no findings, say so and list what was checked.
+Confirm each finding by reading the import and the manifests; run the repo's dependency or boundary checks when available (`nx lint` with module boundaries, `pnpm -r why`, `go build ./...` in each module (cross-module `internal` imports fail to compile), `cargo tree -d`). Report findings ordered by severity (critical, high, medium, low) with `file:line`, the problem, why it matters (build order, hoisting breakage, release coupling), and a fix. If there are no findings, say so and list what was checked.
 
 ## Examples
 

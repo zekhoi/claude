@@ -16,7 +16,7 @@ description: Add a new package, module, or crate to a monorepo workspace, or ext
 - Register it: make sure the workspace globs cover it, add `go.work use ./path`, add it to uv or Cargo members, add TypeScript project references, and add it to task pipelines only where the repo lists packages explicitly.
 - When extracting, move the code with its tests, expose a deliberate public API (`exports`, `__init__.py`, exported identifiers, `pub` items), replace old imports in every consumer with the new package name, and declare the new dependency in each consumer's manifest. Leave no copies behind and do not create import cycles.
 - Move files with `git mv` (or copy, verify, then delete) after reading them; never overwrite a file you have not read.
-- Refresh the lockfile with the workspace tool (`pnpm install`, `uv lock`, `go work sync`, `cargo check`). Never hand-edit a lockfile; if the command cannot run, say so and leave the refresh to the user.
+- Refresh the lockfile with the workspace tool (`pnpm install`, `uv lock`, `cargo check`; for Go, `go work use ./path` and `go mod tidy` in the new module). Never hand-edit a lockfile; if the command cannot run, say so and leave the refresh to the user.
 
 ## 3. Verify
 

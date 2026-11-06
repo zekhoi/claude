@@ -19,7 +19,14 @@
       "id": "uv-workspace-member",
       "kind": "edge",
       "fixture": "fixtures/uvws",
-      "allowedTools": ["Bash(uv run*)", "Bash(uv lock*)", "Bash(uv sync*)", "Bash(uv tree*)"],
+      "allowedTools": [
+        "Bash(uv run*)",
+        "Bash(uv lock*)",
+        "Bash(uv sync*)",
+        "Bash(uv tree*)",
+        "Bash(git mv*)",
+        "Bash(git rm*)"
+      ],
       "prompt": "Move app/text.py into a new uv workspace member package acme-text, like packages/core, and use it from the app.",
       "expectations": [
         "Creates packages/text with a pyproject.toml and src/acme_text layout matching packages/core",

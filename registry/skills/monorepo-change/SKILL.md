@@ -8,18 +8,18 @@ description: Make a change in a monorepo or multi-module workspace (pnpm, npm, o
 ## 1. Map the workspace
 
 - Identify the tool and its configuration: `pnpm-workspace.yaml`, `workspaces` in `package.json`, `turbo.json`, `nx.json`, `go.work`, `[tool.uv.workspace]` in `pyproject.toml`, or `[workspace]` in `Cargo.toml`. Read root and package scripts and project instructions for the documented commands.
-- Find the package that owns the code to change and the packages that depend on it: `pnpm why`/`pnpm ls --filter ...<pkg>`, `nx graph` or `nx show projects --affected`, `turbo run <task> --filter=...<pkg> --dry`, `go list -deps`/`go work edit -json`, `uv tree`, `cargo tree -i <crate>`, or a search for imports of the package name.
+- Find the package that owns the code to change and the packages that depend on it: `pnpm why`/`pnpm ls --filter ...<pkg>`, `nx graph` or `nx show projects --affected`, `turbo run <task> --filter=...<pkg> --dry`, a search for imports of the module path in the other `go.work` modules, `uv tree --invert --package <pkg>`, `cargo tree -i <crate>`, or a search for imports of the package name.
 
 ## 2. Change within boundaries
 
 - Change the owning package and import other packages only through their public entry points (`exports`, the module path, the published crate API), never by reaching into another package's `src` or internal directories.
-- Declare every new cross-package dependency in the consuming package's manifest using the workspace protocol the repo uses (`workspace:*`, a path or workspace dependency in `pyproject.toml` or `Cargo.toml`, `go.work` `use` plus a `require` in `go.mod`), then refresh the lockfile with the tool (`pnpm install`, `npm install`, `uv lock`, `cargo update -p`, `go work sync`); never hand-edit lockfiles.
+- Declare every new cross-package dependency in the consuming package's manifest using the workspace protocol the repo uses (`workspace:*`, a path or workspace dependency in `pyproject.toml` or `Cargo.toml`; in a Go workspace the `go.work` `use` entry is enough, and a `require` with a real version or `replace` is only needed for builds outside the workspace), then refresh the lockfile with the tool (`pnpm install`, `npm install`, `uv lock`, `cargo check`); never hand-edit lockfiles.
 - When a change alters a package's public API, update all dependents in the same change or keep the old API working, and say which packages were affected.
 - Put a dependency in the package that uses it, not the workspace root, unless the repo keeps shared dev tooling at the root.
 
 ## 3. Verify what is affected
 
-- Run the build, type check, and tests for the owning package and its dependents with the workspace tool: `pnpm --filter <pkg>... run test`, `turbo run test --filter=...[origin/main]`, `nx affected -t test`, `go test ./...` in each affected module or `go test example.com/mod/...`, `uv run --package <member> pytest`, `cargo test -p <crate>`.
+- Run the build, type check, and tests for the owning package and its dependents with the workspace tool: `pnpm --filter ...<pkg> run test` (the package and its dependents), `turbo run test --filter=...[origin/main]`, `nx affected -t test`, `go test ./...` in each affected module or `go test example.com/mod/...`, `uv run --package <member> pytest`, `cargo test -p <crate>`.
 - Use the repository's own scripts when they exist; package-level commands sometimes only work from the root script. If shared configuration, the lockfile, or a widely used package changed, run the full workspace checks.
 
 ## 4. Report
