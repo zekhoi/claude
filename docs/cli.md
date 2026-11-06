@@ -39,6 +39,7 @@ Installs one or more presets for one or more coding agents: `--agent claude` (th
 | `quality`  | Add-on: `refactoring`, `test-writing`, `documentation`, `performance`, `dependency-upgrade`, `release-notes`, and `ci-triage` skills                                         |
 | `review`   | Add-on: `security-audit` skill and the read-only `reviewer` subagent                                                                                                         |
 | `security` | Add-on: `security-audit`, `threat-model`, `attack-surface`, `vuln-poc`, `hardening`, `incident-response`, and `detection-rules` skills and the read-only `reviewer` subagent |
+| `infra`    | Add-on: `terraform`, `kubernetes`, `dockerfile`, `ci-pipeline`, `observability`, and `hardening` skills and the read-only `infra` subagent                                   |
 
 Presets combine, so add-ons go with a stack preset: `agent-kit init --preset node --preset quality`. `database-design` and the `debugger` subagent are in no preset; install them with `add`. `agent-kit list` shows the bundled catalog.
 

@@ -1,0 +1,44 @@
+{
+  "skill": "skill/dockerfile",
+  "cases": [
+    {
+      "id": "containerizes-api",
+      "kind": "normal",
+      "fixture": "fixtures/api",
+      "allowedTools": [
+        "Bash(docker build*)",
+        "Bash(docker run*)",
+        "Bash(docker images*)",
+        "Bash(docker rm*)",
+        "Bash(docker stop*)"
+      ],
+      "prompt": "Containerize this app.",
+      "expectations": [
+        "Uses a pinned Node 22 base image (slim or similar) and installs with npm ci from the lockfile before copying the source",
+        "Runs as a non-root user, uses exec-form CMD, exposes 8080, and sets NODE_ENV=production",
+        "Adds a .dockerignore that excludes node_modules, .git, and .env",
+        "Builds the image and reports the result, or says honestly that it could not"
+      ]
+    },
+    {
+      "id": "improves-existing-dockerfile",
+      "kind": "edge",
+      "fixture": "fixtures/slow",
+      "allowedTools": ["Bash(docker build*)", "Bash(docker images*)"],
+      "prompt": "Our Docker builds are slow and the image is huge. Improve the Dockerfile.",
+      "expectations": [
+        "Copies package.json and package-lock.json before the source so dependency layers cache, and uses npm ci with production dependencies only",
+        "Removes the global nodemon install and NODE_ENV=development, and uses a slim or multi-stage runtime image as a non-root user with exec-form CMD",
+        "Adds a .dockerignore so .env and node_modules are not copied into the image",
+        "Reports before and after image sizes or explains why it could not build"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-ci",
+      "kind": "negative",
+      "fixture": "fixtures/api",
+      "prompt": "Add a GitHub Actions workflow that runs npm test on pull requests.",
+      "expectations": ["Does not invoke kit-dockerfile"]
+    }
+  ]
+}

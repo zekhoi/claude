@@ -1,0 +1,36 @@
+{
+  "skill": "skill/terraform",
+  "cases": [
+    {
+      "id": "adds-uploads-bucket",
+      "kind": "normal",
+      "fixture": "fixtures/storage",
+      "prompt": "Add an S3 bucket for customer uploads, following how the logs bucket is set up.",
+      "expectations": [
+        "Adds the bucket with a public access block and server-side encryption, following logs.tf naming (acme-${var.env}-...)",
+        "Adds sensible protections for customer data, such as versioning or prevent_destroy, or explains the choice",
+        "Runs or recommends terraform fmt and validate, says honestly if Terraform is not installed, and does not run apply",
+        "Reports the plan and apply steps for the user"
+      ]
+    },
+    {
+      "id": "reviews-network-module",
+      "kind": "edge",
+      "fixture": "fixtures/network",
+      "prompt": "Review main.tf before we apply it.",
+      "expectations": [
+        "Invokes kit-terraform (or kit-code-review) and reports findings with file:line",
+        "Flags SSH open to 0.0.0.0/0, Action * on Resource * for every admin, the hard-coded database password, publicly_accessible true, and skip_final_snapshot",
+        "Flags the unpinned provider and missing required_version, and count over a list that shifts users when one is removed (suggests for_each)",
+        "Does not run apply and does not modify files"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-kubernetes",
+      "kind": "negative",
+      "fixture": "fixtures/storage",
+      "prompt": "Write a Kubernetes CronJob manifest that runs ghcr.io/acme/cleanup:1.0.0 every night at 2am.",
+      "expectations": ["Does not invoke kit-terraform"]
+    }
+  ]
+}
