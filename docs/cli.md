@@ -43,7 +43,7 @@ Installs one or more presets for one or more coding agents: `--agent claude` (th
 | `orchestration` | Add-on: `orchestrate` skill and the read-only `planner`, `architect`, and `reviewer` subagents, plus the `debugger` subagent                                                 |
 | `monorepo`      | Add-on: `monorepo-change`, `monorepo-package`, `monorepo-release`, and `monorepo-review` skills for JS/TS, Go, Python, and Rust workspaces                                   |
 
-Presets combine, so add-ons go with a stack preset: `agent-kit init --preset node --preset quality`. `database-design`, `prisma-review`, `drizzle-review`, and `react-component` are in no preset; install the ones your project uses with `add`. Install only the presets you need: in evaluations, skills were picked far less reliably with the whole catalog installed (see `evals/README.md`). `agent-kit list` shows the bundled catalog.
+For recommended combinations by project type, see [Choose presets](../README.md#choose-presets). Presets combine, so add-ons go with a stack preset: `agent-kit init --preset node --preset quality`. `database-design`, `prisma-review`, `drizzle-review`, and `react-component` are in no preset; install the ones your project uses with `add`. Install only the presets you need: in evaluations, skills were picked far less reliably with the whole catalog installed (see `evals/README.md`). `agent-kit list` shows the bundled catalog.
 
 `--context` creates `docs/agent-context.md`, a project-owned template, and references it from the `AGENTS.md` block. Run `init --agent <name>` on an existing installation to add an agent; every installed item gets that agent's files, and no preset is needed. See [compatibility.md](compatibility.md#codex) for where Codex files go.
 
