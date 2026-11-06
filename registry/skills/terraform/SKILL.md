@@ -5,7 +5,7 @@ description: Write, change, or review Terraform or OpenTofu configuration follow
 
 # Terraform
 
-Never run `terraform apply`, `destroy`, `import`, `state` subcommands that modify state, or `taint`. Applying is a deployment and needs the user's explicit instruction; leave it to them.
+Run only `terraform fmt`, `terraform init -backend=false` (with `-lockfile=readonly` when reviewing), `terraform validate`, and `terraform plan` with the user's consent. Never run anything else that touches state or remote systems, such as `apply`, `destroy`, `import`, `refresh`, `state` or `workspace` changes, `taint`, `untaint`, `force-unlock`, or `init -migrate-state`. Applying is a deployment and needs the user's explicit instruction; leave it to them.
 
 ## 1. Learn the layout
 
@@ -14,10 +14,10 @@ Never run `terraform apply`, `destroy`, `import`, `state` subcommands that modif
 
 ## 2. Write or review
 
-- Pin `required_version` and providers with `~>` constraints, and commit `.terraform.lock.hcl`.
+- Pin `required_version` and providers with `~>` constraints, and commit `.terraform.lock.hcl` in root modules (shared modules do not use one).
 - Use variables with types, descriptions, and `validation` blocks for inputs; mark secrets `sensitive = true` and never hard-code credentials or secret values.
 - Security defaults: storage not public (block public access on buckets), encryption at rest, least-privilege IAM (no `*` actions or resources without a stated reason), security groups without `0.0.0.0/0` on admin ports, logging enabled where the platform supports it.
-- Protect stateful resources with `prevent_destroy` or deletion protection where losing them would be costly. Watch for changes that force replacement (renames, changed immutable arguments) and use `moved` blocks when refactoring addresses.
+- Protect stateful resources with provider-side deletion protection and `prevent_destroy` where losing them would be costly; `prevent_destroy` does not help once the resource block is removed. Watch for changes that force replacement (renames, changed immutable arguments) and use `moved` blocks when refactoring addresses.
 - Use `for_each` over `count` for collections keyed by name, so removing one item does not shift the others.
 
 ## 3. Verify

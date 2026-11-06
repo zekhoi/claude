@@ -15,13 +15,13 @@ Find the runtime and version, package manager and lockfile, build command, start
 - **Multi-stage:** install dependencies and build in a builder stage; copy only the build output and production dependencies into the runtime stage.
 - **Caching:** copy the manifest and lockfile first, install with the lockfile (`npm ci`, `pnpm install --frozen-lockfile`, `uv sync --frozen`, `go mod download`), then copy the source. Use BuildKit cache mounts if the project already does.
 - **Security:** run as a non-root `USER`; never copy `.env`, credentials, or `.git` into the image or pass secrets as `ARG` or `ENV` (use BuildKit `--secret`); no package manager caches left in the final image.
-- **Runtime:** exec-form `CMD` or `ENTRYPOINT` so signals reach the process, `EXPOSE` the port, a `HEALTHCHECK` if the platform uses it, and production settings such as `NODE_ENV=production`.
+- **Runtime:** exec-form `CMD` or `ENTRYPOINT` so signals reach the process, `EXPOSE` the port, a `HEALTHCHECK` if the platform uses it (distroless images have no shell or curl, so use the app binary or skip it), and production settings such as `NODE_ENV=production`.
 - **.dockerignore:** exclude `node_modules`, `.venv`, build output, `.git`, `.env*`, and test artifacts.
 - **Compose:** pinned images, named volumes for data, health-checked `depends_on`, and no secrets inline.
 
 ## 3. Verify
 
-Build the image (`docker build .`) and, when possible, run it briefly to confirm it starts and answers on its port, then stop it. Report the image size. If Docker is unavailable, say so instead of claiming the build works.
+Build the image (`docker build .`) and, when possible, run it briefly to confirm it starts and answers on its port, then stop it. Report the image size. Never tag and push images to a registry unless the user asks. If Docker is unavailable, say so instead of claiming the build works.
 
 ## 4. Report
 

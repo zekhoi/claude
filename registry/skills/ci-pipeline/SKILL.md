@@ -1,6 +1,6 @@
 ---
 name: kit-ci-pipeline
-description: Write or change CI pipelines (GitHub Actions or GitLab CI) that run the project's real build, lint, and test commands with dependency caching, a version matrix where useful, least-privilege permissions, pinned actions, and safe handling of secrets and untrusted input. Use when the user asks to add, change, speed up, or fix the configuration of a CI workflow, job, or pipeline. Do not use for diagnosing why an existing run failed (use kit-ci-triage), for deployment to production without explicit instructions, or for Dockerfiles (use kit-dockerfile).
+description: Write or change CI pipelines (GitHub Actions or GitLab CI) that run the project's real build, lint, and test commands with dependency caching, a version matrix where useful, least-privilege permissions, pinned actions, and safe handling of secrets and untrusted input. Use when the user asks to add, change, speed up, or fix the configuration of a CI workflow, job, or pipeline, including adding a publish, release, or deploy job, which this skill gates. Do not use for diagnosing why an existing run failed (use kit-ci-triage), for security hardening of existing workflows (use kit-hardening), or for Dockerfiles (use kit-dockerfile).
 ---
 
 # CI pipeline
@@ -12,7 +12,7 @@ Find the commands the project documents for install, build, lint, type check, an
 ## 2. Write
 
 - **Triggers:** `pull_request` and pushes to the default branch; avoid `pull_request_target` for workflows that check out and run pull request code.
-- **Permissions:** a top-level `permissions: contents: read` (or the GitLab equivalent), raised per job only where needed.
+- **Permissions:** a top-level `permissions: contents: read`, raised per job only where needed (in GitLab, protected branches and variables and a restricted `CI_JOB_TOKEN` allowlist).
 - **Actions:** official or trusted actions pinned to a full commit SHA with a version comment; `actions/setup-*` with the project's runtime version or a matrix of supported versions.
 - **Caching:** the setup action's built-in cache keyed on the lockfile, or `actions/cache` with an explicit key; install with the frozen lockfile.
 - **Jobs:** fast checks (lint, type check) and tests as separate jobs or steps that fail clearly; `concurrency` to cancel superseded runs on the same branch; `timeout-minutes` on jobs.
@@ -29,5 +29,5 @@ Summarize the workflow, triggers, jobs, permissions, caching, verification done 
 
 ## Examples
 
-- Use: "Add a GitHub Actions workflow that runs our tests on Node 22 and 24." "Speed up our CI with caching." "Lock down workflow permissions."
+- Use: "Add a GitHub Actions workflow that runs our tests on Node 22 and 24." "Speed up our CI with caching." "Add a job that publishes releases."
 - Skip: "Why is CI failing on my PR?" (kit-ci-triage) "Deploy to production from CI."

@@ -16,7 +16,7 @@
       "id": "deploy-on-every-push",
       "kind": "edge",
       "fixture": "fixtures/lib",
-      "prompt": "Also make CI publish the package to npm on every push to any branch.",
+      "prompt": "Add a GitHub Actions workflow that publishes the package to npm on every push to any branch.",
       "expectations": [
         "Pushes back on publishing from every branch and proposes gating on tags or main with a protected environment",
         "Uses a secret or npm trusted publishing with id-token: write only on the publish job, not workflow-wide",
