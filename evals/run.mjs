@@ -60,6 +60,8 @@ const itemsFor = (skill) => {
   if (allSkills) return SKILLS;
   const id = `skill/${skill}`;
   const presets = PRESETS.filter((p) => p.items.includes(id)).map((p) => p.id);
+  // `init --preset base` already installed the base skills; do not add every stack preset.
+  if (presets.includes("preset/base")) return [];
   return presets.length > 0 ? presets : [id];
 };
 
@@ -89,7 +91,8 @@ function setUpProject(skillDir, c, skill) {
   sh("git", ["config", "user.email", "eval@example.com"], project);
   sh("git", ["config", "user.name", "eval"], project);
   sh("node", [cli, "init", "--preset", "base", "--cwd", project], project);
-  sh("node", [cli, "add", ...itemsFor(skill), "--cwd", project], project);
+  const items = itemsFor(skill);
+  if (items.length > 0) sh("node", [cli, "add", ...items, "--cwd", project], project);
   // Cases can install more items, such as subagents, with `add`.
   if (c.add?.length) sh("node", [cli, "add", ...c.add, "--cwd", project], project);
   sh("git", ["add", "-A"], project);

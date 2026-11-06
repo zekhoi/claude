@@ -81,10 +81,10 @@ Rerun the affected cases whenever a skill's instructions or supporting files cha
 
 ## Triggering and catalog size
 
-How many skills are installed matters more than how their descriptions are worded. On 2026-11-06, with Claude Code 2.1.318 and Sonnet:
+In these runs, the number of installed skills had a much larger effect on whether a skill was picked than shortening its description. Measured on 2026-11-06 with Claude Code 2.1.318 and Sonnet, two runs per case, with the summaries kept outside the repository:
 
-- 13 trigger-sensitive cases triggered their skill in 21 of 26 runs when only that skill and the `base` preset were installed, and in about 7 of 26 runs with all 42 catalog skills installed.
-- 30 trigger-sensitive cases triggered in 32 of 60 runs with the presets a user of each skill would install, against 16 of 60 with the whole catalog. The cases that still did not trigger were mostly refusals the model handled without a skill (external scans, remote exploits, live firewall changes), plus `feature-implementation`, `orchestrate`, and `monorepo-change`.
-- An A/B run of 30 cases with all skills installed showed no benefit from descriptions shortened to about 250 characters (13 of 60 runs) over the full descriptions (16 of 60 runs).
+- 13 trigger-sensitive cases triggered their skill in 21 of 26 runs with only that skill and the `base` preset installed, and in 7 of 26 runs with all 42 catalog skills installed.
+- 29 trigger-sensitive cases (cases that name the skill with a slash command are excluded) triggered in 35 of 58 runs with the presets a user of each skill would install, and in 16 of 58 runs with the whole catalog. The cases that still did not trigger were mostly refusals the model handled without a skill (external scans, remote exploits, live firewall changes), plus `orchestrate` and `monorepo-change`.
+- With the whole catalog installed, descriptions shortened to about 250 characters did not improve triggering (13 of 58 runs against 16 of 58).
 
-Keep presets small and install only the presets a project needs. Results recorded before this date installed the whole catalog, so their triggering notes describe the worst case.
+Keep presets small and install only the presets a project needs. Results recorded before this change (pull request #31) installed the whole catalog, so their triggering notes describe the worst case. By default each case now runs without the more specific skills that might compete with it; use `--all-skills`, or list competitors in `add`, to test deferral between skills. Skills in two add-on presets (`security-audit`, `hardening`) install both.
