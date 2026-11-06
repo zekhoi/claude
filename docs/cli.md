@@ -36,7 +36,7 @@ Installs one or more presets for one or more coding agents: `--agent claude` (th
 | `node`    | `base` plus TypeScript rules and the `kysely-review`, `prisma-review`, `drizzle-review`, `fastify-api`, and `react-component` skills |
 | `python`  | `base` plus Python rules and the `fastapi-api` and `sqlalchemy-review` skills                                                        |
 | `go`      | `base` plus Go rules and the `go-http-api`, `go-sql-review`, and `go-review` skills                                                  |
-| `quality` | Add-on: `refactoring`, `test-writing`, and `documentation` skills                                                                    |
+| `quality` | Add-on: `refactoring`, `test-writing`, `documentation`, `performance`, `dependency-upgrade`, `release-notes`, and `ci-triage` skills |
 | `review`  | Add-on: `security-audit` skill and the read-only `reviewer` subagent                                                                 |
 
 Presets combine, so add-ons go with a stack preset: `agent-kit init --preset node --preset quality`. `database-design` and the `debugger` subagent are in no preset; install them with `add`. `agent-kit list` shows the bundled catalog.

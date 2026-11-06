@@ -6,6 +6,7 @@ All notable changes to the CLI and its bundled catalog. Item versions are listed
 
 ### Catalog
 
+- New skills in the `quality` add-on: `skill/performance`, `skill/dependency-upgrade`, `skill/release-notes`, and `skill/ci-triage` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet). In evaluation `dependency-upgrade` could not read upstream changelogs without network approval and said so.
 - New `go` preset: `base` plus `rule/go` and the `skill/go-http-api`, `skill/go-sql-review`, and `skill/go-review` skills (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet). In evaluation `go-http-api` was not invoked automatically for a plain "add an endpoint" request, though its behavior expectations passed.
 - `rule/testing` 1.1.0: also applies to Go `*_test.go` and Python `test_*.py` and `*_test.py` files.
 - New TypeScript skills in the `node` preset: `skill/prisma-review`, `skill/drizzle-review`, and `skill/react-component` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet); see `evals/*/results/`. In evaluation the React skill was applied, but it was not invoked automatically for a plain "add a search box" request.
