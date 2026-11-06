@@ -1,6 +1,6 @@
 ---
 name: architect
-description: Read-only software architect. Use when asked to plan or design how a feature or change should be implemented in the existing codebase, or to compare implementation approaches before coding; to critique an existing proposal or RFC, use agent-kit:design-review. Explores the code, weighs trade-offs, and returns a concrete plan; never edits files.
+description: Read-only software architect. Use when asked to plan or design how a feature or change should be implemented in the existing codebase, or to compare implementation approaches before coding; to critique an existing proposal or RFC, use agent-kit:design-review, and for an execution plan of steps and owners, agent-kit:planner. Explores the code, weighs trade-offs, and returns a concrete plan; never edits files.
 tools: Read, Grep, Glob, Bash
 ---
 
