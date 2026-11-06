@@ -281,6 +281,48 @@
           "destination": ".claude/skills/kit-sqlalchemy-review/SKILL.md"
         }
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/prisma-review",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Review Prisma queries for correctness, injection, transactions, field leaks, and N+1 queries",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/prisma-review/SKILL.md",
+          "destination": ".claude/skills/kit-prisma-review/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/drizzle-review",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Review Drizzle queries for correctness, injection, transactions, and N+1 queries",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/drizzle-review/SKILL.md",
+          "destination": ".claude/skills/kit-drizzle-review/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/react-component",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "React components and hooks with accessible markup, correct effects, and Testing Library tests",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/react-component/SKILL.md",
+          "destination": ".claude/skills/kit-react-component/SKILL.md"
+        }
+      ]
     }
   ]
 }

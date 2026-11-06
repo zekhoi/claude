@@ -30,13 +30,13 @@ Prints an item's bundled files. With `--diff`, compares what the target holds (t
 
 Installs one or more presets for one or more coding agents: `--agent claude` (the default) and `--agent codex`. On an interactive terminal it asks which presets to install (default `base`); otherwise, including with `--json`, `--preset` is required. Running `init` again with additional presets installs only what is new.
 
-| Preset    | Contents                                                                                                                         |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `base`    | Engineering guidelines; `code-review`, `debugging`, `feature-implementation`, `commit`, and `pull-request` skills; testing rules |
-| `node`    | `base` plus TypeScript rules and the `kysely-review` and `fastify-api` skills                                                    |
-| `python`  | `base` plus Python rules and the `fastapi-api` and `sqlalchemy-review` skills                                                    |
-| `quality` | Add-on: `refactoring`, `test-writing`, and `documentation` skills                                                                |
-| `review`  | Add-on: `security-audit` skill and the read-only `reviewer` subagent                                                             |
+| Preset    | Contents                                                                                                                             |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `base`    | Engineering guidelines; `code-review`, `debugging`, `feature-implementation`, `commit`, and `pull-request` skills; testing rules     |
+| `node`    | `base` plus TypeScript rules and the `kysely-review`, `prisma-review`, `drizzle-review`, `fastify-api`, and `react-component` skills |
+| `python`  | `base` plus Python rules and the `fastapi-api` and `sqlalchemy-review` skills                                                        |
+| `quality` | Add-on: `refactoring`, `test-writing`, and `documentation` skills                                                                    |
+| `review`  | Add-on: `security-audit` skill and the read-only `reviewer` subagent                                                                 |
 
 Presets combine, so add-ons go with a stack preset: `agent-kit init --preset node --preset quality`. `database-design` and the `debugger` subagent are in no preset; install them with `add`. `agent-kit list` shows the bundled catalog.
 

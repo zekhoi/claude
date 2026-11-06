@@ -1,0 +1,37 @@
+{
+  "skill": "skill/prisma-review",
+  "cases": [
+    {
+      "id": "finds-planted-defects",
+      "kind": "normal",
+      "fixture": "fixtures/shop",
+      "prompt": "/kit-prisma-review Review src/orders.ts.",
+      "expectations": [
+        "Reports that cancelOrders' deleteMany({}) deletes every order (and ignores tenantId)",
+        "Reports SQL injection through sortColumn in $queryRawUnsafe and suggests an allowlist",
+        "Reports that placeOrder creates items through prisma instead of tx, outside the transaction",
+        "Reports the N+1 query in ordersWithItems and suggests include or an in filter",
+        "Reports the non-null assertion on findUnique and that customerProfile returns passwordHash",
+        "Gives severity and file:line for each finding and does not modify files"
+      ]
+    },
+    {
+      "id": "clean-queries-triggered-naturally",
+      "kind": "edge",
+      "fixture": "fixtures/reports",
+      "prompt": "Review the database queries in src/reports.ts.",
+      "expectations": [
+        "Invokes kit-prisma-review without being named",
+        "Reports no significant defects instead of inventing problems, noting what was checked (select lists, ordering, tenant filters, updateMany scoping)",
+        "Does not modify files"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-schema-change",
+      "kind": "negative",
+      "fixture": "fixtures/shop",
+      "prompt": "Add a shippedAt DateTime field to the Order model in prisma/schema.prisma.",
+      "expectations": ["Does not invoke kit-prisma-review"]
+    }
+  ]
+}

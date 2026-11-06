@@ -1,0 +1,37 @@
+{
+  "skill": "skill/react-component",
+  "cases": [
+    {
+      "id": "adds-search-filter",
+      "kind": "normal",
+      "fixture": "fixtures/users-ui",
+      "install": true,
+      "prompt": "Add a search box to UserList that filters users by name as you type.",
+      "expectations": [
+        "Adds a labelled text input (accessible name) and derives the filtered list during render instead of duplicating state",
+        "Shows an empty state when nothing matches",
+        "Adds Testing Library tests that type with user-event and query by role or label, and runs the tests successfully",
+        "Keeps the existing tests passing"
+      ]
+    },
+    {
+      "id": "fetching-component-needs-cleanup",
+      "kind": "edge",
+      "fixture": "fixtures/users-ui",
+      "install": true,
+      "prompt": "Add a UserDetails component that takes a userId prop and fetches /api/users/{userId} to show the user's name and email.",
+      "expectations": [
+        "Handles loading and error states",
+        "Cancels or ignores stale requests when userId changes or the component unmounts (AbortController or an ignore flag), with userId in the effect dependencies",
+        "Adds tests with fetch mocked, and runs them successfully"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-explanation",
+      "kind": "negative",
+      "fixture": "fixtures/users-ui",
+      "prompt": "Explain what the key prop does in src/components/UserList.jsx.",
+      "expectations": ["Does not invoke kit-react-component", "Does not modify files"]
+    }
+  ]
+}

@@ -226,7 +226,7 @@ Do not modify code unless requested.
 Avoid generic advice and unsupported assumptions.
 ```
 
-Candidate custom skills: database migrations and merge request review. Shipped since the initial catalog: commit, pull and merge requests (`pull-request`), security audit, Kysely query review, Fastify API implementation, and the Python FastAPI and SQLAlchemy skills. Add them incrementally as their workflows and evaluations become reliable.
+Candidate custom skills: database migrations and merge request review. Shipped since the initial catalog: commit, pull and merge requests (`pull-request`), security audit, Kysely query review, Fastify API implementation, the Python FastAPI and SQLAlchemy skills, and the TypeScript Prisma, Drizzle, and React skills. Add them incrementally as their workflows and evaluations become reliable.
 
 Anthropic's `skill-creator` can optionally assist with drafting and evaluation. It is an authoring aid, not a required runtime dependency or an automatically bundled third-party skill.
 
@@ -470,7 +470,7 @@ Keep the default installation small. Presets reference existing registry items; 
 | Preset | Initial contents |
 | --- | --- |
 | `base` | Core engineering guidelines, code-review, debugging, feature-implementation, and testing rules |
-| `node` | `base` plus TypeScript rules and the evaluated Fastify and Kysely skills |
+| `node` | `base` plus TypeScript rules and the evaluated Fastify, Kysely, Prisma, Drizzle, and React skills |
 | `python` | `base` plus Python rules and the FastAPI and SQLAlchemy skills |
 
 Database-design and specialist agents remain optional items initially. Do not list planned skills as installable until their content and evaluations are ready. Support explicit selection through `init --preset <name>`, repeated `--preset` flags, and `add preset/<name>`; default to `base`. Detecting stack files may suggest presets but must not silently install them.
