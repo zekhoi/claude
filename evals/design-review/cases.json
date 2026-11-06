@@ -1,0 +1,38 @@
+{
+  "skill": "skill/design-review",
+  "cases": [
+    {
+      "id": "reviews-queue-rfc",
+      "kind": "normal",
+      "fixture": "fixtures/queue",
+      "prompt": "Review the RFC in docs/rfc-email-queue.md.",
+      "expectations": [
+        "Starts with a recommendation (rethink or proceed with changes)",
+        "Points out that Kafka, a schema registry, a new Go microservice, and a generic event bus are far more than 300 signups a day need, and proposes a simpler alternative (a database-backed job queue, an existing managed queue, or a background job in the same service)",
+        "Flags the dual-write between the user row and the publish (lost or orphaned emails; suggests an outbox or transactional enqueue), immediate retries then dropping events, and monitoring being out of scope",
+        "Flags the all-at-once Friday rollout with no rollback, and does not modify files"
+      ]
+    },
+    {
+      "id": "reviews-cache-plan",
+      "kind": "edge",
+      "fixture": "fixtures/cache",
+      "prompt": "Is this caching plan in docs/plan-cache.md sound?",
+      "expectations": [
+        "Invokes kit-design-review without being named",
+        "Flags that a 24-hour TTL with prices changing several times a day serves stale prices, and that checkout reading the cache charges stale prices",
+        "Flags returning 503 when Redis is down instead of falling back to the pricing service, and proposes invalidation on price change or a short TTL"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-diff-review",
+      "kind": "negative",
+      "fixture": "fixtures/queue",
+      "changes": {
+        "src/signup.js": "export async function signup(db, mailer, input) {\n  const user = await db.users.insert({ email: input.email });\n  mailer.send(input.email, \"Welcome!\");\n  return user;\n}\n"
+      },
+      "prompt": "Review my uncommitted changes.",
+      "expectations": ["Does not invoke kit-design-review"]
+    }
+  ]
+}

@@ -1,6 +1,12 @@
 {
   "schemaVersion": 1,
   "id": "preset/review",
-  "description": "Add-on: security audits and an independent read-only reviewer subagent",
-  "items": ["skill/security-audit", "agent/reviewer"]
+  "description": "Add-on: security audits, design and over-engineering reviews, and the read-only reviewer and architect subagents",
+  "items": [
+    "skill/security-audit",
+    "agent/reviewer",
+    "skill/design-review",
+    "skill/overengineering-review",
+    "agent/architect"
+  ]
 }

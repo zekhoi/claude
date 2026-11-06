@@ -603,6 +603,48 @@
           "destination": ".claude/agents/kit-infra.md"
         }
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/design-review",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Review designs, plans, and RFCs for fit, simpler alternatives, failure modes, and rollout risk",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/design-review/SKILL.md",
+          "destination": ".claude/skills/kit-design-review/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/overengineering-review",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Find speculative abstractions, reinvented built-ins, and unneeded dependencies to delete",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/overengineering-review/SKILL.md",
+          "destination": ".claude/skills/kit-overengineering-review/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "agent/architect",
+      "version": "1.0.0",
+      "type": "agent",
+      "description": "Read-only architect subagent that plans changes and weighs trade-offs",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "agents/architect.md",
+          "destination": ".claude/agents/kit-architect.md"
+        }
+      ]
     }
   ]
 }
