@@ -673,6 +673,62 @@
           "destination": ".claude/agents/kit-planner.md"
         }
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/monorepo-change",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Workspace-aware changes: owning package, dependents, boundaries, lockfile, and affected tests",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/monorepo-change/SKILL.md",
+          "destination": ".claude/skills/kit-monorepo-change/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/monorepo-package",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Add or extract workspace packages matching existing layout and wiring",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/monorepo-package/SKILL.md",
+          "destination": ".claude/skills/kit-monorepo-package/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/monorepo-release",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Per-package versions, changesets, and changelogs without publishing",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/monorepo-release/SKILL.md",
+          "destination": ".claude/skills/kit-monorepo-release/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/monorepo-review",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Report boundary violations, undeclared dependencies, cycles, and version drift across packages",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/monorepo-review/SKILL.md",
+          "destination": ".claude/skills/kit-monorepo-review/SKILL.md"
+        }
+      ]
     }
   ]
 }

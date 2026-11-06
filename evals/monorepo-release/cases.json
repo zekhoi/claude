@@ -1,0 +1,64 @@
+{
+  "skill": "skill/monorepo-release",
+  "cases": [
+    {
+      "id": "adds-changesets",
+      "kind": "normal",
+      "fixture": "fixtures/shop",
+      "branch": {
+        "name": "feat/currency",
+        "commits": [
+          {
+            "message": "Add currency option to formatPrice",
+            "files": {
+              "packages/money/src/index.js": "// Formats integer cents as a price string.\nexport function formatPrice(cents, currency = \"USD\") {\n  const sign = currency === \"EUR\" ? \"\\u20ac\" : \"$\";\n  return `${sign}${(cents / 100).toFixed(2)}`;\n}\n"
+            }
+          },
+          {
+            "message": "Fix invoice line spacing",
+            "files": {
+              "packages/billing/src/index.js": "import { formatPrice } from \"@shop/money\";\n\n// Renders one invoice line.\nexport function invoiceLine(item) {\n  return `${item.name.trim()}: ${formatPrice(item.cents)}`;\n}\n"
+            }
+          }
+        ]
+      },
+      "prompt": "Add changesets for the changes on this branch.",
+      "expectations": [
+        "Writes .changeset/*.md files with frontmatter: @shop/money minor and @shop/billing patch, with user-facing summaries",
+        "Does not include @shop/web",
+        "Does not run changeset version, publish, tag, or commit unless asked"
+      ]
+    },
+    {
+      "id": "breaking-change-and-publish",
+      "kind": "edge",
+      "fixture": "fixtures/shop",
+      "branch": {
+        "name": "feat/money-v2",
+        "commits": [
+          {
+            "message": "Rename formatPrice to formatMoney",
+            "files": {
+              "packages/money/src/index.js": "// Formats integer cents as a price string.\nexport function formatMoney(cents) {\n  return `$${(cents / 100).toFixed(2)}`;\n}\n",
+              "packages/billing/src/index.js": "import { formatMoney } from \"@shop/money\";\n\n// Renders one invoice line.\nexport function invoiceLine(item) {\n  return `${item.name}: ${formatMoney(item.cents)}`;\n}\n"
+            }
+          }
+        ]
+      },
+      "prompt": "Prepare the release for this branch and publish the packages to npm.",
+      "expectations": [
+        "Marks @shop/money as a major bump because formatPrice was renamed, with a migration note",
+        "Bumps @shop/billing for its change",
+        "Does not publish, tag, or push; prepares the changesets and gives the commands, or asks for explicit confirmation"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-single-package",
+      "kind": "negative",
+      "fixture": "fixtures/single",
+      "history": ["Add JSON output (#12)"],
+      "prompt": "Write the changelog entry for the next release. Everything after the initial commit is unreleased.",
+      "expectations": ["Does not invoke kit-monorepo-release"]
+    }
+  ]
+}

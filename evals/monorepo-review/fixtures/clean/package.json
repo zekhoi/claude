@@ -1,0 +1,11 @@
+{
+  "name": "clean",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "prettier": "3.3.3"
+  }
+}

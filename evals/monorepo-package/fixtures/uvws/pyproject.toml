@@ -1,0 +1,14 @@
+[project]
+name = "acme"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["acme-core", "pytest==8.3.5"]
+
+[tool.uv.sources]
+acme-core = { workspace = true }
+
+[tool.uv.workspace]
+members = ["packages/core"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

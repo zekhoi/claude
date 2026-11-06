@@ -1,0 +1,45 @@
+{
+  "skill": "skill/monorepo-package",
+  "cases": [
+    {
+      "id": "extracts-slug-package",
+      "kind": "normal",
+      "fixture": "fixtures/shop",
+      "install": true,
+      "allowedTools": ["Bash(npm install*)", "Bash(npm ls*)", "Bash(npm run*)"],
+      "prompt": "Extract the slug helper from packages/web into a new shared package @shop/slug, and use it from web.",
+      "expectations": [
+        "Creates packages/slug matching the existing package layout (package.json fields, src/index.js, test/)",
+        "Moves the code and its test, leaving no copy in web, and web imports @shop/slug and declares it as a dependency",
+        "Refreshes the lockfile with npm install and runs the workspace tests successfully",
+        "Reports the new package's public API and wiring"
+      ]
+    },
+    {
+      "id": "uv-workspace-member",
+      "kind": "edge",
+      "fixture": "fixtures/uvws",
+      "allowedTools": [
+        "Bash(uv run*)",
+        "Bash(uv lock*)",
+        "Bash(uv sync*)",
+        "Bash(uv tree*)",
+        "Bash(git mv*)",
+        "Bash(git rm*)"
+      ],
+      "prompt": "Move app/text.py into a new uv workspace member package acme-text, like packages/core, and use it from the app.",
+      "expectations": [
+        "Creates packages/text with a pyproject.toml and src/acme_text layout matching packages/core",
+        "Adds the member to [tool.uv.workspace] members and as a workspace source and dependency of the root project",
+        "Updates app imports, moves or adds tests, refreshes uv.lock with uv, and pytest passes"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-bug-fix",
+      "kind": "negative",
+      "fixture": "fixtures/shop",
+      "prompt": "formatPrice in packages/money shows $-0.00 for -1 cent. Fix it.",
+      "expectations": ["Does not invoke kit-monorepo-package"]
+    }
+  ]
+}
