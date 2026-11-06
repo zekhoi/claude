@@ -2,7 +2,7 @@
 // Runs skill evaluation cases with Claude Code and saves one transcript summary per case.
 // Judging the expectations is a separate, human (or reviewing-agent) step; see README.md.
 //
-// Usage: node evals/run.mjs [--skill <id>] [--case <id>] [--model sonnet] [--budget 1] [--out <dir>]
+// Usage: node evals/run.mjs [--skill <id>] [--case <id>] [--model sonnet] [--budget 1] [--out <dir>] [--all-skills]
 // Requires a built CLI (`pnpm -r run build`) and an authenticated `claude` on PATH.
 import { execFileSync, spawn } from "node:child_process";
 import {
@@ -45,10 +45,23 @@ const ALLOWED_TOOLS = [
   "Bash(git status*)",
   "Bash(git log*)",
 ];
-// Every skill is installed in each case, so negative cases test real triggering.
+// By default each case installs what a user of the skill would: the base preset plus every preset
+// that contains the skill (or the skill alone if no preset does). `--all-skills` installs the whole
+// catalog instead, the worst case for skill selection.
+const allSkills = process.argv.includes("--all-skills");
 const SKILLS = JSON.parse(readFileSync(path.join(repo, "registry/index.json"), "utf8"))
   .items.filter((i) => i.type === "skill")
   .map((i) => i.id);
+const presetsDir = path.join(repo, "registry/presets");
+const PRESETS = readdirSync(presetsDir).map((f) =>
+  JSON.parse(readFileSync(path.join(presetsDir, f), "utf8")),
+);
+const itemsFor = (skill) => {
+  if (allSkills) return SKILLS;
+  const id = `skill/${skill}`;
+  const presets = PRESETS.filter((p) => p.items.includes(id)).map((p) => p.id);
+  return presets.length > 0 ? presets : [id];
+};
 
 const sh = (cmd, args, cwd) =>
   execFileSync(cmd, args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
@@ -58,7 +71,7 @@ const sh = (cmd, args, cwd) =>
  * then optional `history` commits, an optional `branch` with commits, and optional uncommitted
  * `changes` (`staged: true` stages them).
  */
-function setUpProject(skillDir, c) {
+function setUpProject(skillDir, c, skill) {
   const project = mkdtempSync(path.join(tmpdir(), "agent-kit-eval-project-"));
   if (c.fixture) cpSync(path.join(skillDir, c.fixture), project, { recursive: true });
   const write = (files) => {
@@ -76,7 +89,7 @@ function setUpProject(skillDir, c) {
   sh("git", ["config", "user.email", "eval@example.com"], project);
   sh("git", ["config", "user.name", "eval"], project);
   sh("node", [cli, "init", "--preset", "base", "--cwd", project], project);
-  sh("node", [cli, "add", ...SKILLS, "--cwd", project], project);
+  sh("node", [cli, "add", ...itemsFor(skill), "--cwd", project], project);
   // Cases can install more items, such as subagents, with `add`.
   if (c.add?.length) sh("node", [cli, "add", ...c.add, "--cwd", project], project);
   sh("git", ["add", "-A"], project);
@@ -179,7 +192,7 @@ for (const skill of readdirSync(evalsDir).sort()) {
   for (const c of cases) {
     if (onlyCase && onlyCase !== c.id) continue;
     process.stderr.write(`running ${skill}/${c.id} ...\n`);
-    const project = setUpProject(skillDir, c);
+    const project = setUpProject(skillDir, c, skill);
     const run = await runClaude(project, c.prompt, c.allowedTools);
     const summary = summarize(run.stdout);
     const changedFiles = sh("git", ["status", "--porcelain"], project)

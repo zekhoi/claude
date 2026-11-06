@@ -470,7 +470,7 @@ Keep the default installation small. Presets reference existing registry items; 
 | Preset | Initial contents |
 | --- | --- |
 | `base` | Core engineering guidelines, code-review, debugging, feature-implementation, and testing rules |
-| `node` | `base` plus TypeScript rules and the evaluated Fastify, Kysely, Prisma, Drizzle, and React skills (React with a recorded triggering caveat) |
+| `node` | `base` plus TypeScript rules and the evaluated Fastify and Kysely skills; the Prisma, Drizzle, and React skills are opt-in |
 | `python` | `base` plus Python rules and the FastAPI and SQLAlchemy skills |
 | `go` | `base` plus Go rules and the evaluated Go HTTP API (with a recorded triggering caveat), Go SQL review, and Go review skills |
 

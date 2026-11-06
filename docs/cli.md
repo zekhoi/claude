@@ -33,7 +33,7 @@ Installs one or more presets for one or more coding agents: `--agent claude` (th
 | Preset          | Contents                                                                                                                                                                     |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `base`          | Engineering guidelines; `code-review`, `debugging`, `feature-implementation`, `commit`, and `pull-request` skills; testing rules                                             |
-| `node`          | `base` plus TypeScript rules and the `kysely-review`, `prisma-review`, `drizzle-review`, `fastify-api`, and `react-component` skills                                         |
+| `node`          | `base` plus TypeScript rules and the `kysely-review` and `fastify-api` skills                                                                                                |
 | `python`        | `base` plus Python rules and the `fastapi-api` and `sqlalchemy-review` skills                                                                                                |
 | `go`            | `base` plus Go rules and the `go-http-api`, `go-sql-review`, and `go-review` skills                                                                                          |
 | `quality`       | Add-on: `refactoring`, `test-writing`, `documentation`, `performance`, `dependency-upgrade`, `release-notes`, and `ci-triage` skills                                         |
@@ -43,7 +43,7 @@ Installs one or more presets for one or more coding agents: `--agent claude` (th
 | `orchestration` | Add-on: `orchestrate` skill and the read-only `planner`, `architect`, and `reviewer` subagents, plus the `debugger` subagent                                                 |
 | `monorepo`      | Add-on: `monorepo-change`, `monorepo-package`, `monorepo-release`, and `monorepo-review` skills for JS/TS, Go, Python, and Rust workspaces                                   |
 
-Presets combine, so add-ons go with a stack preset: `agent-kit init --preset node --preset quality`. `database-design` is in no preset; install it with `add`. `agent-kit list` shows the bundled catalog.
+Presets combine, so add-ons go with a stack preset: `agent-kit init --preset node --preset quality`. `database-design`, `prisma-review`, `drizzle-review`, and `react-component` are in no preset; install the ones your project uses with `add`. Install only the presets you need: in evaluations, skills were picked far less reliably with the whole catalog installed (see `evals/README.md`). `agent-kit list` shows the bundled catalog.
 
 `--context` creates `docs/agent-context.md`, a project-owned template, and references it from the `AGENTS.md` block. Run `init --agent <name>` on an existing installation to add an agent; every installed item gets that agent's files, and no preset is needed. See [compatibility.md](compatibility.md#codex) for where Codex files go.
 
