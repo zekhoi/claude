@@ -13,7 +13,7 @@ description: Plan and run a multi-step engineering task by splitting it into ste
 ## 2. Plan
 
 - Use the skills and subagents your tools show as available, so steps are only assigned to what exists. As a fallback, look for kit items in the project or home directory: `.claude/skills/kit-*` and `.claude/agents/kit-*` (Claude Code), `.agents/skills/kit-*` and `.codex/agents/kit-*.toml` (Codex), or the plugin's `agent-kit:` names. Use kit-architect for design trade-offs and kit-planner, when installed, for a step plan of a large or unclear task.
-- Break the task into steps. For each, record: the goal, the owner (a kit skill, a kit subagent, or yourself), the files or area it touches, what it depends on, and how it is verified.
+- Break the task into steps. For each, record: the goal, the owner (a kit skill, a kit subagent, or yourself; prefer the matching kit skill, such as kit-feature-implementation, kit-test-writing, or kit-documentation, even when steps run in order), the files or area it touches, what it depends on, and how it is verified.
 - Group steps that can run in parallel: they must be independent and touch disjoint files, so their results apply cleanly. Steps that edit the same files, depend on each other's output, or change shared contracts (schemas, APIs, lockfiles) run in order.
 - In a Git repository, every parallel group that edits files runs one subagent per Git worktree created from the current commit. Use the shared working tree only for read-only subagents, a single delegated step, a directory that is not a Git repository, or a group whose files have uncommitted changes (see below).
 - Show the plan briefly before executing when it has more than three steps or any parallel group.

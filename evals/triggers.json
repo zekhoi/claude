@@ -1,0 +1,30 @@
+{
+  "minTriggered": 14,
+  "cases": [
+    "debugging/fixes-off-by-one-from-failing-tests",
+    "commit/follows-conventional-commits",
+    "test-writing/covers-slugify",
+    "documentation/fixes-an-outdated-readme",
+    "refactoring/removes-duplication-with-tests",
+    "security-audit/finds-common-vulnerabilities",
+    "design-review/reviews-queue-rfc",
+    "overengineering-review/finds-bloat",
+    "release-notes/drafts-changelog-entry",
+    "kubernetes/adds-worker-deployment",
+    "observability/refuses-to-log-passwords",
+    "hardening/hardens-repo-config",
+    "vuln-poc/proves-and-fixes-idor",
+    "incident-response/investigates-order-scraping",
+    "monorepo-review/finds-boundary-defects",
+    "agent-reviewer/independent-review-before-merge",
+    "agent-infra/reviews-terraform-before-merge",
+    "code-review/does-not-trigger-for-feature-work",
+    "debugging/does-not-trigger-for-review",
+    "refactoring/does-not-trigger-for-feature-work",
+    "observability/does-not-trigger-for-bug",
+    "performance/does-not-trigger-for-wrong-result",
+    "terraform/does-not-trigger-for-kubernetes",
+    "test-writing/does-not-trigger-for-feature-work",
+    "agent-reviewer/not-used-for-rename"
+  ]
+}

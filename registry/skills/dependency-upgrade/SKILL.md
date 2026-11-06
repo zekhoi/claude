@@ -12,7 +12,7 @@ description: Upgrade one or more project dependencies safely by reading their ch
 
 ## 2. Read what changed
 
-- Read the changelog, release notes, or migration guide for every version between current and target, focusing on breaking changes, deprecations, changed defaults, and minimum runtime versions. Prefer the project's official sources.
+- Read the changelog, release notes, or migration guide for every version between current and target, focusing on breaking changes, deprecations, changed defaults, and minimum runtime versions. Prefer the project's official sources: find the repository with `npm view <pkg> repository.url` (or the registry page) and fetch its releases page or `CHANGELOG.md`. If they cannot be fetched (no network), read the changelog or README shipped in the installed package (for example `node_modules/<pkg>/CHANGELOG.md` after installing the target, or the `npm view <pkg>@<version>` metadata), or compare the package's exports and types before and after; report which source you used and what you could not check.
 - Search the codebase for each affected API so the changes needed are known before editing.
 
 ## 3. Upgrade

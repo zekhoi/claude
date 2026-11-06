@@ -12,7 +12,8 @@ description: Improve the speed or resource use of existing code by measuring fir
 
 ## 2. Measure a baseline
 
-- Reproduce the slowness with a benchmark or timing harness that uses representative input: `go test -bench`, `pytest-benchmark` or `timeit`, `node --cpu-prof` or a small script with `performance.now()`, the database's `EXPLAIN ANALYZE` (it executes the statement: wrap writes in a transaction you roll back or use plain `EXPLAIN`, and never run it against production without approval).
+- If the project already has a benchmark (`npm run bench`, `make bench`, `go test -bench`), run it unchanged first.
+- Otherwise reproduce the slowness with a benchmark or timing harness that uses representative input: `go test -bench`, `pytest-benchmark` or `timeit`, `node --cpu-prof` or a small script with `performance.now()`, the database's `EXPLAIN ANALYZE` (it executes the statement: wrap writes in a transaction you roll back or use plain `EXPLAIN`, and never run it against production without approval).
 - Profile instead of guessing: CPU profiles (`pprof`, `py-spy`, `--cpu-prof`), allocation profiles, query logs. Record the numbers and the environment.
 - If you cannot measure, say so and stop at a hypothesis; do not ship speculative optimizations.
 
