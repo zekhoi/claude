@@ -2,6 +2,12 @@
 
 All notable changes to the CLI and its bundled catalog. Item versions are listed per release; see [versioning rules](docs/PLAN.md#content-versioning).
 
+## Unreleased
+
+### Catalog
+
+- New Python skills in the `python` preset: `skill/fastapi-api` and `skill/sqlalchemy-review` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet); see `evals/*/results/`.
+
 ## 0.1.0
 
 First release. Published as `@zekhoi/agent-kit`.

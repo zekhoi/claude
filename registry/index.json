@@ -253,6 +253,34 @@
           "destination": ".claude/skills/kit-fastify-api/SKILL.md"
         }
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/fastapi-api",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "FastAPI endpoints with Pydantic models, dependency-injected auth, correct status codes, and TestClient tests",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/fastapi-api/SKILL.md",
+          "destination": ".claude/skills/kit-fastapi-api/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/sqlalchemy-review",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Review SQLAlchemy queries for correctness, injection, session and transaction handling, and N+1 queries",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/sqlalchemy-review/SKILL.md",
+          "destination": ".claude/skills/kit-sqlalchemy-review/SKILL.md"
+        }
+      ]
     }
   ]
 }

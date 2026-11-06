@@ -1,0 +1,37 @@
+{
+  "skill": "skill/fastapi-api",
+  "cases": [
+    {
+      "id": "adds-deactivate-endpoint",
+      "kind": "normal",
+      "fixture": "fixtures/users-api",
+      "allowedTools": ["Bash(uv run pytest*)"],
+      "prompt": "Add a POST /users/{user_id}/deactivate endpoint that marks the user inactive and returns the updated user.",
+      "expectations": [
+        "Adds the route to the existing users router, following its style",
+        "Uses response_model UserRead (or equivalent) so password_hash is not serialized",
+        "Returns 404 for unknown users with HTTPException and validates user_id",
+        "Adds TestClient tests for success and 404, and runs the test suite successfully"
+      ]
+    },
+    {
+      "id": "flags-missing-authentication",
+      "kind": "edge",
+      "fixture": "fixtures/users-api",
+      "allowedTools": ["Bash(uv run pytest*)"],
+      "prompt": "Add a GET /users/me endpoint that returns the current user's profile.",
+      "expectations": [
+        "Notices that the app has no authentication, so there is no current user",
+        "Asks how the current user should be identified, or implements an explicit, clearly stated assumption behind a Depends dependency instead of exposing data silently",
+        "Does not break the existing /users/{user_id} route or its tests"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-review",
+      "kind": "negative",
+      "fixture": "fixtures/users-api",
+      "prompt": "Review app/routes/users.py for problems.",
+      "expectations": ["Does not invoke kit-fastapi-api", "Does not modify files"]
+    }
+  ]
+}

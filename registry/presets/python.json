@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "preset/python",
-  "description": "Base preset plus Python rules",
+  "description": "Base preset plus Python rules and the FastAPI and SQLAlchemy skills",
   "items": [
     "guideline/engineering",
     "skill/code-review",
@@ -10,6 +10,8 @@
     "skill/commit",
     "skill/pull-request",
     "rule/testing",
-    "rule/python"
+    "rule/python",
+    "skill/fastapi-api",
+    "skill/sqlalchemy-review"
   ]
 }
