@@ -30,6 +30,15 @@
       "fixture": "fixtures/bloated",
       "prompt": "Rename the Greeter class to WelcomeGreeter across the codebase.",
       "expectations": ["Does not invoke kit-overengineering-review"]
+    },
+    {
+      "id": "does-not-trigger-for-simplify-request",
+      "kind": "negative",
+      "fixture": "fixtures/bloated",
+      "prompt": "Simplify src/greeter.js.",
+      "expectations": [
+        "Does not invoke kit-overengineering-review (kit-refactoring, which makes the change, fits)"
+      ]
     }
   ]
 }

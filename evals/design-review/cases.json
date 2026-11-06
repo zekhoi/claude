@@ -33,6 +33,13 @@
       },
       "prompt": "Review my uncommitted changes.",
       "expectations": ["Does not invoke kit-design-review"]
+    },
+    {
+      "id": "does-not-trigger-for-threat-model",
+      "kind": "negative",
+      "fixture": "fixtures/queue",
+      "prompt": "Threat model the signup flow described in docs/rfc-email-queue.md.",
+      "expectations": ["Does not invoke kit-design-review (kit-threat-model fits)"]
     }
   ]
 }

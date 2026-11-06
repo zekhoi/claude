@@ -20,7 +20,7 @@ Review the files, module, or diff the user named; otherwise the uncommitted chan
 - **Dead weight:** unused exports, flags, branches, compatibility shims for versions no longer supported, and commented-out code.
 - **Premature optimization:** caches, pools, or concurrency without a measured need, especially where they add invalidation or race risks.
 
-Keep structure that has a concrete reason: a second implementation in tests is not enough on its own, but a real second backend, a published API contract, or a documented extension point is.
+Keep structure that has a concrete reason: a second implementation in tests is not enough on its own, but a real second backend, a published API contract, or a documented extension point is. Respect language idioms, such as small Go interfaces declared by the consumer as test seams.
 
 ## 3. Report
 
