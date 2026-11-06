@@ -8,6 +8,7 @@
       "install": true,
       "prompt": "Add a search box to UserList that filters users by name as you type.",
       "expectations": [
+        "Invokes kit-react-component",
         "Adds a labelled text input (accessible name) and derives the filtered list during render instead of duplicating state",
         "Shows an empty state when nothing matches",
         "Adds Testing Library tests that type with user-event and query by role or label, and runs the tests successfully",
@@ -27,10 +28,10 @@
       ]
     },
     {
-      "id": "does-not-trigger-for-explanation",
+      "id": "does-not-trigger-for-review",
       "kind": "negative",
       "fixture": "fixtures/users-ui",
-      "prompt": "Explain what the key prop does in src/components/UserList.jsx.",
+      "prompt": "Review src/components/UserList.jsx for problems.",
       "expectations": ["Does not invoke kit-react-component", "Does not modify files"]
     }
   ]

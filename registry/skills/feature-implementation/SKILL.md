@@ -1,6 +1,6 @@
 ---
 name: kit-feature-implementation
-description: Implement a new feature or behavior change end to end, tracing requirements through design, code, tests, and verification. Use when the user asks to add, build, or change functionality that spans more than a trivial edit. Do not use for bug diagnosis, code review, or one-line changes.
+description: Implement a new feature or behavior change end to end, tracing requirements through design, code, tests, and verification. Use when the user asks to add, build, or change functionality that spans more than a trivial edit. Do not use for bug diagnosis, code review, one-line changes, or work that a more specific installed kit skill covers, such as React components (kit-react-component) or framework endpoints (kit-fastify-api, kit-fastapi-api).
 ---
 
 # Feature implementation

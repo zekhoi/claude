@@ -6,7 +6,8 @@ All notable changes to the CLI and its bundled catalog. Item versions are listed
 
 ### Catalog
 
-- New TypeScript skills in the `node` preset: `skill/prisma-review`, `skill/drizzle-review`, and `skill/react-component` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet); see `evals/*/results/`.
+- New TypeScript skills in the `node` preset: `skill/prisma-review`, `skill/drizzle-review`, and `skill/react-component` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet); see `evals/*/results/`. In evaluation the React skill was applied, but it was not invoked automatically for a plain "add a search box" request.
+- `skill/feature-implementation` 1.0.1: the description defers to more specific installed skills such as `kit-react-component`. With Claude Code 2.1.318 it no longer triggers automatically for its normal and edge cases (also with 1.0.0), although its behavior expectations pass.
 - New Python skills in the `python` preset: `skill/fastapi-api` and `skill/sqlalchemy-review` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet); see `evals/*/results/`.
 
 ## 0.1.0

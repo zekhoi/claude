@@ -51,17 +51,17 @@
       ]
     },
     "skill/feature-implementation": {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "files": [
         {
           "destination": ".claude/skills/kit-feature-implementation/SKILL.md",
           "install": "file",
-          "sha256": "cbdd0c2f80d1bd68f8458f71a4ce99a3e7fc3d8d1b78ddb022c3c4bd411431ed"
+          "sha256": "7f15f895a3dffc678f58b9712dc9fa5f9fc6c05e0083363809a7c23bab158d63"
         },
         {
           "destination": ".agents/skills/kit-feature-implementation/SKILL.md",
           "install": "file",
-          "sha256": "cbdd0c2f80d1bd68f8458f71a4ce99a3e7fc3d8d1b78ddb022c3c4bd411431ed"
+          "sha256": "7f15f895a3dffc678f58b9712dc9fa5f9fc6c05e0083363809a7c23bab158d63"
         }
       ]
     },

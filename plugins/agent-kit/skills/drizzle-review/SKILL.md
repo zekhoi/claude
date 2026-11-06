@@ -9,7 +9,7 @@ Report findings without modifying code unless the user asks for fixes.
 
 ## 1. Understand the schema and conventions
 
-- Read the table definitions (`pgTable`, `mysqlTable`, `sqliteTable`), relations from `relations()`, indexes, unique constraints, and which columns are nullable or have defaults.
+- Read the table definitions (`pgTable`, `mysqlTable`, `sqliteTable`), relations (`relations()` or `defineRelations()`), indexes, unique constraints, and which columns are nullable or have defaults.
 - Find the `drizzle()` instance and driver, whether the code uses the SQL-like API (`db.select().from()`) or the relational query API (`db.query.users.findMany`), and how transactions and errors are handled.
 
 ## 2. Check each query
@@ -18,7 +18,7 @@ Report findings without modifying code unless the user asks for fixes.
 
 - `db.update(table).set(...)` and `db.delete(table)` without `.where()` affect every row. Flag them unless that is clearly intended.
 - Select queries return arrays: flag code that treats `const [row] = await ...` as always defined, and `findFirst` results used without a check for `undefined`.
-- `leftJoin` makes the joined table's columns nullable; check the result handling. `limit`/`offset` pagination needs a deterministic `orderBy`. Upserts need the right `onConflictDoUpdate` target.
+- `leftJoin` makes the joined table's columns nullable; check the result handling. `limit`/`offset` pagination needs a deterministic `orderBy`. Upserts need the right `onConflictDoUpdate` target (MySQL uses `onDuplicateKeyUpdate` and has no `.returning()`).
 - Conditions combined from optional filters must use `and(...)`/`or(...)` correctly; `and()` of all-`undefined` conditions returns no filter and matches every row.
 
 **Safety**
@@ -32,7 +32,7 @@ Report findings without modifying code unless the user asks for fixes.
 
 **Performance**
 
-- Queries in loops (N+1) should become one query with `inArray(col, ids)`, a join, or the relational API's `with`. Select only needed columns, check filtered and sorted columns are indexed, and insert many rows with one `insert().values([...])`.
+- Queries in loops (N+1) should become one query with `inArray(col, ids)`, a join, or the relational API's `with`. Select only needed columns, check filtered and sorted columns are indexed, and insert many rows with one `insert().values([...])`, guarding against an empty array, which throws.
 
 ## 3. Verify and report
 

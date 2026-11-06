@@ -470,7 +470,7 @@ Keep the default installation small. Presets reference existing registry items; 
 | Preset | Initial contents |
 | --- | --- |
 | `base` | Core engineering guidelines, code-review, debugging, feature-implementation, and testing rules |
-| `node` | `base` plus TypeScript rules and the evaluated Fastify, Kysely, Prisma, Drizzle, and React skills |
+| `node` | `base` plus TypeScript rules and the evaluated Fastify, Kysely, Prisma, Drizzle, and React skills (React with a recorded triggering caveat) |
 | `python` | `base` plus Python rules and the FastAPI and SQLAlchemy skills |
 
 Database-design and specialist agents remain optional items initially. Do not list planned skills as installable until their content and evaluations are ready. Support explicit selection through `init --preset <name>`, repeated `--preset` flags, and `add preset/<name>`; default to `base`. Detecting stack files may suggest presets but must not silently install them.

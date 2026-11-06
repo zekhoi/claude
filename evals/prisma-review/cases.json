@@ -7,7 +7,7 @@
       "fixture": "fixtures/shop",
       "prompt": "/kit-prisma-review Review src/orders.ts.",
       "expectations": [
-        "Reports that cancelOrders' deleteMany({}) deletes every order (and ignores tenantId)",
+        "Reports that cancelOrders' deleteMany({}) is unscoped: it ignores tenantId and targets every tenant's orders",
         "Reports SQL injection through sortColumn in $queryRawUnsafe and suggests an allowlist",
         "Reports that placeOrder creates items through prisma instead of tx, outside the transaction",
         "Reports the N+1 query in ordersWithItems and suggests include or an in filter",

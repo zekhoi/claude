@@ -9,21 +9,21 @@ Report findings without modifying code unless the user asks for fixes.
 
 ## 1. Understand the schema and conventions
 
-- Read `schema.prisma`: models, relations, `@unique` and `@@unique`, `@@index`, optional fields, and `onDelete` behavior. Note the Prisma major version and any client extensions or middleware.
+- Read `schema.prisma`: models, relations, `@unique` and `@@unique`, `@@index`, optional fields, and `onDelete` behavior. Note the Prisma major version, where the client is generated (`@prisma/client`, or a custom `output` path with the `prisma-client` generator), and any client extensions, middleware, or driver adapters.
 - Find how the client is created (one shared `PrismaClient`, not one per request), how transactions are written, and how errors such as `P2002` and `P2025` are handled.
 
 ## 2. Check each query
 
 **Correctness**
 
-- `updateMany` and `deleteMany` with an empty or missing `where` affect every row. Flag them unless that is clearly intended.
-- `findUnique` and `findFirst` return `null`; flag non-null assertions or unchecked access. `update` and `delete` throw `P2025` when nothing matches; check callers handle it or use the `...OrThrow` variants deliberately.
+- `updateMany` and `deleteMany` with an empty or missing `where` affect every row (or fail with `P2003` when a required relation restricts the delete). Flag them unless that is clearly intended.
+- `findUnique` and `findFirst` return `null`; flag non-null assertions or unchecked access, and suggest an explicit check or `findUniqueOrThrow`/`findFirstOrThrow`. `update` and `delete` throw `P2025` when nothing matches; check callers catch it, or use `updateMany`/`deleteMany` and check `count`.
 - `findFirst` and paginated `findMany` need a deterministic `orderBy`. Cursor pagination needs a unique cursor field. `upsert` needs a unique `where`; concurrent upserts can still raise `P2002`.
 
 **Safety**
 
 - `$queryRaw` and `$executeRaw` as tagged templates are parameterized. `$queryRawUnsafe`, `$executeRawUnsafe`, and `Prisma.raw()` with interpolated input are injection: require parameters or an allowlist for identifiers.
-- Without `select`, queries return every scalar field, including password hashes and tokens; flag results passed straight to API responses. Check tenant or owner filters are present on every query that needs them, including nested writes.
+- Without `select` or `omit`, queries return every scalar field, including password hashes and tokens; flag results passed straight to API responses and suggest `select`, `omit`, or a global `omit` on the client. Check tenant or owner filters are present on every query that needs them, including nested writes.
 
 **Transactions**
 

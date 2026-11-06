@@ -17,11 +17,11 @@ description: Implement or change React components and hooks following the projec
 - Use effects only to synchronize with something outside React. Give every effect correct dependencies and a cleanup for subscriptions, timers, and in-flight requests (`AbortController`) so unmounting or changed inputs do not set stale state.
 - Give list items stable keys from the data, not the array index when items can reorder.
 - Handle loading, empty, and error states that the data can produce. Never render untrusted HTML with `dangerouslySetInnerHTML` without sanitizing it.
-- In Next.js App Router projects, add `"use client"` only to components that need state, effects, or browser APIs.
+- In Next.js App Router projects, add `"use client"` only to components that need state, effects, event handlers, or browser APIs.
 
 ## 3. Test
 
-- Test with Testing Library from the user's perspective: query by role, label, or text (`getByRole("button", { name: "Save" })`), interact with `user-event`, and assert on visible output, not implementation details or internal state.
+- Test with Testing Library from the user's perspective: query by role, label, or text (`getByRole("button", { name: "Save" })`), interact with `user-event`, and assert on visible output, not implementation details or internal state. If Testing Library's automatic cleanup is not active (for example Vitest without `globals`), call `cleanup` after each test.
 - Cover the main interaction, the loading, empty, and error states, and keyboard access where it matters. Mock network calls at the boundary the project already uses.
 - Run the project's tests, type check, and linter.
 
