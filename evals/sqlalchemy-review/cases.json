@@ -1,0 +1,37 @@
+{
+  "skill": "skill/sqlalchemy-review",
+  "cases": [
+    {
+      "id": "finds-planted-defects",
+      "kind": "normal",
+      "fixture": "fixtures/shop",
+      "prompt": "/kit-sqlalchemy-review Review app/orders.py.",
+      "expectations": [
+        "Reports that cancel_orders deletes every order because delete(Order) has no where clause (and ignores tenant_id)",
+        "Reports SQL injection through the f-string sort_column in text() and suggests an allowlist",
+        "Reports the module-level shared session and the commit per item in place_order, which leaves a partial order on failure",
+        "Reports the N+1 relationship access in orders_with_items and suggests selectinload",
+        "Reports the unchecked None from one_or_none in customer_email (and ideally the missing tenant filter)",
+        "Gives severity and file:line for each finding and does not modify files"
+      ]
+    },
+    {
+      "id": "clean-queries-triggered-naturally",
+      "kind": "edge",
+      "fixture": "fixtures/reports",
+      "prompt": "Review the database queries in app/reports.py.",
+      "expectations": [
+        "Invokes kit-sqlalchemy-review without being named",
+        "Reports no significant defects instead of inventing problems, noting what was checked (eager loading, ordering, tenant filters, transaction use)",
+        "Does not modify files"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-migrations",
+      "kind": "negative",
+      "fixture": "fixtures/shop",
+      "prompt": "Write an Alembic migration that adds an index on orders (tenant_id, status).",
+      "expectations": ["Does not invoke kit-sqlalchemy-review"]
+    }
+  ]
+}
