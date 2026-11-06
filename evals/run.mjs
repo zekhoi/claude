@@ -57,8 +57,9 @@ const PRESETS = readdirSync(presetsDir).map((f) =>
   JSON.parse(readFileSync(path.join(presetsDir, f), "utf8")),
 );
 const itemsFor = (id) => {
-  if (allSkills) return id.startsWith("skill/") ? SKILLS : [...SKILLS, id];
   const presets = PRESETS.filter((p) => p.items.includes(id)).map((p) => p.id);
+  // Agents keep their presets, so sibling agents are installed too.
+  if (allSkills) return id.startsWith("skill/") ? SKILLS : [...SKILLS, ...presets];
   // `init --preset base` already installed the base skills; do not add every stack preset.
   if (presets.includes("preset/base")) return [];
   return presets.length > 0 ? presets : [id];
@@ -192,7 +193,7 @@ for (const skill of readdirSync(evalsDir).sort()) {
   if (!existsSync(casesFile) || (onlySkill && onlySkill !== skill)) continue;
   // `item` defaults to the skill named by the directory; agent evaluations set it to `agent/<id>`.
   const { item = `skill/${skill}`, cases } = JSON.parse(readFileSync(casesFile, "utf8"));
-  const itemTools = item.startsWith("agent/") ? ["Agent"] : [];
+  const itemTools = item.startsWith("agent/") ? ["Agent", "Task"] : [];
   for (const c of cases) {
     if (onlyCase && onlyCase !== c.id) continue;
     process.stderr.write(`running ${skill}/${c.id} ...\n`);
