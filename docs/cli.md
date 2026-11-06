@@ -30,18 +30,19 @@ Prints an item's bundled files. With `--diff`, compares what the target holds (t
 
 Installs one or more presets for one or more coding agents: `--agent claude` (the default) and `--agent codex`. On an interactive terminal it asks which presets to install (default `base`); otherwise, including with `--json`, `--preset` is required. Running `init` again with additional presets installs only what is new.
 
-| Preset     | Contents                                                                                                                                                                     |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `base`     | Engineering guidelines; `code-review`, `debugging`, `feature-implementation`, `commit`, and `pull-request` skills; testing rules                                             |
-| `node`     | `base` plus TypeScript rules and the `kysely-review`, `prisma-review`, `drizzle-review`, `fastify-api`, and `react-component` skills                                         |
-| `python`   | `base` plus Python rules and the `fastapi-api` and `sqlalchemy-review` skills                                                                                                |
-| `go`       | `base` plus Go rules and the `go-http-api`, `go-sql-review`, and `go-review` skills                                                                                          |
-| `quality`  | Add-on: `refactoring`, `test-writing`, `documentation`, `performance`, `dependency-upgrade`, `release-notes`, and `ci-triage` skills                                         |
-| `review`   | Add-on: `security-audit`, `design-review`, and `overengineering-review` skills and the read-only `reviewer` and `architect` subagents                                        |
-| `security` | Add-on: `security-audit`, `threat-model`, `attack-surface`, `vuln-poc`, `hardening`, `incident-response`, and `detection-rules` skills and the read-only `reviewer` subagent |
-| `infra`    | Add-on: `terraform`, `kubernetes`, `dockerfile`, `ci-pipeline`, `observability`, and `hardening` skills and the read-only `infra` subagent                                   |
+| Preset          | Contents                                                                                                                                                                     |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `base`          | Engineering guidelines; `code-review`, `debugging`, `feature-implementation`, `commit`, and `pull-request` skills; testing rules                                             |
+| `node`          | `base` plus TypeScript rules and the `kysely-review`, `prisma-review`, `drizzle-review`, `fastify-api`, and `react-component` skills                                         |
+| `python`        | `base` plus Python rules and the `fastapi-api` and `sqlalchemy-review` skills                                                                                                |
+| `go`            | `base` plus Go rules and the `go-http-api`, `go-sql-review`, and `go-review` skills                                                                                          |
+| `quality`       | Add-on: `refactoring`, `test-writing`, `documentation`, `performance`, `dependency-upgrade`, `release-notes`, and `ci-triage` skills                                         |
+| `review`        | Add-on: `security-audit`, `design-review`, and `overengineering-review` skills and the read-only `reviewer` and `architect` subagents                                        |
+| `security`      | Add-on: `security-audit`, `threat-model`, `attack-surface`, `vuln-poc`, `hardening`, `incident-response`, and `detection-rules` skills and the read-only `reviewer` subagent |
+| `infra`         | Add-on: `terraform`, `kubernetes`, `dockerfile`, `ci-pipeline`, `observability`, and `hardening` skills and the read-only `infra` subagent                                   |
+| `orchestration` | Add-on: `orchestrate` skill and the read-only `planner`, `architect`, and `reviewer` subagents, plus the `debugger` subagent                                                 |
 
-Presets combine, so add-ons go with a stack preset: `agent-kit init --preset node --preset quality`. `database-design` and the `debugger` subagent are in no preset; install them with `add`. `agent-kit list` shows the bundled catalog.
+Presets combine, so add-ons go with a stack preset: `agent-kit init --preset node --preset quality`. `database-design` is in no preset; install it with `add`. `agent-kit list` shows the bundled catalog.
 
 `--context` creates `docs/agent-context.md`, a project-owned template, and references it from the `AGENTS.md` block. Run `init --agent <name>` on an existing installation to add an agent; every installed item gets that agent's files, and no preset is needed. See [compatibility.md](compatibility.md#codex) for where Codex files go.
 

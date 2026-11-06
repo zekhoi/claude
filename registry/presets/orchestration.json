@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "preset/orchestration",
+  "description": "Add-on: the orchestrate skill and the read-only planner, architect, and reviewer subagents, plus the debugger subagent",
+  "items": [
+    "skill/orchestrate",
+    "agent/planner",
+    "agent/architect",
+    "agent/reviewer",
+    "agent/debugger"
+  ]
+}
