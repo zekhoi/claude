@@ -77,6 +77,8 @@ function setUpProject(skillDir, c) {
   sh("git", ["config", "user.name", "eval"], project);
   sh("node", [cli, "init", "--preset", "base", "--cwd", project], project);
   sh("node", [cli, "add", ...SKILLS, "--cwd", project], project);
+  // Cases can install more items, such as subagents, with `add`.
+  if (c.add?.length) sh("node", [cli, "add", ...c.add, "--cwd", project], project);
   sh("git", ["add", "-A"], project);
   sh("git", ["commit", "-q", "-m", "Initial commit"], project);
   for (const message of c.history ?? []) {

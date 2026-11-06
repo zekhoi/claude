@@ -1,0 +1,71 @@
+{
+  "skill": "skill/orchestrate",
+  "cases": [
+    {
+      "id": "builds-tests-documents-reviews",
+      "kind": "normal",
+      "fixture": "fixtures/todos",
+      "add": ["preset/orchestration"],
+      "allowedTools": ["Agent", "Task"],
+      "prompt": "Add due dates to todos, with tests, update the README, and get the change independently reviewed.",
+      "expectations": [
+        "Invokes kit-orchestrate",
+        "Plans steps with owners from installed kit skills and subagents (for example feature-implementation, documentation, and the kit-reviewer subagent) and runs them in dependency order",
+        "Implements optional due dates with tests, updates the README API section, and npm test passes",
+        "Runs an independent review through kit-reviewer (or kit-code-review), handles its findings, and reports the steps, owners, and verification"
+      ]
+    },
+    {
+      "id": "parallel-independent-packages",
+      "kind": "edge",
+      "fixture": "fixtures/mono",
+      "add": ["preset/orchestration"],
+      "allowedTools": ["Agent", "Task"],
+      "prompt": "Add input validation with tests to parseAmount in packages/billing and parseQuantity in packages/inventory. They are independent, so use subagents in parallel.",
+      "expectations": [
+        "Invokes kit-orchestrate",
+        "Delegates the two packages to separate subagents in one batch, each limited to its own package's files",
+        "Checks each subagent's result itself (diff and tests) rather than trusting the report",
+        "Runs the full test suite on the combined changes successfully and reports what ran in parallel"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-small-fix",
+      "kind": "negative",
+      "fixture": "fixtures/todos",
+      "add": ["preset/orchestration"],
+      "prompt": "Fix the typo \"Retruns\" in the comment in todos.js.",
+      "expectations": [
+        "Does not invoke kit-orchestrate",
+        "Does not start subagents",
+        "Changes only the typo"
+      ]
+    },
+    {
+      "id": "builds-tests-documents-reviews-named",
+      "kind": "normal",
+      "fixture": "fixtures/todos",
+      "add": ["preset/orchestration"],
+      "allowedTools": ["Agent", "Task"],
+      "prompt": "/kit-orchestrate Add due dates to todos, with tests, update the README, and get the change independently reviewed.",
+      "expectations": [
+        "Plans steps with owners from installed kit skills and subagents (for example feature-implementation, documentation, and the kit-reviewer subagent) and runs them in dependency order",
+        "Implements optional due dates with tests, updates the README API section, and npm test passes",
+        "Runs an independent review through kit-reviewer (or kit-code-review), handles its findings, and reports the steps, owners, and verification"
+      ]
+    },
+    {
+      "id": "parallel-independent-packages-named",
+      "kind": "edge",
+      "fixture": "fixtures/mono",
+      "add": ["preset/orchestration"],
+      "allowedTools": ["Agent", "Task"],
+      "prompt": "/kit-orchestrate Add input validation with tests to parseAmount in packages/billing and parseQuantity in packages/inventory. They are independent, so use subagents in parallel.",
+      "expectations": [
+        "Delegates the two packages to separate subagents in one batch, each limited to its own package's files",
+        "Checks each subagent's result itself (diff and tests) rather than trusting the report",
+        "Runs the full test suite on the combined changes successfully and reports what ran in parallel"
+      ]
+    }
+  ]
+}

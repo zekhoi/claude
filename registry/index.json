@@ -645,6 +645,34 @@
           "destination": ".claude/agents/kit-architect.md"
         }
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/orchestrate",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Split multi-step tasks into steps owned by kit skills and subagents, run independent steps in parallel, and verify",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/orchestrate/SKILL.md",
+          "destination": ".claude/skills/kit-orchestrate/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "agent/planner",
+      "version": "1.0.0",
+      "type": "agent",
+      "description": "Read-only planner that turns a request into ordered steps with owners, dependencies, and verification",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "agents/planner.md",
+          "destination": ".claude/agents/kit-planner.md"
+        }
+      ]
     }
   ]
 }
