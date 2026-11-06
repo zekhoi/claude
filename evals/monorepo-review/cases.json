@@ -1,0 +1,39 @@
+{
+  "skill": "skill/monorepo-review",
+  "cases": [
+    {
+      "id": "finds-boundary-defects",
+      "kind": "normal",
+      "fixture": "fixtures/tangled",
+      "prompt": "Review this monorepo's package boundaries and dependencies.",
+      "expectations": [
+        "Reports web's relative deep import into ../../money/src/internal/round.js",
+        "Reports billing importing lodash without declaring it (only the root declares it)",
+        "Reports the circular dependency between @shop/money and @shop/billing",
+        "Reports zod version drift (3.22.4 vs 3.23.8) and that web declares @shop/money but does not import it through it",
+        "Gives severity and file:line for each finding and does not modify files"
+      ]
+    },
+    {
+      "id": "clean-workspace",
+      "kind": "edge",
+      "fixture": "fixtures/clean",
+      "prompt": "Are there circular dependencies or undeclared dependencies between our packages?",
+      "expectations": [
+        "Invokes kit-monorepo-review without being named",
+        "Reports no cycles or undeclared dependencies instead of inventing problems, listing what was checked",
+        "Does not modify files"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-diff-review",
+      "kind": "negative",
+      "fixture": "fixtures/clean",
+      "changes": {
+        "packages/money/src/index.js": "import { z } from \"zod\";\n\nconst Cents = z.number().int();\n\nexport function formatPrice(cents) {\n  return `$${(Cents.parse(cents) / 10).toFixed(2)}`;\n}\n"
+      },
+      "prompt": "Review my uncommitted changes.",
+      "expectations": ["Does not invoke kit-monorepo-review"]
+    }
+  ]
+}

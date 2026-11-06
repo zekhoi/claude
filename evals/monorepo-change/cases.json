@@ -1,0 +1,45 @@
+{
+  "skill": "skill/monorepo-change",
+  "cases": [
+    {
+      "id": "adds-currency-across-packages",
+      "kind": "normal",
+      "fixture": "fixtures/shop",
+      "install": true,
+      "allowedTools": ["Bash(npm install*)", "Bash(npm ls*)", "Bash(npm run*)"],
+      "prompt": "Add an optional currency to formatPrice in packages/money (default USD, support EUR with the euro sign), and make billing's invoiceLine use the item's currency.",
+      "expectations": [
+        "Changes packages/money and packages/billing only, importing @shop/money through its public entry point",
+        "Keeps the default USD behavior so existing callers and tests still work",
+        "Adds tests in both packages and runs the affected packages' tests (and not only one package) successfully",
+        "Reports the packages changed and that web was unaffected"
+      ]
+    },
+    {
+      "id": "go-workspace-change",
+      "kind": "edge",
+      "fixture": "fixtures/gowork",
+      "allowedTools": [
+        "Bash(go test*)",
+        "Bash(go vet*)",
+        "Bash(go build*)",
+        "Bash(go work*)",
+        "Bash(go list*)"
+      ],
+      "prompt": "Add a Truncate function to the strutil module that shortens a string to n runes with an ellipsis, and use it in svc's Label to keep names to 20 runes.",
+      "expectations": [
+        "Adds Truncate to lib/strutil with tests, handling multi-byte runes",
+        "Uses it from svc through the example.com/strutil import in the go.work workspace",
+        "Runs go test for both modules successfully",
+        "Does not add replace directives or vendor the module"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-new-package",
+      "kind": "negative",
+      "fixture": "fixtures/shop",
+      "prompt": "Create a new packages/notifications package like packages/web.",
+      "expectations": ["Does not invoke kit-monorepo-change"]
+    }
+  ]
+}

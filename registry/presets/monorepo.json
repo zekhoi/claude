@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "preset/monorepo",
+  "description": "Add-on: monorepo change, package, release, and boundary review skills for JS/TS, Go, Python, and Rust workspaces",
+  "items": [
+    "skill/monorepo-change",
+    "skill/monorepo-package",
+    "skill/monorepo-release",
+    "skill/monorepo-review"
+  ]
+}

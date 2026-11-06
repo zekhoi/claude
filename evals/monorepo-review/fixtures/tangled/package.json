@@ -1,0 +1,11 @@
+{
+  "name": "tangled",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "lodash": "4.17.21"
+  }
+}
