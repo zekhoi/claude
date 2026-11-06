@@ -38,10 +38,11 @@ First release. Published as `@zekhoi/agent-kit`.
 | Presets `base`, `node`, `python`, `go`; add-ons `infra`, `monorepo`, `orchestration`, `quality`, `review`, `security`                              | —       |
 
 - **Presets:** `base`, `node` (TypeScript, Kysely, Fastify), `python` (FastAPI, SQLAlchemy), and `go` (net/http, database/sql, Go review), plus add-ons `quality`, `review`, `security`, `infra`, `orchestration`, and `monorepo`. `database-design`, `prisma-review`, `drizzle-review`, and `react-component` are in no preset; install them with `add`.
-- **Orchestration:** `kit-orchestrate` runs independent steps as parallel subagents, each in a Git worktree created from the current commit, and applies their results as uncommitted changes.
-- **Evaluations:** every skill was evaluated with Claude Code 2.1.318 (Sonnet), installing the presets a user of the skill would. 117 of 132 cases pass, 13 are partial, and 2 fail. Skills triggered on their own in 56 of 76 cases that do not name them, and no negative case triggered. See `evals/*/results/`.
+- **Orchestration:** `kit-orchestrate` runs parallel groups that edit files in one Git worktree per subagent, created from the current commit, and applies their results as uncommitted changes.
+- **Safety boundaries:** infra skills only edit files and run read-only or dry-run commands, never apply or deploy. Red-team skills work only on the user's own code and local or named test targets. `incident-response` never deletes evidence or rewrites history.
+- **Evaluations:** every skill was evaluated with Claude Code 2.1.318 (Sonnet), installing the presets a user of the skill would. 117 of 132 cases pass, 13 are partial, and 2 fail: an `orchestrate` parallel case that ran without the skill, and a `refactoring` run that skipped characterization tests. Skills triggered on their own in 56 of 76 cases that do not name them, and no negative case triggered. Subagents are not evaluated. See `evals/*/results/`.
 - **Choosing presets:** skills are picked less reliably as more are installed. Trigger-sensitive cases triggered in 35 of 58 runs with a project's presets and in 16 of 58 with the whole catalog. Install only the presets a project needs; see [Choose presets](README.md#choose-presets) and `evals/README.md`.
-- **Known gaps:** `orchestrate` and `monorepo-change` are rarely picked without being named. In evaluation, `dependency-upgrade` could not read upstream changelogs without network access.
+- **Known gaps:** `orchestrate`, `monorepo-change`, `monorepo-release`, and `go-http-api` are rarely picked without being named. In evaluation, `dependency-upgrade` could not read upstream changelogs without network access.
 
 ### Repository
 
