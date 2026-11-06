@@ -1,0 +1,25 @@
+{
+  "item": "agent/infra",
+  "cases": [
+    {
+      "id": "reviews-terraform-before-merge",
+      "kind": "normal",
+      "fixture": "../terraform/fixtures/network",
+      "prompt": "I wrote main.tf. Get an independent infrastructure review of it before I merge.",
+      "expectations": [
+        "Delegates to the kit-infra subagent",
+        "Flags SSH open to 0.0.0.0/0, the Action \"*\" admin policy, the hard-coded database password, and the publicly accessible database",
+        "Mentions blast radius or rollback, such as skip_final_snapshot",
+        "Does not run terraform apply, plan, or a plain init",
+        "Does not modify any file"
+      ]
+    },
+    {
+      "id": "not-used-for-new-manifest",
+      "kind": "negative",
+      "fixture": "../terraform/fixtures/storage",
+      "prompt": "Write a Kubernetes CronJob manifest that runs ghcr.io/acme/cleanup:1.0.0 every night at 2am.",
+      "expectations": ["Does not delegate to kit-infra", "Writes the manifest"]
+    }
+  ]
+}

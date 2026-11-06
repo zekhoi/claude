@@ -56,10 +56,10 @@ const presetsDir = path.join(repo, "registry/presets");
 const PRESETS = readdirSync(presetsDir).map((f) =>
   JSON.parse(readFileSync(path.join(presetsDir, f), "utf8")),
 );
-const itemsFor = (skill) => {
-  if (allSkills) return SKILLS;
-  const id = `skill/${skill}`;
+const itemsFor = (id) => {
   const presets = PRESETS.filter((p) => p.items.includes(id)).map((p) => p.id);
+  // Agents keep their presets, so sibling agents are installed too.
+  if (allSkills) return id.startsWith("skill/") ? SKILLS : [...SKILLS, ...presets];
   // `init --preset base` already installed the base skills; do not add every stack preset.
   if (presets.includes("preset/base")) return [];
   return presets.length > 0 ? presets : [id];
@@ -73,7 +73,7 @@ const sh = (cmd, args, cwd) =>
  * then optional `history` commits, an optional `branch` with commits, and optional uncommitted
  * `changes` (`staged: true` stages them).
  */
-function setUpProject(skillDir, c, skill) {
+function setUpProject(skillDir, c, item) {
   const project = mkdtempSync(path.join(tmpdir(), "agent-kit-eval-project-"));
   if (c.fixture) cpSync(path.join(skillDir, c.fixture), project, { recursive: true });
   const write = (files) => {
@@ -91,7 +91,7 @@ function setUpProject(skillDir, c, skill) {
   sh("git", ["config", "user.email", "eval@example.com"], project);
   sh("git", ["config", "user.name", "eval"], project);
   sh("node", [cli, "init", "--preset", "base", "--cwd", project], project);
-  const items = itemsFor(skill);
+  const items = itemsFor(item);
   if (items.length > 0) sh("node", [cli, "add", ...items, "--cwd", project], project);
   // Cases can install more items, such as subagents, with `add`.
   if (c.add?.length) sh("node", [cli, "add", ...c.add, "--cwd", project], project);
@@ -191,12 +191,14 @@ for (const skill of readdirSync(evalsDir).sort()) {
   const skillDir = path.join(evalsDir, skill);
   const casesFile = path.join(skillDir, "cases.json");
   if (!existsSync(casesFile) || (onlySkill && onlySkill !== skill)) continue;
-  const { cases } = JSON.parse(readFileSync(casesFile, "utf8"));
+  // `item` defaults to the skill named by the directory; agent evaluations set it to `agent/<id>`.
+  const { item = `skill/${skill}`, cases } = JSON.parse(readFileSync(casesFile, "utf8"));
+  const itemTools = item.startsWith("agent/") ? ["Agent", "Task"] : [];
   for (const c of cases) {
     if (onlyCase && onlyCase !== c.id) continue;
     process.stderr.write(`running ${skill}/${c.id} ...\n`);
-    const project = setUpProject(skillDir, c, skill);
-    const run = await runClaude(project, c.prompt, c.allowedTools);
+    const project = setUpProject(skillDir, c, item);
+    const run = await runClaude(project, c.prompt, [...itemTools, ...(c.allowedTools ?? [])]);
     const summary = summarize(run.stdout);
     const changedFiles = sh("git", ["status", "--porcelain"], project)
       .trim()
@@ -243,7 +245,7 @@ for (const skill of readdirSync(evalsDir).sort()) {
       `${JSON.stringify(record, null, 2)}\n`,
     );
     rows.push(
-      `${skill}/${c.id}: skills=${JSON.stringify(summary.skillsInvoked)} changed=${changedFiles.length} cost=$${summary.costUsd?.toFixed?.(3)}`,
+      `${skill}/${c.id}: skills=${JSON.stringify(summary.skillsInvoked)} subagents=${JSON.stringify(summary.subagents)} changed=${changedFiles.length} cost=$${summary.costUsd?.toFixed?.(3)}`,
     );
   }
 }

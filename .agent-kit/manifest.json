@@ -116,12 +116,12 @@
         {
           "destination": ".claude/agents/kit-debugger.md",
           "install": "file",
-          "sha256": "ef2bb16ff4f508c1e18118cf611f657ebc67e7d2f718fbb8f34e2c6bef784232"
+          "sha256": "237a86ca6fd53dcd1d91ef300180b0df83e57e86b154e7d77ca8138460429347"
         },
         {
           "destination": ".codex/agents/kit-debugger.toml",
           "install": "file",
-          "sha256": "466809a2ae43631e4d97598b60a53b48af6452b7e098394252ba8575e781dde7"
+          "sha256": "e24c207b5253a0f831e94ad8468d21a1ca52587634863767769f00d7c56b1dbf"
         }
       ]
     },

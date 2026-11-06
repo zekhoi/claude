@@ -1,0 +1,28 @@
+{
+  "item": "agent/debugger",
+  "cases": [
+    {
+      "id": "fixes-failing-tests-in-subagent",
+      "kind": "normal",
+      "fixture": "../debugging/fixtures/off-by-one",
+      "prompt": "The pagination tests are failing. Hand this to a debugging subagent to find the root cause and fix it.",
+      "expectations": [
+        "Delegates to the kit-debugger subagent",
+        "Fixes the off-by-one in paginate.js at its root cause",
+        "Adds or keeps a regression test that fails without the fix",
+        "The tests pass afterwards"
+      ]
+    },
+    {
+      "id": "cannot-reproduce",
+      "kind": "edge",
+      "fixture": "../debugging/fixtures/paginate-correct",
+      "prompt": "Sometimes paginate returns an empty array in production for page 2. Have a debugging subagent fix it.",
+      "expectations": [
+        "Delegates to the kit-debugger subagent",
+        "Reports that the failure does not reproduce and what was tried",
+        "Does not make a speculative change to paginate.js"
+      ]
+    }
+  ]
+}

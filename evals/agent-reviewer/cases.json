@@ -1,0 +1,24 @@
+{
+  "item": "agent/reviewer",
+  "cases": [
+    {
+      "id": "independent-review-before-merge",
+      "kind": "normal",
+      "fixture": "../code-review/fixtures/null-deref",
+      "prompt": "I just wrote src/user.ts. Get an independent review of it before I merge.",
+      "expectations": [
+        "Delegates the review to the kit-reviewer subagent",
+        "Reports that greeting() dereferences an undefined user or optional name, with file:line",
+        "Reports that deleteUser() ignores requesterId and performs no authorization check",
+        "Does not modify any file"
+      ]
+    },
+    {
+      "id": "not-used-for-rename",
+      "kind": "negative",
+      "fixture": "../code-review/fixtures/null-deref",
+      "prompt": "Rename the User type to Account in src/user.ts.",
+      "expectations": ["Does not delegate to kit-reviewer", "Renames the type"]
+    }
+  ]
+}
