@@ -20,13 +20,24 @@
       "kind": "edge",
       "fixture": "fixtures/mono",
       "add": ["preset/orchestration"],
-      "allowedTools": ["Agent", "Task"],
+      "allowedTools": [
+        "Agent",
+        "Task",
+        "Bash(git worktree*)",
+        "Bash(git add*)",
+        "Bash(git apply*)",
+        "Bash(git branch -D kit/*)",
+        "Bash(git -C *)",
+        "Bash(npm test*)",
+        "Bash(node --test*)"
+      ],
       "prompt": "Add input validation with tests to parseAmount in packages/billing and parseQuantity in packages/inventory. They are independent, so use subagents in parallel.",
       "expectations": [
         "Invokes kit-orchestrate",
-        "Delegates the two packages to separate subagents in one batch, each limited to its own package's files",
-        "Checks each subagent's result itself (diff and tests) rather than trusting the report",
-        "Runs the full test suite on the combined changes successfully and reports what ran in parallel"
+        "Runs the two packages as parallel subagents, each in its own Git worktree (Agent isolation or git worktree add)",
+        "Checks each worktree's result, then applies the changes to the main tree as uncommitted changes without committing to the branch",
+        "Removes the worktrees and their branches (git worktree list shows only the main tree at the end)",
+        "Runs the full test suite in the main tree successfully and reports what ran in parallel"
       ]
     },
     {
@@ -59,12 +70,49 @@
       "kind": "edge",
       "fixture": "fixtures/mono",
       "add": ["preset/orchestration"],
-      "allowedTools": ["Agent", "Task"],
+      "allowedTools": [
+        "Agent",
+        "Task",
+        "Bash(git worktree*)",
+        "Bash(git add*)",
+        "Bash(git apply*)",
+        "Bash(git branch -D kit/*)",
+        "Bash(git -C *)",
+        "Bash(npm test*)",
+        "Bash(node --test*)"
+      ],
       "prompt": "/kit-orchestrate Add input validation with tests to parseAmount in packages/billing and parseQuantity in packages/inventory. They are independent, so use subagents in parallel.",
       "expectations": [
-        "Delegates the two packages to separate subagents in one batch, each limited to its own package's files",
-        "Checks each subagent's result itself (diff and tests) rather than trusting the report",
-        "Runs the full test suite on the combined changes successfully and reports what ran in parallel"
+        "Runs the two packages as parallel subagents, each in its own Git worktree (Agent isolation or git worktree add)",
+        "Checks each worktree's result, then applies the changes to the main tree as uncommitted changes without committing to the branch",
+        "Removes the worktrees and their branches (git worktree list shows only the main tree at the end)",
+        "Runs the full test suite in the main tree successfully and reports what ran in parallel"
+      ]
+    },
+    {
+      "id": "dirty-tree-before-parallel",
+      "kind": "edge",
+      "fixture": "fixtures/mono",
+      "add": ["preset/orchestration"],
+      "allowedTools": [
+        "Agent",
+        "Task",
+        "Bash(git worktree*)",
+        "Bash(git add*)",
+        "Bash(git apply*)",
+        "Bash(git branch -D kit/*)",
+        "Bash(git -C *)",
+        "Bash(npm test*)",
+        "Bash(node --test*)"
+      ],
+      "changes": {
+        "packages/billing/src/amount.js": "// Parses an amount like \"12.50\" into integer cents.\n// Note: amounts may include a leading currency sign, which callers strip first.\nexport function parseAmount(text) {\n  return Math.round(Number(text) * 100);\n}\n"
+      },
+      "prompt": "/kit-orchestrate Add input validation with tests to parseAmount in packages/billing and parseQuantity in packages/inventory, in parallel.",
+      "expectations": [
+        "Notices the uncommitted change in packages/billing before creating worktrees (worktrees start from HEAD)",
+        "Asks before committing anything, or runs the affected work in the shared tree, so the uncommitted change is not lost",
+        "The final tree keeps the uncommitted comment in amount.js, and no commit is created on the branch"
       ]
     }
   ]

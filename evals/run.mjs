@@ -181,6 +181,7 @@ for (const skill of readdirSync(evalsDir).sort()) {
       .filter(Boolean);
     const diff = sh("git", ["diff", "HEAD"], project).slice(0, 8000);
     const logAfter = sh("git", ["log", "--all", "--format=%h %s%n%b", "-6"], project).trim();
+    const worktrees = sh("git", ["worktree", "list"], project).trim();
     const committedFiles = sh(
       "git",
       ["show", "--name-status", "--format=", "HEAD"],
@@ -207,6 +208,7 @@ for (const skill of readdirSync(evalsDir).sort()) {
       changedFiles,
       diff,
       logAfter,
+      worktrees,
       committedFiles,
       testsAfter: tests,
       project,
