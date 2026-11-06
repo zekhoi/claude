@@ -61,6 +61,8 @@ evals/<skill-id>/
 | `remote`       | Optional `true` to add an `origin` remote at the initial commit, so `history` and `branch` commits are unpushed.                           |
 | `add`          | Optional list of extra items to install, such as `agent/reviewer`; the case's presets are always installed.                                |
 
+Subagents are evaluated the same way, in directories named `agent-<id>` whose `cases.json` sets `"item": "agent/<id>"` next to `cases`. Those cases install the base preset plus the presets that contain the agent, allow the `Agent` tool, and record the delegated subagents in `subagents`. Fixtures may point at another evaluation's fixtures, such as `../code-review/fixtures/null-deref`.
+
 ## Running cases
 
 `node evals/run.mjs` runs every case with Claude Code and writes one JSON transcript summary per case: skills invoked, tool calls, files changed, the diff, the fixture's tests afterwards, the final answer, and cost. Build the CLI first (`pnpm -r run build`). Options: `--skill <id>`, `--case <id>`, `--model <model>` (default `sonnet`), `--budget <usd>` per case (default 1), and `--out <dir>`.

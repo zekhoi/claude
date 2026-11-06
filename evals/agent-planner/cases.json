@@ -1,0 +1,36 @@
+{
+  "item": "agent/planner",
+  "cases": [
+    {
+      "id": "plans-multi-step-task",
+      "kind": "normal",
+      "fixture": "../orchestrate/fixtures/todos",
+      "prompt": "Before anyone starts, break this into an ordered plan with an owner for each step: add due dates to todos, with tests, update the README, and get the change reviewed. Do not implement it yet.",
+      "expectations": [
+        "Delegates to the kit-planner subagent",
+        "Returns ordered steps with owners that are installed kit skills or subagents, or the main agent",
+        "Gives each step a verification, such as a test command or review",
+        "Does not modify any file"
+      ]
+    },
+    {
+      "id": "plans-multi-step-task-named",
+      "kind": "edge",
+      "fixture": "../orchestrate/fixtures/todos",
+      "prompt": "Use the kit-planner subagent to break this into an ordered plan before anyone starts: add due dates to todos, with tests, update the README, and get the change reviewed. Do not implement it yet.",
+      "expectations": [
+        "Delegates to the kit-planner subagent",
+        "Returns ordered steps with owners that are installed kit skills or subagents, or the main agent",
+        "Gives each step a verification, such as a test command or review",
+        "Does not modify any file"
+      ]
+    },
+    {
+      "id": "not-used-for-small-fix",
+      "kind": "negative",
+      "fixture": "../orchestrate/fixtures/todos",
+      "prompt": "Fix the typo \"Retruns\" in the comment in todos.js.",
+      "expectations": ["Does not delegate to kit-planner", "Fixes the typo"]
+    }
+  ]
+}

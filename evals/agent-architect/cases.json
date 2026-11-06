@@ -1,0 +1,36 @@
+{
+  "item": "agent/architect",
+  "cases": [
+    {
+      "id": "plans-before-coding",
+      "kind": "normal",
+      "fixture": "../feature-implementation/fixtures/todo-api",
+      "prompt": "Before we write any code, work out how we should add due dates and an overdue filter to this todo API.",
+      "expectations": [
+        "Delegates to the kit-architect subagent",
+        "Proposes a design grounded in todos.js (addTodo, listTodos, the todo shape) and its tests",
+        "Raises open questions such as date format or what counts as overdue",
+        "Does not modify any file"
+      ]
+    },
+    {
+      "id": "plans-before-coding-named",
+      "kind": "edge",
+      "fixture": "../feature-implementation/fixtures/todo-api",
+      "prompt": "Use the kit-architect subagent to work out how we should add due dates and an overdue filter to this todo API before we write any code.",
+      "expectations": [
+        "Delegates to the kit-architect subagent",
+        "Proposes a design grounded in todos.js (addTodo, listTodos, the todo shape) and its tests",
+        "Raises open questions such as date format or what counts as overdue",
+        "Does not modify any file"
+      ]
+    },
+    {
+      "id": "not-used-for-trivial-edit",
+      "kind": "negative",
+      "fixture": "../feature-implementation/fixtures/todo-api",
+      "prompt": "Rename nextId to nextTodoId.",
+      "expectations": ["Does not delegate to kit-architect", "Renames the variable"]
+    }
+  ]
+}
