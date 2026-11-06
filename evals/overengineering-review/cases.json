@@ -1,0 +1,44 @@
+{
+  "skill": "skill/overengineering-review",
+  "cases": [
+    {
+      "id": "finds-bloat",
+      "kind": "normal",
+      "fixture": "fixtures/bloated",
+      "prompt": "Is src/greeter.js over-engineered? What can we delete?",
+      "expectations": [
+        "Flags the abstract strategy, single-implementation strategy, and factory whose default branch duplicates en as speculative generality",
+        "Flags the unused config options (retries, enableCache by default off, padWidth 0) and the cache as dead or premature",
+        "Flags left-pad (String.prototype.padStart) and is-odd (i % 2) as unneeded dependencies",
+        "Proposes a small replacement (a greet function) with an estimate of lines removed, and does not modify files"
+      ]
+    },
+    {
+      "id": "lean-code-is-left-alone",
+      "kind": "edge",
+      "fixture": "fixtures/lean",
+      "prompt": "What can we simplify or delete in src/slug.js?",
+      "expectations": [
+        "Invokes kit-overengineering-review without being named",
+        "Says the code is already simple and does not invent abstractions to remove",
+        "Does not modify files"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-refactor",
+      "kind": "negative",
+      "fixture": "fixtures/bloated",
+      "prompt": "Rename the Greeter class to WelcomeGreeter across the codebase.",
+      "expectations": ["Does not invoke kit-overengineering-review"]
+    },
+    {
+      "id": "does-not-trigger-for-simplify-request",
+      "kind": "negative",
+      "fixture": "fixtures/bloated",
+      "prompt": "Simplify src/greeter.js.",
+      "expectations": [
+        "Does not invoke kit-overengineering-review (kit-refactoring, which makes the change, fits)"
+      ]
+    }
+  ]
+}
