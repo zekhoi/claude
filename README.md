@@ -24,7 +24,7 @@ Install only the presets a project needs. Every installed skill competes for the
 
 See [docs/cli.md](docs/cli.md#init---preset-name---agent-name---context) for each preset's contents.
 
-Some skills are rarely picked on their own, because the agent prefers to do the work directly. Name them when you want their workflow: `/kit-orchestrate` for work split across subagents, `/kit-monorepo-change` and `/kit-monorepo-release` in workspaces, and `/kit-go-http-api` for Go endpoints. With Codex, mention the skill by name in the request.
+Some skills are rarely picked on their own, because the agent prefers to do the work directly. Name them when you want their workflow: `/kit-orchestrate` for work split across subagents, `/kit-monorepo-change` and `/kit-monorepo-release` in workspaces, and `/kit-go-http-api` for Go endpoints. With the Claude Code plugin, the names are `/agent-kit:orchestrate` and so on; with Codex, mention the skill by name in the request.
 
 ## Development
 

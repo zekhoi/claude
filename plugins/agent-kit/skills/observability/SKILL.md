@@ -12,7 +12,7 @@ Find the logger and its configuration, existing metrics and tracing libraries an
 ## 2. Instrument
 
 - **Logs:** structured (JSON or key-value) with a level, message, and consistent fields such as request ID, trace ID, user or tenant ID (not personal data), operation, and duration. Log errors once at the boundary that handles them, with the cause. Never log passwords, tokens, full payment or personal data, or secrets; redact at the logger level if the library supports it. When you touch logging, also remove or redact existing log statements that leak headers, cookies, tokens, or request bodies.
-- **Metrics:** the RED set for request-driven code (rate, errors, duration as a histogram) and USE for resources (utilization, saturation, errors). Use labels with bounded cardinality: route templates, not raw paths; status classes (`2xx`, `4xx`, `5xx`), not exact codes or user IDs.
+- **Metrics:** the RED set for request-driven code (rate, errors, duration as a histogram) and USE for resources (utilization, saturation, errors). Use labels with bounded cardinality: route templates, not raw paths; status class (`2xx`, `4xx`, `5xx`) or code, never user IDs.
 - **Traces:** OpenTelemetry auto-instrumentation for the framework, database, and HTTP clients first, then manual spans around meaningful work with attributes that help diagnosis. Propagate context across async boundaries and outbound calls.
 - **Health:** a liveness endpoint that checks the process only, and a readiness endpoint that checks required dependencies with timeouts.
 - **Alerts:** on symptoms users feel (error rate, latency against an SLO, saturation), each with a runbook note; avoid alerting on every error log.
