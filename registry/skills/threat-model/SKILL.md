@@ -23,6 +23,8 @@ For each boundary and data flow, consider STRIDE and keep only threats that appl
 - **Denial of service:** unbounded queries, uploads, or fan-out; missing rate limits.
 - **Elevation of privilege:** missing authorization checks, role changes by the user themselves, SSRF to internal services, injection.
 
+For file uploads, also check malware scanning, content-type and size validation, and isolated processing of untrusted files.
+
 Write each threat as an abuse case: who does what, through which entry point, to which asset.
 
 ## 3. Rank and mitigate

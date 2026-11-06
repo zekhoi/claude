@@ -1,6 +1,6 @@
 ---
 name: kit-refactoring
-description: Restructure existing code to improve its design without changing behavior, protected by tests run before and after. Use when the user asks to refactor, clean up, simplify, deduplicate, extract, rename across modules, or reorganize code while keeping it working the same. Do not use for fixing bugs, adding features, or performance work that changes behavior.
+description: Restructure existing code to improve its design without changing behavior, protected by tests run before and after. Use when the user asks to refactor, clean up, tidy, simplify, deduplicate, extract, rename across modules, or reorganize code, or says code is hard to read or messy, while keeping it working the same. Do not use for fixing bugs, adding features, performance work that changes behavior, or reviewing code without changing it (use kit-code-review or kit-overengineering-review).
 ---
 
 # Refactoring

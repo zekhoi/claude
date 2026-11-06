@@ -7,6 +7,8 @@ description: Write or improve Dockerfiles and compose files with multi-stage bui
 
 ## 1. Learn the app
 
+If a Dockerfile already exists, build it before editing and record the image size, so you can compare.
+
 Find the runtime and version, package manager and lockfile, build command, start command, port, required environment variables, and files the app needs at runtime. Read any existing Dockerfile, compose file, and `.dockerignore`.
 
 ## 2. Write
@@ -21,7 +23,7 @@ Find the runtime and version, package manager and lockfile, build command, start
 
 ## 3. Verify
 
-Build the image (`docker build .`) and, when possible, run it briefly to confirm it starts and answers on its port, then stop it. Report the image size. Never tag and push images to a registry unless the user asks. If Docker is unavailable, say so instead of claiming the build works.
+Build the new image (`docker build .`) and, when possible, run it briefly to confirm it starts and answers on its port, then stop it. Report the image size, before and after when there was an earlier image. Never tag and push images to a registry unless the user asks. If Docker is unavailable, say so instead of claiming the build works.
 
 ## 4. Report
 
