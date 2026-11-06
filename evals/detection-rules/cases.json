@@ -9,7 +9,7 @@
       "expectations": [
         "Writes a rule (taint mode or patterns) with sources from req.query, req.body, or req.params and sinks such as exec and execSync, plus message, severity, and CWE metadata",
         "Excludes or does not flag execFile with an argument array",
-        "Adds a test file with ruleid and ok annotations covering /ping as a true positive and /version and /lookup as negatives",
+        "Adds a test file with ruleid and ok annotations covering /ping as a true positive and /version and /lookup as negatives for this CWE-78 rule (/lookup still allows dig option injection, CWE-88, which this rule does not target)",
         "Runs semgrep --test if available, or says it could not run it"
       ]
     },

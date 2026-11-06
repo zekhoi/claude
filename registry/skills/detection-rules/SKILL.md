@@ -12,14 +12,14 @@ description: Write and test detection rules, such as Semgrep or CodeQL queries f
 
 ## 2. Write the rule
 
-- **Semgrep:** prefer `mode: taint` with sources and sinks when the risk is data flow; use `pattern-not` and `pattern-inside` to exclude safe forms such as parameterized queries. Include `message`, `severity`, `languages`, and metadata such as CWE.
+- **Semgrep:** prefer `mode: taint` with `pattern-sources`, `pattern-sinks`, and `pattern-sanitizers` when the risk is data flow (exclude safe forms with sanitizers or `pattern-not` inside the source and sink specs); in search mode use `pattern-not` and `pattern-inside`. Include `message`, `severity`, `languages`, and metadata such as CWE.
 - **CodeQL:** write a path-problem query using the standard library's sources, sinks, and sanitizers for the language rather than string matching.
-- **Sigma:** a `logsource` that matches the user's data, a `detection` with selections and a `condition`, and documented `falsepositives` and `level`.
+- **Sigma:** a `logsource` that matches the user's data (a custom product or service plus field mappings for custom JSON logs), a `detection` with selections and a `condition`, and documented `falsepositives` and `level`. For thresholds and sequences, write a correlation rule (`event_count`, `value_count`, `temporal`, `temporal_ordered`) instead of the deprecated `| count() by` syntax.
 - Keep rules narrow enough that their findings are worth acting on.
 
 ## 3. Test
 
-- Add true-positive samples the rule must flag and false-positive samples it must not (the safe variants), using the tool's test convention (`# ruleid:` and `# ok:` annotations for `semgrep --test`, CodeQL test directories with `.expected` files, sample log events for Sigma).
+- Add true-positive samples the rule must flag and false-positive samples it must not (the safe variants), using the tool's test convention (`ruleid:` and `ok:` comments in the target language's comment syntax for `semgrep --test`, CodeQL test directories with `.expected` files, sample log events for Sigma).
 - Run the tool's tests when it is available locally; run the rule against the project and review the real findings.
 
 ## 4. Report

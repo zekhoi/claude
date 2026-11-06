@@ -18,8 +18,8 @@ Find the web framework and its security middleware (Helmet, `@fastify/helmet`, D
 - **Cookies:** `Secure`, `HttpOnly` for session cookies, and `SameSite=Lax` or `Strict`; short session lifetimes where appropriate.
 - **Errors and debug:** debug mode, stack traces, and docs endpoints disabled or protected in production configuration.
 - **Containers:** pinned base images (digest or exact tag), a non-root `USER`, no secrets in layers or build args, a minimal runtime image, and a `.dockerignore` that excludes `.env` and `.git`.
-- **CI:** least-privilege `permissions:` per workflow or job, third-party actions pinned to a commit SHA, no secrets exposed to pull requests from forks (`pull_request_target` reviewed), and untrusted input never interpolated into `run:` scripts.
-- **Secrets and dependencies:** no committed secrets (`.env` in `.gitignore`, example files without real values), lockfiles committed, and automated dependency updates if the project uses them.
+- **CI:** least-privilege `permissions:` per workflow or job, third-party actions pinned to a commit SHA, never checking out or running pull request code under `pull_request_target` or `workflow_run` (use `pull_request` for untrusted code), `persist-credentials: false` on checkout, and untrusted input never interpolated into `run:` scripts.
+- **Secrets and dependencies:** no committed secrets (`.env` in `.gitignore`, example files without real values); a secret that was already committed must be rotated by the user, because removing or untracking it does not revoke it; lockfiles committed, and automated dependency updates if the project uses them.
 
 ## 3. Verify
 
