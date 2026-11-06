@@ -519,6 +519,90 @@
           "destination": ".claude/skills/kit-detection-rules/SKILL.md"
         }
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/terraform",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Terraform and OpenTofu with pinned providers and safe defaults, verified by fmt, validate, and plan only",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/terraform/SKILL.md",
+          "destination": ".claude/skills/kit-terraform/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/kubernetes",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Kubernetes manifests, Helm, and Kustomize with probes, resources, security contexts, and dry-run validation",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/kubernetes/SKILL.md",
+          "destination": ".claude/skills/kit-kubernetes/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/dockerfile",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Multi-stage Dockerfiles with pinned bases, layer caching, a non-root user, and .dockerignore",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/dockerfile/SKILL.md",
+          "destination": ".claude/skills/kit-dockerfile/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/ci-pipeline",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "GitHub Actions and GitLab CI with caching, least-privilege permissions, pinned actions, and safe secrets",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/ci-pipeline/SKILL.md",
+          "destination": ".claude/skills/kit-ci-pipeline/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/observability",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Structured logs, bounded-cardinality metrics, tracing, health checks, and alerts without leaking personal data",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/observability/SKILL.md",
+          "destination": ".claude/skills/kit-observability/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "agent/infra",
+      "version": "1.0.0",
+      "type": "agent",
+      "description": "Read-only infrastructure reviewer for blast radius, security, cost, and rollback",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "agents/infra.md",
+          "destination": ".claude/agents/kit-infra.md"
+        }
+      ]
     }
   ]
 }

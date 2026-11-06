@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "preset/infra",
+  "description": "Add-on: Terraform, Kubernetes, Dockerfile, CI pipeline, and observability skills, configuration hardening, and the read-only infrastructure reviewer subagent",
+  "items": [
+    "skill/terraform",
+    "skill/kubernetes",
+    "skill/dockerfile",
+    "skill/ci-pipeline",
+    "skill/observability",
+    "skill/hardening",
+    "agent/infra"
+  ]
+}

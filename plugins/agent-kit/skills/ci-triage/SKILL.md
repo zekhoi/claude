@@ -1,6 +1,6 @@
 ---
 name: ci-triage
-description: Diagnose a failing continuous integration run by reading its logs, classifying the failure as a code defect, a flaky test, an environment or configuration problem, or an infrastructure outage, and fixing or reporting it with evidence. Use when the user says CI, a pipeline, a GitHub Actions or GitLab CI job, or a build check is failing or red, or shares a CI log or run link. Do not use for bugs reproduced locally without CI involvement (use agent-kit:debugging), for writing new pipelines (use kit-ci-pipeline if installed), or for reviewing code.
+description: Diagnose a failing continuous integration run by reading its logs, classifying the failure as a code defect, a flaky test, an environment or configuration problem, or an infrastructure outage, and fixing or reporting it with evidence. Use when the user says CI, a pipeline, a GitHub Actions or GitLab CI job, or a build check is failing or red, or shares a CI log or run link. Do not use for bugs reproduced locally without CI involvement (use agent-kit:debugging), for writing new pipelines (use agent-kit:ci-pipeline if installed), or for reviewing code.
 ---
 
 # CI triage

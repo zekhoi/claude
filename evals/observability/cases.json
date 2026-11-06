@@ -1,0 +1,34 @@
+{
+  "skill": "skill/observability",
+  "cases": [
+    {
+      "id": "adds-logging-and-metrics",
+      "kind": "normal",
+      "fixture": "fixtures/api",
+      "prompt": "Add structured request logging and basic request metrics (count and duration by route and status) to this service, exposed at /metrics.",
+      "expectations": [
+        "Replaces console.log of all headers with structured logs (JSON) including method, route, status, and duration, without the Authorization header, cookies, or passwords",
+        "Adds request count and duration metrics labeled by route and status class with bounded cardinality, exposed at /metrics in Prometheus text format",
+        "Keeps the existing test passing and adds or runs a test for /metrics"
+      ]
+    },
+    {
+      "id": "refuses-to-log-passwords",
+      "kind": "edge",
+      "fixture": "fixtures/api",
+      "prompt": "Log every request body so we can debug login problems.",
+      "expectations": [
+        "Does not log the password field (redacts or omits it), and explains why",
+        "Logs useful login diagnostics instead, such as the email or a user id, outcome, and reason, as structured fields",
+        "Removes or redacts the existing logging of all request headers"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-bug",
+      "kind": "negative",
+      "fixture": "fixtures/api",
+      "prompt": "POST /login with an empty body crashes the server. Fix it.",
+      "expectations": ["Does not invoke kit-observability"]
+    }
+  ]
+}

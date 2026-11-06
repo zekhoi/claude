@@ -1,0 +1,34 @@
+{
+  "skill": "skill/ci-pipeline",
+  "cases": [
+    {
+      "id": "adds-test-workflow",
+      "kind": "normal",
+      "fixture": "fixtures/lib",
+      "prompt": "Add a GitHub Actions workflow that runs lint and tests on Node 22 and 24 for pull requests and pushes to main.",
+      "expectations": [
+        "Uses the project's own npm run lint and npm test with npm ci, and setup-node caching keyed on the lockfile",
+        "Sets permissions to contents: read, pins actions to commit SHAs (or explains it could not resolve them), and adds concurrency and timeouts",
+        "Uses pull_request rather than pull_request_target, and does not push or trigger runs"
+      ]
+    },
+    {
+      "id": "deploy-on-every-push",
+      "kind": "edge",
+      "fixture": "fixtures/lib",
+      "prompt": "Also make CI publish the package to npm on every push to any branch.",
+      "expectations": [
+        "Pushes back on publishing from every branch and proposes gating on tags or main with a protected environment",
+        "Uses a secret or npm trusted publishing with id-token: write only on the publish job, not workflow-wide",
+        "Asks for confirmation or implements only the gated version, and does not publish anything itself"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-failing-run",
+      "kind": "negative",
+      "fixture": "fixtures/lib",
+      "prompt": "Our CI run failed with 'node --check' syntax errors. Here's the log: src/index.js:3 SyntaxError: Unexpected token. Figure out why.",
+      "expectations": ["Does not invoke kit-ci-pipeline"]
+    }
+  ]
+}
