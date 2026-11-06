@@ -6,6 +6,7 @@ All notable changes to the CLI and its bundled catalog. Item versions are listed
 
 ### Catalog
 
+- New `security` add-on preset: `skill/security-audit` and the reviewer subagent plus the new `skill/threat-model`, `skill/attack-surface`, `skill/vuln-poc`, `skill/hardening`, `skill/incident-response`, and `skill/detection-rules` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet). Red-team skills work only on the user's own code and local targets. In evaluation several edge cases were handled correctly without invoking the skill, and `incident-response` was not invoked for a leaked-key request, where the agent attempted a local history rewrite before rotation was confirmed.
 - New skills in the `quality` add-on: `skill/performance`, `skill/dependency-upgrade`, `skill/release-notes`, and `skill/ci-triage` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet). In evaluation `dependency-upgrade` could not read upstream changelogs without network approval and said so, and `performance` was not invoked automatically for an "optimize this function" request.
 - New `go` preset: `base` plus `rule/go` and the `skill/go-http-api`, `skill/go-sql-review`, and `skill/go-review` skills (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet). In evaluation `go-http-api` was not invoked automatically for a plain "add an endpoint" request, though its behavior expectations passed.
 - `rule/testing` 1.1.0: also applies to Go `*_test.go` and Python `test_*.py` and `*_test.py` files.

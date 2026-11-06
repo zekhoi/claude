@@ -226,7 +226,7 @@ Do not modify code unless requested.
 Avoid generic advice and unsupported assumptions.
 ```
 
-Candidate custom skills: database migrations and merge request review. Shipped since the initial catalog: commit, pull and merge requests (`pull-request`), security audit, Kysely query review, Fastify API implementation, the Python FastAPI and SQLAlchemy skills, the TypeScript Prisma, Drizzle, and React skills, the Go HTTP API, SQL review, and review skills, and the performance, dependency upgrade, release notes, and CI triage skills. Add them incrementally as their workflows and evaluations become reliable.
+Candidate custom skills: database migrations and merge request review. Shipped since the initial catalog: commit, pull and merge requests (`pull-request`), security audit, Kysely query review, Fastify API implementation, the Python FastAPI and SQLAlchemy skills, the TypeScript Prisma, Drizzle, and React skills, the Go HTTP API, SQL review, and review skills, the performance, dependency upgrade, release notes, and CI triage skills, and the red- and blue-team security skills. Add them incrementally as their workflows and evaluations become reliable.
 
 Anthropic's `skill-creator` can optionally assist with drafting and evaluation. It is an authoring aid, not a required runtime dependency or an automatically bundled third-party skill.
 
