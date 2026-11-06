@@ -16,6 +16,7 @@ type Result struct {
 
 // CountLines counts lines in each file with at most limit concurrent reads.
 func CountLines(ctx context.Context, paths []string, limit int) []Result {
+	limit = max(limit, 1)
 	results := make([]Result, len(paths))
 	sem := make(chan struct{}, limit)
 	var wg sync.WaitGroup

@@ -7,7 +7,7 @@ description: Implement or change HTTP handlers in a Go service following the pro
 
 ## 1. Learn the service's structure
 
-- Find the router (`http.ServeMux` with Go 1.22 method patterns, chi, gin, echo), how handlers are registered and grouped, and how dependencies such as the store and logger reach handlers (a server struct, closures).
+- Find the router (`http.ServeMux` with method and wildcard patterns, which need `go 1.22` or later in `go.mod`; chi, gin, echo), how handlers are registered and grouped, and how dependencies such as the store and logger reach handlers (a server struct, closures).
 - Note existing middleware for authentication, request IDs, logging, and recovery, the JSON helpers and error response shape, and how tests build the server.
 - Read an existing handler and its test, and follow them.
 

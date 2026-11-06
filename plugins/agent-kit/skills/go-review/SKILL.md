@@ -1,6 +1,6 @@
 ---
 name: go-review
-description: Review Go code for language-level defects, including goroutine leaks, data races, unchecked or shadowed errors, context misuse, nil map writes, defer in loops, and unsafe concurrency patterns, and report findings with severity and file locations. Use when asked to review Go code, a Go diff, package, or service for correctness and concurrency problems. Do not use for non-Go code, for SQL data-access review (use agent-kit:go-sql-review), for writing new handlers (use agent-kit:go-http-api), or for fixing a known bug (use agent-kit:debugging); this skill reports and does not edit code.
+description: Review Go code for language-level defects, including goroutine leaks, data races, unchecked or shadowed errors, context misuse, nil map writes, defer in loops, and unsafe concurrency patterns, and report findings with severity and file locations. Use when asked to review Go code, a Go diff, package, or service for Go-specific correctness and concurrency problems. Do not use for general reviews that also need security and maintainability coverage (use agent-kit:code-review), for non-Go code, for SQL data-access review (use agent-kit:go-sql-review), for writing new handlers (use agent-kit:go-http-api), or for fixing a known bug (use agent-kit:debugging); this skill reports and does not edit code.
 ---
 
 # Go review
@@ -20,12 +20,13 @@ Review the files, package, or diff the user named; otherwise the uncommitted cha
 
 **Concurrency**
 
-- Goroutines with no exit path: blocked sends on unbuffered channels nobody reads, missing `ctx.Done()` in loops, `time.After` in long loops. Channels closed by a receiver or closed twice.
+- Goroutines with no exit path: blocked sends on unbuffered channels nobody reads, missing `ctx.Done()` in loops. Channels closed by a receiver or closed twice.
 - Data races: maps or slices written from several goroutines without a mutex, `sync.WaitGroup.Add` called inside the goroutine, copying structs that contain a `sync.Mutex`. Suggest `go test -race` to confirm.
 - Before Go 1.22, closures in loops capturing the loop variable.
 
 **Context and resources**
 
+- Before Go 1.23, `time.After` in long loops keeps each timer alive until it fires; use `time.NewTimer` with `Stop` or `Reset`.
 - `context.Background()` used where a request context exists, `cancel` from `WithTimeout` not deferred, contexts stored in structs.
 - `defer` inside a loop holding files or locks until the function returns; HTTP response bodies not closed; `http.Client` without a timeout.
 
@@ -40,5 +41,5 @@ Confirm findings by tracing the code; run `go vet ./...`, `go build ./...`, and 
 
 ## Examples
 
-- Use: "Review internal/worker for concurrency bugs." "Review my Go changes."
+- Use: "Review internal/worker for concurrency bugs." "Check my Go changes for goroutine leaks."
 - Skip: "Review the SQL in store.go." (agent-kit:go-sql-review) "Add a /health endpoint." (agent-kit:go-http-api)

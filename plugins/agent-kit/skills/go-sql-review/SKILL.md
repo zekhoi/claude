@@ -16,8 +16,8 @@ Report findings without modifying code unless the user asks for fixes.
 
 **Correctness**
 
-- `UPDATE` and `DELETE` without `WHERE`, and GORM `Delete` or `Updates` on an empty model or condition, affect every row. Flag them unless intended (GORM blocks global updates unless `AllowGlobalUpdate` is set; check it is not).
-- `QueryRow(...).Scan` returns `sql.ErrNoRows`: callers must handle it with `errors.Is`. Nullable columns need `sql.NullString`, pointers, or `COALESCE`; scanning NULL into `string` fails.
+- `UPDATE` and `DELETE` without `WHERE` affect every row. Flag them unless intended. GORM v2 refuses global `Update`/`Delete` with `ErrMissingWhereClause`, unless `AllowGlobalUpdate`, `Where("1 = 1")`, or raw `Exec` bypasses it (GORM v1 does not refuse). Struct conditions skip zero-value fields, so `Where(&Order{TenantID: 0})` silently drops the tenant filter.
+- `QueryRow(...).Scan` returns `sql.ErrNoRows` (`pgx.ErrNoRows` with native pgx): callers must handle it with `errors.Is`. Nullable columns need `sql.NullString`, pointers, or `COALESCE`; scanning NULL into `string` fails.
 - GORM `Updates(struct)` skips zero values (`false`, `0`, `""`): flag updates that silently drop them and suggest `map[string]any` or `Select`. GORM `First` returns `ErrRecordNotFound`; `Find` does not.
 - Pagination needs a deterministic `ORDER BY`.
 
@@ -34,7 +34,7 @@ Report findings without modifying code unless the user asks for fixes.
 
 **Performance**
 
-- Queries in loops (N+1) should become one query with `= ANY($1)` or `IN (?)` via sqlx, a join, or GORM `Preload`. Use batch inserts or `COPY` for many rows. Check filtered and sorted columns are indexed.
+- Queries in loops (N+1) should become one query with `= ANY($1)` (wrap the slice in `pq.Array` with lib/pq; native pgx accepts slices) or `IN (?)` via sqlx, a join, or GORM `Preload`. Use batch inserts or `COPY` for many rows. Check filtered and sorted columns are indexed.
 
 ## 3. Verify and report
 
