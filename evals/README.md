@@ -59,13 +59,13 @@ evals/<skill-id>/
 | `allowedTools` | Optional extra Claude Code tool permissions for the case, such as `Bash(git commit*)`.                                                     |
 | `install`      | Optional `true` to run `npm install --ignore-scripts` in the fixture before the case, for fixtures whose tests need real dependencies.     |
 | `remote`       | Optional `true` to add an `origin` remote at the initial commit, so `history` and `branch` commits are unpushed.                           |
-| `add`          | Optional list of extra items to install, such as `agent/reviewer`; every registry skill is always installed.                               |
+| `add`          | Optional list of extra items to install, such as `agent/reviewer`; the case's presets are always installed.                                |
 
 ## Running cases
 
 `node evals/run.mjs` runs every case with Claude Code and writes one JSON transcript summary per case: skills invoked, tool calls, files changed, the diff, the fixture's tests afterwards, the final answer, and cost. Build the CLI first (`pnpm -r run build`). Options: `--skill <id>`, `--case <id>`, `--model <model>` (default `sonnet`), `--budget <usd>` per case (default 1), and `--out <dir>`.
 
-Each case runs in a fresh git repository containing the fixture, with the guidelines and every skill installed by the CLI, so negative cases test real triggering. Sessions load only the project's configuration. Judging the expectations remains a review step: read the summaries and record the outcome.
+Each case runs in a fresh git repository containing the fixture, with what a user of the skill would install: the `base` preset plus every preset that contains the skill (or the skill alone if no preset does). `--all-skills` installs the whole catalog instead, which is the worst case for skill selection. Sessions load only the project's configuration. Judging the expectations remains a review step: read the summaries and record the outcome.
 
 ## Result records
 
@@ -78,3 +78,13 @@ Each run is a Markdown file under `results/` recording:
 - Changes made to the skill as a result, if any.
 
 Rerun the affected cases whenever a skill's instructions or supporting files change, and before releasing a changed skill.
+
+## Triggering and catalog size
+
+In these runs, the number of installed skills had a much larger effect on whether a skill was picked than shortening its description. Measured on 2026-11-06 with Claude Code 2.1.318 and Sonnet, two runs per case, with the summaries kept outside the repository:
+
+- 13 trigger-sensitive cases triggered their skill in 21 of 26 runs with only that skill and the `base` preset installed, and in 7 of 26 runs with all 42 catalog skills installed.
+- 29 trigger-sensitive cases (cases that name the skill with a slash command are excluded) triggered in 35 of 58 runs with the presets a user of each skill would install, and in 16 of 58 runs with the whole catalog. The cases that still did not trigger were mostly refusals the model handled without a skill (external scans, remote exploits, live firewall changes), plus `orchestrate` and `monorepo-change`.
+- With the whole catalog installed, descriptions shortened to about 250 characters did not improve triggering (13 of 58 runs against 16 of 58).
+
+Keep presets small and install only the presets a project needs. Results recorded before this change (pull request #31) installed the whole catalog, so their triggering notes describe the worst case. By default each case now runs without the more specific skills that might compete with it; use `--all-skills`, or list competitors in `add`, to test deferral between skills. Skills in two add-on presets (`security-audit`, `hardening`) install both.
