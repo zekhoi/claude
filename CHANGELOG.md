@@ -2,29 +2,6 @@
 
 All notable changes to the CLI and its bundled catalog. Item versions are listed per release; see [versioning rules](docs/PLAN.md#content-versioning).
 
-## Unreleased
-
-### Repository
-
-- `main` and `v*` tags are protected by GitHub rulesets (squash-only pull requests with the required checks, linear history, and no deletion or force pushes), replacing classic branch protection.
-
-### Catalog
-
-- Every skill was re-evaluated with preset installs (Claude Code 2.1.318, Sonnet): 117 of 132 cases pass, 13 partial, 2 fail, and skills triggered on their own in 56 of 76 cases that do not name them, with no negative case triggering. Each result file has a "Rerun with preset installs" section; the failures are `orchestrate` without invocation in a parallel case and a `refactoring` run that skipped characterization tests.
-- `feature-implementation` hands off to `kit-monorepo-change` and `kit-orchestrate`, and the `orchestrate` and `monorepo-change` descriptions use more of the user's phrasing; in evaluation this did not make the two skills trigger on their own.
-- Skill selection depends on how many skills are installed. In two runs per case, trigger-sensitive cases triggered in 35 of 58 runs with the presets a user of each skill would install and in 16 of 58 with the whole catalog, while shorter descriptions did not improve triggering. Evaluations now install those presets by default (`--all-skills` for the worst case), and the docs advise installing only the presets a project needs.
-- New `monorepo` add-on preset: `skill/monorepo-change`, `skill/monorepo-package`, `skill/monorepo-release`, and `skill/monorepo-review` (1.0.0) for JS/TS, Go, Python, and Rust workspaces, evaluated with Claude Code 2.1.318 (Sonnet). `monorepo-package` and `monorepo-review` triggered on their own; `monorepo-change` and `monorepo-release` did the right work without being invoked. `monorepo-package` passed its uv workspace case only after the case was allowed to run `git mv`.
-- New `orchestration` add-on preset: `skill/orchestrate` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet), and the read-only `agent/planner` subagent (1.0.0, not evaluated), with the architect, reviewer, and debugger subagents. When named, the skill delegated independent packages to parallel subagents and verified the result, and did a small change itself with an independent review; it was not invoked automatically for multi-step requests. Parallel groups that edit files run one subagent per Git worktree, and the results are applied to the user's tree as uncommitted changes.
-- The `review` add-on gains `skill/design-review` and `skill/overengineering-review` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet), and the read-only `agent/architect` subagent (1.0.0, not evaluated).
-- New `infra` add-on preset: `skill/terraform`, `skill/kubernetes`, `skill/dockerfile`, `skill/ci-pipeline`, `skill/observability` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet), the read-only `agent/infra` subagent (1.0.0, not evaluated), and `skill/hardening`. The skills edit files and run read-only or dry-run commands, never apply or deploy. In evaluation `ci-pipeline` first did not trigger for a request to publish on every push, because its description excluded deployment; after including publish and deploy jobs it triggered and gated publishing. `observability` was not invoked for a request to log request bodies, and `terraform` was not invoked for a plain "add a bucket" request.
-- New `security` add-on preset: `skill/security-audit` and the reviewer subagent plus the new `skill/threat-model`, `skill/attack-surface`, `skill/vuln-poc`, `skill/hardening`, `skill/incident-response`, and `skill/detection-rules` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet). The red-team skills are written to work only on the user's own code and local or named test targets; in evaluation, requests against external targets were declined, but several of those edge cases were handled without invoking the skill, and `incident-response` was not invoked for a leaked-key request; one early run attempted a local history rewrite before rotation was confirmed, which led to an explicit rule against rewriting history.
-- New skills in the `quality` add-on: `skill/performance`, `skill/dependency-upgrade`, `skill/release-notes`, and `skill/ci-triage` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet). In evaluation `dependency-upgrade` could not read upstream changelogs without network approval and said so, and `performance` was not invoked automatically for an "optimize this function" request.
-- New `go` preset: `base` plus `rule/go` and the `skill/go-http-api`, `skill/go-sql-review`, and `skill/go-review` skills (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet). In evaluation `go-http-api` was not invoked automatically for a plain "add an endpoint" request, though its behavior expectations passed.
-- `rule/testing` 1.1.0: also applies to Go `*_test.go` and Python `test_*.py` and `*_test.py` files.
-- New opt-in TypeScript skills, in no preset so projects install only the one they use: `skill/prisma-review`, `skill/drizzle-review`, and `skill/react-component` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet); see `evals/*/results/`. In evaluation the React skill was applied, but it was not invoked automatically for a plain "add a search box" request.
-- `skill/feature-implementation` 1.0.1: the description defers to more specific installed skills such as `kit-react-component` and the framework API skills. With Claude Code 2.1.318 it no longer triggers automatically for its normal and edge cases (also with 1.0.0), although its behavior expectations pass.
-- New Python skills in the `python` preset: `skill/fastapi-api` and `skill/sqlalchemy-review` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet); see `evals/*/results/`.
-
 ## 0.1.0
 
 First release. Published as `@zekhoi/agent-kit`.
@@ -44,15 +21,29 @@ First release. Published as `@zekhoi/agent-kit`.
 
 ### Catalog
 
-| Item                                                                                            | Version |
-| ----------------------------------------------------------------------------------------------- | ------- |
-| `guideline/engineering`                                                                         | 1.0.0   |
-| `rule/testing`, `rule/typescript`, `rule/python`                                                | 1.0.0   |
-| `skill/code-review`, `skill/debugging`, `skill/feature-implementation`, `skill/database-design` | 1.0.0   |
-| `skill/commit`, `skill/pull-request`, `skill/security-audit`                                    | 1.0.0   |
-| `skill/refactoring`, `skill/test-writing`, `skill/documentation`                                | 1.0.0   |
-| `skill/kysely-review`, `skill/fastify-api`                                                      | 1.0.0   |
-| `agent/reviewer`, `agent/debugger`                                                              | 1.0.0   |
-| Presets `base`, `node`, `python`, and add-ons `quality`, `review`                               | —       |
+| Item                                                                                                                                               | Version |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `guideline/engineering`                                                                                                                            | 1.0.0   |
+| `rule/go`, `rule/python`, `rule/typescript`                                                                                                        | 1.0.0   |
+| `rule/testing`                                                                                                                                     | 1.1.0   |
+| `skill/attack-surface`, `skill/ci-pipeline`, `skill/ci-triage`, `skill/code-review`, `skill/commit`, `skill/database-design`                       | 1.0.0   |
+| `skill/debugging`, `skill/dependency-upgrade`, `skill/design-review`, `skill/detection-rules`, `skill/dockerfile`, `skill/documentation`           | 1.0.0   |
+| `skill/drizzle-review`, `skill/fastapi-api`, `skill/fastify-api`, `skill/go-http-api`, `skill/go-review`, `skill/go-sql-review`                    | 1.0.0   |
+| `skill/hardening`, `skill/incident-response`, `skill/kubernetes`, `skill/kysely-review`, `skill/monorepo-change`, `skill/monorepo-package`         | 1.0.0   |
+| `skill/monorepo-release`, `skill/monorepo-review`, `skill/observability`, `skill/orchestrate`, `skill/overengineering-review`, `skill/performance` | 1.0.0   |
+| `skill/prisma-review`, `skill/pull-request`, `skill/react-component`, `skill/refactoring`, `skill/release-notes`, `skill/security-audit`           | 1.0.0   |
+| `skill/sqlalchemy-review`, `skill/terraform`, `skill/test-writing`, `skill/threat-model`, `skill/vuln-poc`                                         | 1.0.0   |
+| `skill/feature-implementation`                                                                                                                     | 1.0.1   |
+| `agent/architect`, `agent/debugger`, `agent/infra`, `agent/planner`, `agent/reviewer`                                                              | 1.0.0   |
+| Presets `base`, `node`, `python`, `go`; add-ons `infra`, `monorepo`, `orchestration`, `quality`, `review`, `security`                              | —       |
 
-All twelve skills were evaluated with Claude Code 2.1.296 (Sonnet) against normal, edge, and negative cases; see `evals/*/results/`. The `base`, `node`, and `python` presets include `commit` and `pull-request`, and `node` adds `kysely-review` and `fastify-api`; `security-audit`, `database-design`, `refactoring`, `test-writing`, and `documentation` are optional. The `debugging` description now also covers intermittent and production-only problems after an evaluation showed it did not trigger for them.
+- **Presets:** `base`, `node` (TypeScript, Kysely, Fastify), `python` (FastAPI, SQLAlchemy), and `go` (net/http, database/sql, Go review), plus add-ons `quality`, `review`, `security`, `infra`, `orchestration`, and `monorepo`. `database-design`, `prisma-review`, `drizzle-review`, and `react-component` are in no preset; install them with `add`.
+- **Orchestration:** `kit-orchestrate` runs parallel groups that edit files in one Git worktree per subagent, created from the current commit, and applies their results as uncommitted changes.
+- **Safety boundaries:** infra skills only edit files and run read-only or dry-run commands, never apply or deploy. Red-team skills work only on the user's own code and local or named test targets. `incident-response` never deletes evidence or rewrites history.
+- **Evaluations:** every skill was evaluated with Claude Code 2.1.318 (Sonnet), installing the presets a user of the skill would. 117 of 132 cases pass, 13 are partial, and 2 fail: an `orchestrate` parallel case that ran without the skill, and a `refactoring` run that skipped characterization tests. Skills triggered on their own in 56 of 76 cases that do not name them, and no negative case triggered. Subagents are not evaluated. See `evals/*/results/`.
+- **Choosing presets:** skills are picked less reliably as more are installed. Trigger-sensitive cases triggered in 35 of 58 runs with a project's presets and in 16 of 58 with the whole catalog. Install only the presets a project needs; see [Choose presets](README.md#choose-presets) and `evals/README.md`.
+- **Known gaps:** `orchestrate`, `monorepo-change`, `monorepo-release`, and `go-http-api` are rarely picked without being named. In evaluation, `dependency-upgrade` could not read upstream changelogs without network access.
+
+### Repository
+
+- `main` and `v*` tags are protected by GitHub rulesets (squash-only pull requests with the required checks, linear history, and no deletion or force pushes).
