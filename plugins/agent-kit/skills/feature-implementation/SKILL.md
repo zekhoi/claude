@@ -1,6 +1,6 @@
 ---
 name: feature-implementation
-description: Implement a new feature or behavior change end to end, tracing requirements through design, code, tests, and verification. Use when the user asks to add, build, or change functionality that spans more than a trivial edit. Do not use for bug diagnosis, code review, one-line changes, or work that a more specific installed kit skill covers, such as React components (agent-kit:react-component) or framework endpoints (agent-kit:fastify-api, agent-kit:fastapi-api, agent-kit:go-http-api).
+description: Implement a new feature or behavior change end to end, tracing requirements through design, code, tests, and verification. Use when the user asks to add, build, or change functionality that spans more than a trivial edit. Do not use for bug diagnosis, code review, one-line changes, or work that a more specific installed kit skill covers, such as React components (agent-kit:react-component), framework endpoints (agent-kit:fastify-api, agent-kit:fastapi-api, agent-kit:go-http-api), changes across several packages of a monorepo (agent-kit:monorepo-change), or requests to delegate or coordinate build, tests, docs, and review (agent-kit:orchestrate).
 ---
 
 # Feature implementation
@@ -38,4 +38,4 @@ description: Implement a new feature or behavior change end to end, tracing requ
 ## Examples
 
 - Use: "Add CSV export to the reports page." "Support API keys in addition to session auth."
-- Skip: "Fix the null pointer in the parser." (debugging) "Rename this variable." (trivial edit)
+- Skip: "Fix the null pointer in the parser." (debugging) "Rename this variable." (trivial edit) "Add currency to the shared money package and use it in billing." (agent-kit:monorepo-change, if installed)

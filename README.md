@@ -5,6 +5,25 @@ A CLI that installs engineering guidelines, rules, subagents, and skills for Cla
 > Status: preparing the first release, `@zekhoi/agent-kit` 0.1.0. It is not published yet.
 > See [docs/PLAN.md](docs/PLAN.md) for the design and roadmap, and [SECURITY.md](SECURITY.md) for the threat model and how to report vulnerabilities.
 
+## Choose presets
+
+Install only the presets a project needs. Every installed skill competes for the agent's attention: in evaluations, skills were picked far more often with a project's presets installed than with the whole catalog (see [evals/README.md](evals/README.md#triggering-and-catalog-size)). The `node`, `python`, and `go` presets include `base`; add-ons don't, so for other stacks pass `--preset base` with them.
+
+| Project                                         | Command                                                                                                                     |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Node.js or TypeScript service                   | `agent-kit init --preset node` (then `add skill/prisma-review`, `skill/drizzle-review`, or `skill/react-component` if used) |
+| Python service                                  | `agent-kit init --preset python`                                                                                            |
+| Go service                                      | `agent-kit init --preset go`                                                                                                |
+| Other languages                                 | `agent-kit init --preset base`                                                                                              |
+| Monorepo or workspace                           | add `--preset monorepo` to the stack preset                                                                                 |
+| Security work                                   | add `--preset security`                                                                                                     |
+| Infrastructure as code, containers, CI          | add `--preset infra`                                                                                                        |
+| Larger tasks split across subagents             | add `--preset orchestration`                                                                                                |
+| Refactoring, tests, docs, performance, upgrades | add `--preset quality`                                                                                                      |
+| Design and over-engineering reviews             | add `--preset review`                                                                                                       |
+
+See [docs/cli.md](docs/cli.md#init---preset-name---agent-name---context) for each preset's contents.
+
 ## Development
 
 Requires Node.js >= 22.12 and pnpm (pinned through `packageManager`; `corepack pnpm` works without a global install).

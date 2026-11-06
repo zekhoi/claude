@@ -1,6 +1,6 @@
 # Agent Kit — Implementation Plan
 
-Status: Phases 1–4 implemented; CI and the cross-platform matrix pass on GitHub, and initial skill evaluations are recorded. Outstanding before the first release: the package name and scope, the npm publisher and GitHub environment setup, branch protection, the declared Claude Code range, and the version and changelog.
+Status: Phases 1–4 implemented; CI and the cross-platform matrix pass on GitHub, and initial skill evaluations are recorded. Branch and release-tag rulesets are in place. Outstanding before the first release: the package name and scope, the npm publisher and GitHub environment setup, the declared Claude Code range, and the version and changelog.
 
 ## 1. Goal
 

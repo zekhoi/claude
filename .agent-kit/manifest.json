@@ -56,12 +56,12 @@
         {
           "destination": ".claude/skills/kit-feature-implementation/SKILL.md",
           "install": "file",
-          "sha256": "d8db20402ccb097295b00ab90fb52f71213ade9e21a3e2f69ab21007ea59a8d3"
+          "sha256": "33809dfcf892d07ad809ba2e115819e711b7fe3549baf280e0343a969219c299"
         },
         {
           "destination": ".agents/skills/kit-feature-implementation/SKILL.md",
           "install": "file",
-          "sha256": "d8db20402ccb097295b00ab90fb52f71213ade9e21a3e2f69ab21007ea59a8d3"
+          "sha256": "33809dfcf892d07ad809ba2e115819e711b7fe3549baf280e0343a969219c299"
         }
       ]
     },

@@ -4,8 +4,13 @@ All notable changes to the CLI and its bundled catalog. Item versions are listed
 
 ## Unreleased
 
+### Repository
+
+- `main` and `v*` tags are protected by GitHub rulesets (squash-only pull requests with the required checks, linear history, and no deletion or force pushes), replacing classic branch protection.
+
 ### Catalog
 
+- `feature-implementation` hands off to `kit-monorepo-change` and `kit-orchestrate`, and the `orchestrate` and `monorepo-change` descriptions use more of the user's phrasing; in evaluation this did not make the two skills trigger on their own.
 - Skill selection depends on how many skills are installed. In two runs per case, trigger-sensitive cases triggered in 35 of 58 runs with the presets a user of each skill would install and in 16 of 58 with the whole catalog, while shorter descriptions did not improve triggering. Evaluations now install those presets by default (`--all-skills` for the worst case), and the docs advise installing only the presets a project needs.
 - New `monorepo` add-on preset: `skill/monorepo-change`, `skill/monorepo-package`, `skill/monorepo-release`, and `skill/monorepo-review` (1.0.0) for JS/TS, Go, Python, and Rust workspaces, evaluated with Claude Code 2.1.318 (Sonnet). `monorepo-package` and `monorepo-review` triggered on their own; `monorepo-change` and `monorepo-release` did the right work without being invoked. `monorepo-package` passed its uv workspace case only after the case was allowed to run `git mv`.
 - New `orchestration` add-on preset: `skill/orchestrate` (1.0.0), evaluated with Claude Code 2.1.318 (Sonnet), and the read-only `agent/planner` subagent (1.0.0, not evaluated), with the architect, reviewer, and debugger subagents. When named, the skill delegated independent packages to parallel subagents and verified the result, and did a small change itself with an independent review; it was not invoked automatically for multi-step requests. Parallel groups that edit files run one subagent per Git worktree, and the results are applied to the user's tree as uncommitted changes.
