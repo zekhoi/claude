@@ -35,6 +35,7 @@ Installs one or more presets for one or more coding agents: `--agent claude` (th
 | `base`    | Engineering guidelines; `code-review`, `debugging`, `feature-implementation`, `commit`, and `pull-request` skills; testing rules     |
 | `node`    | `base` plus TypeScript rules and the `kysely-review`, `prisma-review`, `drizzle-review`, `fastify-api`, and `react-component` skills |
 | `python`  | `base` plus Python rules and the `fastapi-api` and `sqlalchemy-review` skills                                                        |
+| `go`      | `base` plus Go rules and the `go-http-api`, `go-sql-review`, and `go-review` skills                                                  |
 | `quality` | Add-on: `refactoring`, `test-writing`, and `documentation` skills                                                                    |
 | `review`  | Add-on: `security-audit` skill and the read-only `reviewer` subagent                                                                 |
 

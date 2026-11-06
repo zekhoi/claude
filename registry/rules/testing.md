@@ -5,6 +5,9 @@ paths:
   - "**/test/**"
   - "**/tests/**"
   - "**/__tests__/**"
+  - "**/*_test.go"
+  - "**/test_*.py"
+  - "**/*_test.py"
 ---
 
 # Testing conventions

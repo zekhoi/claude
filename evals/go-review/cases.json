@@ -1,0 +1,38 @@
+{
+  "skill": "skill/go-review",
+  "cases": [
+    {
+      "id": "finds-planted-defects",
+      "kind": "normal",
+      "fixture": "fixtures/worker",
+      "allowedTools": ["Bash(go vet*)", "Bash(go build*)", "Bash(go test*)"],
+      "prompt": "/kit-go-review Review worker/worker.go.",
+      "expectations": [
+        "Reports that CountLines leaks every goroutine but one, blocked sending on the unbuffered results channel, and ignores the ReadFile error and ctx",
+        "Reports the data race on the shared totals map and wg.Add called inside the goroutine",
+        "Reports the shadowed err in ConcatAll (so errors are lost), defer f.Close() inside the loop, and the ignored Read error",
+        "Reports that Index.Add writes to a nil map on a zero-value Index",
+        "Gives severity and file:line for each finding and does not modify files"
+      ]
+    },
+    {
+      "id": "clean-code-triggered-naturally",
+      "kind": "edge",
+      "fixture": "fixtures/clean",
+      "allowedTools": ["Bash(go vet*)", "Bash(go build*)", "Bash(go test*)"],
+      "prompt": "Review worker/worker.go for concurrency bugs.",
+      "expectations": [
+        "Invokes kit-go-review without being named",
+        "Reports no significant concurrency defects instead of inventing problems, noting what was checked (WaitGroup use, semaphore, ctx cancellation, per-index writes, Go 1.22 loop variables)",
+        "Does not modify files"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-new-code",
+      "kind": "negative",
+      "fixture": "fixtures/worker",
+      "prompt": "Write a Go function that reads a CSV file and returns its rows as maps keyed by header.",
+      "expectations": ["Does not invoke kit-go-review"]
+    }
+  ]
+}

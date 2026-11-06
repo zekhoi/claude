@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "preset/go",
+  "description": "Base preset plus Go rules and the Go HTTP API, Go SQL review, and Go review skills",
+  "items": [
+    "guideline/engineering",
+    "skill/code-review",
+    "skill/debugging",
+    "skill/feature-implementation",
+    "skill/commit",
+    "skill/pull-request",
+    "rule/testing",
+    "rule/go",
+    "skill/go-http-api",
+    "skill/go-sql-review",
+    "skill/go-review"
+  ]
+}

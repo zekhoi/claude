@@ -1,6 +1,6 @@
 ---
 name: kit-testing-rules
-description: "Testing conventions for this project. Use when reading, writing, or reviewing files matching `**/*.test.*`, `**/*.spec.*`, `**/test/**`, `**/tests/**`, `**/__tests__/**`. Do not use for other files."
+description: "Testing conventions for this project. Use when reading, writing, or reviewing files matching `**/*.test.*`, `**/*.spec.*`, `**/test/**`, `**/tests/**`, `**/__tests__/**`, `**/*_test.go`, `**/test_*.py`, `**/*_test.py`. Do not use for other files."
 ---
 
 # Testing conventions

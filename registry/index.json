@@ -19,7 +19,7 @@
     {
       "schemaVersion": 1,
       "id": "rule/testing",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "type": "rule",
       "description": "Testing conventions applied to test files",
       "dependencies": [],
@@ -321,6 +321,62 @@
         {
           "source": "skills/react-component/SKILL.md",
           "destination": ".claude/skills/kit-react-component/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rule/go",
+      "version": "1.0.0",
+      "type": "rule",
+      "description": "Go conventions applied to .go files",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "rules/go.md",
+          "destination": ".claude/rules/agent-kit/go.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/go-http-api",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Go HTTP handlers with validation, context propagation, correct status codes, and httptest table tests",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/go-http-api/SKILL.md",
+          "destination": ".claude/skills/kit-go-http-api/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/go-sql-review",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Review Go database code for correctness, injection, rows and transaction handling, and N+1 queries",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/go-sql-review/SKILL.md",
+          "destination": ".claude/skills/kit-go-sql-review/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/go-review",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Review Go code for goroutine leaks, data races, error handling, and context misuse",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/go-review/SKILL.md",
+          "destination": ".claude/skills/kit-go-review/SKILL.md"
         }
       ]
     }
