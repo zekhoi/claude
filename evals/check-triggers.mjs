@@ -4,7 +4,7 @@
 // Usage: node evals/check-triggers.mjs [--out <dir>] [--jobs 4]
 // Requires a built CLI and an authenticated `claude` on PATH (ANTHROPIC_API_KEY works).
 import { spawn } from "node:child_process";
-import { appendFileSync, mkdtempSync, readFileSync } from "node:fs";
+import { appendFileSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -16,6 +16,10 @@ const arg = (name, fallback) => {
 };
 const outDir = path.resolve(arg("out", mkdtempSync(path.join(tmpdir(), "agent-kit-triggers-"))));
 const jobs = Number(arg("jobs", "4"));
+if (!Number.isInteger(jobs) || jobs < 1) {
+  console.error("--jobs must be a positive integer");
+  process.exit(2);
+}
 const { minTriggered, cases } = JSON.parse(
   readFileSync(path.join(evalsDir, "triggers.json"), "utf8"),
 );
@@ -23,6 +27,8 @@ const { minTriggered, cases } = JSON.parse(
 const runCase = (entry) =>
   new Promise((resolve) => {
     const [dir, id] = entry.split("/");
+    // A reused --out directory must not supply a previous run's transcript.
+    rmSync(path.join(outDir, `${dir}--${id}.json`), { force: true });
     const child = spawn(
       process.execPath,
       [path.join(evalsDir, "run.mjs"), "--skill", dir, "--case", id, "--out", outDir],
@@ -51,6 +57,11 @@ for (const entry of cases) {
   } catch {
     failures.push(`${entry}: no transcript (the run failed)`);
     rows.push(`| \`${entry}\` | ? | no transcript |`);
+    continue;
+  }
+  if (record.isError || record.exitCode !== 0) {
+    failures.push(`${entry}: the run ended with an error (exit code ${record.exitCode})`);
+    rows.push(`| \`${entry}\` | ${record.kind} | run error |`);
     continue;
   }
   const picked = (dir.startsWith("agent-") ? record.subagents : record.skillsInvoked).some(

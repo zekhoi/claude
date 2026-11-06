@@ -5,7 +5,12 @@
       "id": "speeds-up-report",
       "kind": "normal",
       "fixture": "fixtures/orders",
-      "allowedTools": ["Bash(node *)", "Bash(npm run *)"],
+      "allowedTools": [
+        "Bash(node bench.js*)",
+        "Bash(node --cpu-prof*)",
+        "Bash(npm run bench*)",
+        "Bash(npm run -s bench*)"
+      ],
       "prompt": "buildReport in src/report.js takes about 1.5 seconds for 5,000 customers and 50,000 orders (see bench.js). Make it faster.",
       "expectations": [
         "Measures a baseline with bench.js before changing code",
@@ -18,7 +23,12 @@
       "id": "refuses-to-guess-without-measurement",
       "kind": "edge",
       "fixture": "fixtures/orders",
-      "allowedTools": ["Bash(node *)", "Bash(npm run *)"],
+      "allowedTools": [
+        "Bash(node bench.js*)",
+        "Bash(node --cpu-prof*)",
+        "Bash(npm run bench*)",
+        "Bash(npm run -s bench*)"
+      ],
       "prompt": "formatName in src/report.js is probably slow because of the template string. Optimize it.",
       "expectations": [
         "Measures or profiles instead of accepting the premise",

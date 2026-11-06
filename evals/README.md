@@ -71,9 +71,9 @@ Each case runs in a fresh git repository containing the fixture, with what a use
 
 ## Trigger check
 
-`node evals/check-triggers.mjs` runs the cases listed in `triggers.json` once each and checks only whether the skill or subagent was picked: no negative case may pick its item, and at least `minTriggered` of the other cases must. It prints a table and exits non-zero on a problem. Options: `--jobs <n>` (default 4) and `--out <dir>`. The baseline on 2026-11-06 (Claude Code 2.1.319, Sonnet) was 17 of 17 picked and no negative case triggered; the minimum of 14 leaves room for run-to-run variation.
+`node evals/check-triggers.mjs` runs the cases listed in `triggers.json` once each and checks only whether the skill or subagent was picked: no negative case may pick its item, no run may end with an error, and at least `minTriggered` of the other cases must. It prints a table and exits non-zero on a problem. Options: `--jobs <n>` (default 4) and `--out <dir>`. The baseline on 2026-11-06 (Claude Code 2.1.319, Sonnet) was 17 of 17 picked and no negative case triggered; the minimum of 14 leaves room for run-to-run variation. The baseline is recorded in `trigger-check/`.
 
-The `Trigger check` workflow (`.github/workflows/trigger-check.yml`) runs it every Monday and on manual dispatch, with the latest Claude Code or a version given at dispatch. It needs an `ANTHROPIC_API_KEY` repository secret and skips without one; a run costs about $2. Update `triggers.json` and its baseline when cases or skills change.
+The `Trigger check` workflow (`.github/workflows/trigger-check.yml`) runs it every Monday and on manual dispatch, with the latest Claude Code or a version given at dispatch. It needs an `ANTHROPIC_API_KEY` repository secret and skips without one; a run costs about $2 (at most $25 at the per-case cap), and its transcript summaries are uploaded as an artifact. Update `triggers.json` and its baseline when cases or skills change.
 
 ## Result records
 
