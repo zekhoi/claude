@@ -18,8 +18,8 @@ Report findings without modifying code unless the user asks for fixes.
 **Correctness**
 
 - `update()` and `delete()` without `where`, and `session.query(...).delete()` without a filter, affect every row. Flag them unless that is clearly intended.
-- `scalar_one()` raises when nothing or more than one row matches, `scalar_one_or_none()` and `session.get()` return `None`, and `first()` silently drops extra rows. Check the result handling matches the intent.
-- Pagination needs a deterministic `order_by`. Bulk `update()`/`delete()` statements bypass ORM events and leave stale objects in the session unless `synchronize_session` is handled.
+- `scalar_one()` raises when nothing or more than one row matches, `scalar_one_or_none()` returns `None` for no rows but raises for several, `session.get()` returns `None`, and `first()` silently drops extra rows. Check the result handling matches the intent.
+- Pagination needs a deterministic `order_by`. Bulk `update()`/`delete()` statements bypass per-object ORM events and relationship cascades; loaded objects go stale only with `synchronize_session=False` or legacy `Query` code that sets it.
 
 **Safety**
 
@@ -35,7 +35,7 @@ Report findings without modifying code unless the user asks for fixes.
 **Performance**
 
 - Accessing relationships in a loop (N+1) should use `selectinload` or `joinedload`, or one query with `in_(ids)`.
-- Select only needed columns for large rows, check that filters and sort columns are indexed, and use `insert().values([...])` or `session.execute(insert(Model), rows)` for many rows instead of `add()` in a loop.
+- Select only needed columns for large rows, check that filters and sort columns are indexed, and flag a flush or commit per row; for many rows use `session.execute(insert(Model), rows)` or `add_all()` with one flush.
 
 ## 3. Verify and report
 

@@ -27,11 +27,11 @@ def units_by_sku(session: Session, tenant_id: int) -> dict[str, int]:
 
 
 def mark_shipped(session: Session, tenant_id: int, order_id: int) -> bool:
-    with session.begin():
-        order = session.scalars(
-            select(Order).where(Order.id == order_id, Order.tenant_id == tenant_id)
-        ).one_or_none()
-        if order is None:
-            return False
-        order.status = "shipped"
+    """Marks an order shipped; the caller owns the transaction and commits."""
+    order = session.scalars(
+        select(Order).where(Order.id == order_id, Order.tenant_id == tenant_id)
+    ).one_or_none()
+    if order is None:
+        return False
+    order.status = "shipped"
     return True

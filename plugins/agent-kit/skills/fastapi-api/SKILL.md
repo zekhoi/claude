@@ -13,7 +13,7 @@ description: Implement or change HTTP endpoints in a FastAPI application followi
 
 ## 2. Implement the route
 
-- Add the route to the matching `APIRouter`. Separate input and output models (`UserCreate`, `UserRead`) and set `response_model` or a return annotation so fields such as password hashes are never serialized.
+- Add the route to the matching `APIRouter`. Separate input and output models (`UserCreate`, `UserRead`) and set `response_model` or a return annotation so fields such as password hashes are never serialized. Output models that validate ORM objects need `model_config = ConfigDict(from_attributes=True)` (v1: `orm_mode = True`).
 - Use path, query, and body parameters with types and constraints (`Annotated[int, Path(gt=0)]`, `Field`) so FastAPI validates input and returns 422 on bad data.
 - Raise `HTTPException` (or the project's error types) with the right status for missing resources and client mistakes; set `status_code=201` on creation and 204 with no body on deletion.
 - Get the session, current user, and permissions through `Depends`, never globals. Protect anything not explicitly public; if no authentication exists and the endpoint exposes user data, say so and ask before shipping it unprotected.
