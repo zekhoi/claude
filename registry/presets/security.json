@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "preset/security",
+  "description": "Add-on: red- and blue-team security skills (audit, threat model, attack surface, vulnerability proofs, hardening, incident response, detection rules) and the read-only reviewer subagent",
+  "items": [
+    "skill/security-audit",
+    "skill/threat-model",
+    "skill/attack-surface",
+    "skill/vuln-poc",
+    "skill/hardening",
+    "skill/incident-response",
+    "skill/detection-rules",
+    "agent/reviewer"
+  ]
+}

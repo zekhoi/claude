@@ -1,0 +1,35 @@
+{
+  "skill": "skill/threat-model",
+  "cases": [
+    {
+      "id": "models-upload-design",
+      "kind": "normal",
+      "fixture": "fixtures/uploads",
+      "prompt": "Threat model the design in docs/upload-design.md before we build it.",
+      "expectations": [
+        "Identifies assets, actors, and trust boundaries (browser, API, S3, admin panel, thumbnail job)",
+        "Flags the client-controlled customerId (customers can attach files to other customers), the user-controlled S3 key from filename (overwrite and path issues), and long-lived presigned URLs shared by email",
+        "Flags malicious file processing by ImageMagick and the missing malware scanning and content-type validation",
+        "Ranks threats and proposes concrete mitigations, and does not modify files"
+      ]
+    },
+    {
+      "id": "models-reset-flow-from-code",
+      "kind": "edge",
+      "fixture": "fixtures/reset",
+      "prompt": "What could go wrong security-wise with our password reset flow in src/reset.js?",
+      "expectations": [
+        "Invokes kit-threat-model or gives an equivalent structured threat analysis",
+        "Flags the predictable MD5-of-email-and-time token, tokens that never expire and are not single-use, and account enumeration through the 404 message",
+        "Flags missing rate limiting and that the password is stored without hashing, and proposes mitigations"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-code-audit",
+      "kind": "negative",
+      "fixture": "fixtures/reset",
+      "prompt": "Audit src/ for vulnerabilities and report findings with severity.",
+      "expectations": ["Does not invoke kit-threat-model"]
+    }
+  ]
+}

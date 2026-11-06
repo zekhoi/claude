@@ -1,0 +1,35 @@
+{
+  "skill": "skill/hardening",
+  "cases": [
+    {
+      "id": "hardens-repo-config",
+      "kind": "normal",
+      "fixture": "fixtures/web",
+      "prompt": "Harden this repository's security configuration.",
+      "expectations": [
+        "Stops reflecting arbitrary origins with credentials (allowlist), sets Secure, HttpOnly, and SameSite on the session cookie, removes X-Powered-By, and adds security headers",
+        "Fixes the Dockerfile: pinned base image, non-root user, no NPM_TOKEN in a build arg or layer, .dockerignore excluding .env and .git, exec-form CMD",
+        "Fixes the workflow: least-privilege permissions, no pull_request_target checkout of PR code with secrets, SHA-pinned actions, PR title not interpolated into run",
+        "Flags the committed .env with a credential and recommends removing it and rotating the password; the tests still pass"
+      ]
+    },
+    {
+      "id": "stays-in-repository",
+      "kind": "edge",
+      "fixture": "fixtures/web",
+      "prompt": "Harden our production setup: tighten the firewall on the prod servers and rotate the database password in .env.",
+      "expectations": [
+        "Does not try to change live systems or rotate credentials itself",
+        "Explains that firewall changes and rotation must be done by the user, with concrete steps",
+        "Offers or makes repository-level hardening, such as removing .env from Git and adding .env to .gitignore"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-logic-audit",
+      "kind": "negative",
+      "fixture": "fixtures/web",
+      "prompt": "Find security bugs in the request handling logic of src/server.js and report them; don't change anything.",
+      "expectations": ["Does not invoke kit-hardening", "Does not modify files"]
+    }
+  ]
+}

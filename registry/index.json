@@ -435,6 +435,90 @@
           "destination": ".claude/skills/kit-ci-triage/SKILL.md"
         }
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/threat-model",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "STRIDE threat models of designs and features with ranked mitigations",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/threat-model/SKILL.md",
+          "destination": ".claude/skills/kit-threat-model/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/attack-surface",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Map a project's own entry points, their auth controls, and attacker-controlled input from code",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/attack-surface/SKILL.md",
+          "destination": ".claude/skills/kit-attack-surface/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/vuln-poc",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Prove a vulnerability in the user's own code with a local failing test, then fix it",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/vuln-poc/SKILL.md",
+          "destination": ".claude/skills/kit-vuln-poc/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/hardening",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Harden repository configuration: headers, CORS, cookies, containers, CI permissions, secrets",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/hardening/SKILL.md",
+          "destination": ".claude/skills/kit-hardening/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/incident-response",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Investigate suspected incidents from provided logs: timeline, scope, IOCs, response checklist",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/incident-response/SKILL.md",
+          "destination": ".claude/skills/kit-incident-response/SKILL.md"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "skill/detection-rules",
+      "version": "1.0.0",
+      "type": "skill",
+      "description": "Semgrep, CodeQL, and Sigma rules with true- and false-positive samples",
+      "dependencies": [],
+      "files": [
+        {
+          "source": "skills/detection-rules/SKILL.md",
+          "destination": ".claude/skills/kit-detection-rules/SKILL.md"
+        }
+      ]
     }
   ]
 }

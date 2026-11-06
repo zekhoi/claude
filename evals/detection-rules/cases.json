@@ -1,0 +1,35 @@
+{
+  "skill": "skill/detection-rules",
+  "cases": [
+    {
+      "id": "semgrep-command-injection",
+      "kind": "normal",
+      "fixture": "fixtures/runner",
+      "prompt": "Write a Semgrep rule that flags command injection from request input into child_process, with tests.",
+      "expectations": [
+        "Writes a rule (taint mode or patterns) with sources from req.query, req.body, or req.params and sinks such as exec and execSync, plus message, severity, and CWE metadata",
+        "Excludes or does not flag execFile with an argument array",
+        "Adds a test file with ruleid and ok annotations covering /ping as a true positive and /version and /lookup as negatives for this CWE-78 rule (/lookup still allows dig option injection, CWE-88, which this rule does not target)",
+        "Runs semgrep --test if available, or says it could not run it"
+      ]
+    },
+    {
+      "id": "sigma-password-spraying",
+      "kind": "edge",
+      "fixture": "fixtures/auth",
+      "prompt": "Write a Sigma rule that detects password spraying in our auth logs (logs/auth.jsonl).",
+      "expectations": [
+        "Writes a Sigma rule with a logsource and detection matching the JSON fields (event, result, src_ip, user)",
+        "Captures many failures for distinct users from one source IP in a short window (via a correlation or aggregation), not a single failed login",
+        "Documents false positives and level, and explains that 203.0.113.50 matches while 192.0.2.8's single failure does not"
+      ]
+    },
+    {
+      "id": "does-not-trigger-for-review",
+      "kind": "negative",
+      "fixture": "fixtures/runner",
+      "prompt": "Review src/run.js for security problems.",
+      "expectations": ["Does not invoke kit-detection-rules", "Does not modify files"]
+    }
+  ]
+}
