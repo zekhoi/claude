@@ -27,7 +27,7 @@ Run the app's tests, and add tests that assert important headers and cookie flag
 
 ## 4. Report
 
-List each change with its reason, the checks run, anything that could break clients (CSP, CORS, `SameSite`), and remaining items that need infrastructure changes outside the repository.
+List each change with its reason, the checks run, every action still on a tag with the exact command that resolves its commit SHA (`gh api repos/<owner>/<repo>/commits/<tag> --jq .sha`), anything that could break clients (CSP, CORS, `SameSite`), and remaining items that need infrastructure changes outside the repository.
 
 ## Examples
 
