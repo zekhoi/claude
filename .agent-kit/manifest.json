@@ -176,12 +176,12 @@
         {
           "destination": ".claude/skills/kit-refactoring/SKILL.md",
           "install": "file",
-          "sha256": "f3711e0e4f5d6b8e73c2079ce2ff223d82d5f4ad7753fc732e58b41fbed6f939"
+          "sha256": "b897f9b0ca002f79c15d062a951889a0cf4514488f69da73d8384a5340e37faa"
         },
         {
           "destination": ".agents/skills/kit-refactoring/SKILL.md",
           "install": "file",
-          "sha256": "f3711e0e4f5d6b8e73c2079ce2ff223d82d5f4ad7753fc732e58b41fbed6f939"
+          "sha256": "b897f9b0ca002f79c15d062a951889a0cf4514488f69da73d8384a5340e37faa"
         }
       ]
     },

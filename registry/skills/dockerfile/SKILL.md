@@ -21,7 +21,7 @@ Find the runtime and version, package manager and lockfile, build command, start
 
 ## 3. Verify
 
-Build the image (`docker build .`) and, when possible, run it briefly to confirm it starts and answers on its port, then stop it. Report the image size. Never tag and push images to a registry unless the user asks. If Docker is unavailable, say so instead of claiming the build works.
+When a Dockerfile already exists, build it first to record its size and build time. Build the new image (`docker build .`) and, when possible, run it briefly to confirm it starts and answers on its port, then stop it. Report the image size, before and after when there was an earlier image. Never tag and push images to a registry unless the user asks. If Docker is unavailable, say so instead of claiming the build works.
 
 ## 4. Report
 

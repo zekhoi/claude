@@ -21,6 +21,7 @@ For each boundary and data flow, consider STRIDE and keep only threats that appl
 - **Repudiation:** missing audit logs for sensitive actions.
 - **Information disclosure:** cross-tenant reads (IDOR), verbose errors, secrets in logs, over-broad API responses.
 - **Denial of service:** unbounded queries, uploads, or fan-out; missing rate limits.
+- **File uploads, whatever the category:** missing malware scanning, content-type and size validation, and isolated processing of untrusted files.
 - **Elevation of privilege:** missing authorization checks, role changes by the user themselves, SSRF to internal services, injection.
 
 Write each threat as an abuse case: who does what, through which entry point, to which asset.
