@@ -17,7 +17,7 @@ description: Upgrade one or more project dependencies safely by reading their ch
 
 ## 3. Upgrade
 
-- Upgrade one package or one coupled group at a time. Use the package manager's command (`pnpm up <pkg>@<version>`, `uv add <pkg>==<version>`, `go get <module>@<version>`, `go mod tidy`) so the lockfile is regenerated, not hand-edited.
+- Upgrade one package or one coupled group at a time. Use the package manager's command (`pnpm up <pkg>@<version>`, with `-r` or `--filter` in a workspace; `uv lock --upgrade-package <pkg>` within the existing constraint, or `uv add` to change it; `go get <module>@<version>` and `go mod tidy`, updating import paths to `/vN` for a Go major version) so the lockfile is regenerated, not hand-edited.
 - Keep the lockfile diff limited to the target and what it requires; do not refresh unrelated dependencies.
 - Adapt the code to breaking changes, replace deprecated APIs the release notes call out, and update configuration files that changed format.
 

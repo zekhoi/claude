@@ -23,7 +23,7 @@ description: Write release notes or a changelog entry from the commits and merge
 
 ## 4. Report
 
-Show the draft or the edited changelog section, the range used, entries that were left out and why, and open questions. Never create tags, releases, or publish packages; those need an explicit instruction.
+Show the draft or the edited changelog section, the range used, entries that were left out and why, and open questions. Do not create tags or releases or publish packages unless the user explicitly asks.
 
 ## Examples
 
