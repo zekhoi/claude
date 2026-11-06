@@ -58,6 +58,7 @@ evals/<skill-id>/
 | `changes`      | Optional `{ path: content }` written after setup and left uncommitted; add `"staged": true` to stage them.                                 |
 | `allowedTools` | Optional extra Claude Code tool permissions for the case, such as `Bash(git commit*)`.                                                     |
 | `install`      | Optional `true` to run `npm install --ignore-scripts` in the fixture before the case, for fixtures whose tests need real dependencies.     |
+| `remote`       | Optional `true` to add an `origin` remote at the initial commit, so `history` and `branch` commits are unpushed.                           |
 | `add`          | Optional list of extra items to install, such as `agent/reviewer`; every registry skill is always installed.                               |
 
 ## Running cases

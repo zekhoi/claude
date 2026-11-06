@@ -81,6 +81,13 @@ function setUpProject(skillDir, c) {
   if (c.add?.length) sh("node", [cli, "add", ...c.add, "--cwd", project], project);
   sh("git", ["add", "-A"], project);
   sh("git", ["commit", "-q", "-m", "Initial commit"], project);
+  // `remote: true` adds an `origin` at the initial commit, so later commits are local-only.
+  if (c.remote) {
+    sh("git", ["clone", "-q", "--bare", project, `${project}-origin`], project);
+    sh("git", ["remote", "add", "origin", `${project}-origin`], project);
+    sh("git", ["fetch", "-q", "origin"], project);
+    sh("git", ["remote", "set-head", "origin", "-a"], project);
+  }
   for (const message of c.history ?? []) {
     sh("git", ["commit", "-q", "--allow-empty", "-m", message], project);
   }
@@ -181,6 +188,8 @@ for (const skill of readdirSync(evalsDir).sort()) {
       .filter(Boolean);
     const diff = sh("git", ["diff", "HEAD"], project).slice(0, 8000);
     const logAfter = sh("git", ["log", "--all", "--format=%h %s%n%b", "-6"], project).trim();
+    const worktrees = sh("git", ["worktree", "list"], project).trim();
+    const branches = sh("git", ["branch", "--list"], project).trim();
     const committedFiles = sh(
       "git",
       ["show", "--name-status", "--format=", "HEAD"],
@@ -207,6 +216,8 @@ for (const skill of readdirSync(evalsDir).sort()) {
       changedFiles,
       diff,
       logAfter,
+      worktrees,
+      branches,
       committedFiles,
       testsAfter: tests,
       project,
