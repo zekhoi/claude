@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "preset/node",
-  "description": "Base preset plus TypeScript rules and the Kysely and Fastify skills",
+  "description": "Base preset plus TypeScript rules and the Kysely, Prisma, Drizzle, Fastify, and React skills",
   "items": [
     "guideline/engineering",
     "skill/code-review",
@@ -12,6 +12,9 @@
     "rule/testing",
     "rule/typescript",
     "skill/kysely-review",
-    "skill/fastify-api"
+    "skill/fastify-api",
+    "skill/prisma-review",
+    "skill/drizzle-review",
+    "skill/react-component"
   ]
 }
