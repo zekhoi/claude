@@ -86,6 +86,7 @@ function setUpProject(skillDir, c) {
     sh("git", ["clone", "-q", "--bare", project, `${project}-origin`], project);
     sh("git", ["remote", "add", "origin", `${project}-origin`], project);
     sh("git", ["fetch", "-q", "origin"], project);
+    sh("git", ["remote", "set-head", "origin", "-a"], project);
   }
   for (const message of c.history ?? []) {
     sh("git", ["commit", "-q", "--allow-empty", "-m", message], project);
