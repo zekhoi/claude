@@ -96,7 +96,7 @@
       ]
     },
     "agent/reviewer": {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "files": [
         {
           "destination": ".claude/agents/kit-reviewer.md",
@@ -106,7 +106,7 @@
         {
           "destination": ".codex/agents/kit-reviewer.toml",
           "install": "file",
-          "sha256": "a0c7847cc0ff5dd667af7931f198fa1e7763d3f84e2797858aedade8a9bd6997"
+          "sha256": "16c0addb58c9fc3c233ceefcc5a39080e0198695f376e564425d11940eae9cae"
         }
       ]
     },

@@ -2,6 +2,12 @@
 
 All notable changes to the CLI and its bundled catalog. Item versions are listed per release; see [versioning rules](docs/PLAN.md#content-versioning).
 
+## Unreleased
+
+### Catalog
+
+- **Subagent models:** `kit-reviewer` runs on Sonnet (`model: sonnet`) so frequent reviews cost less than the main model (`agent/reviewer` 1.0.1); the other subagents inherit the main model.
+
 ## 0.1.0
 
 First release. Published as `@zekhoi/agent-kit`.
@@ -38,7 +44,6 @@ First release. Published as `@zekhoi/agent-kit`.
 | Presets `base`, `node`, `python`, `go`; add-ons `infra`, `monorepo`, `orchestration`, `quality`, `review`, `security`                              | —       |
 
 - **Presets:** `base`, `node` (TypeScript, Kysely, Fastify), `python` (FastAPI, SQLAlchemy), and `go` (net/http, database/sql, Go review), plus add-ons `quality`, `review`, `security`, `infra`, `orchestration`, and `monorepo`. `database-design`, `prisma-review`, `drizzle-review`, and `react-component` are in no preset; install them with `add`.
-- **Subagent models:** `kit-reviewer` runs on Sonnet (`model: sonnet`) so frequent reviews cost less than the main model; the other subagents inherit the main model.
 - **Orchestration:** `kit-orchestrate` runs parallel groups that edit files in one Git worktree per subagent, created from the current commit, and applies their results as uncommitted changes.
 - **Safety boundaries:** infra skills only edit files and run read-only or dry-run commands, never apply or deploy. Red-team skills work only on the user's own code and local or named test targets. `incident-response` never deletes evidence or rewrites history.
 - **Evaluations:** every skill was evaluated with Claude Code 2.1.318 (Sonnet), installing the presets a user of the skill would. 117 of 132 cases pass, 13 are partial, and 2 fail: an `orchestrate` parallel case that ran without the skill, and a `refactoring` run that skipped characterization tests. Skills triggered on their own in 56 of 76 cases that do not name them, and no negative case triggered. After follow-up fixes, the `refactoring` case passes (the skill now triggers on "hard to read" requests), and one observability partial (status-class labels) and the threat-model partial pass; after a second round (Claude Code 2.1.319), the Dockerfile before-and-after measurement (2 of 2 runs after switching to `docker images`), hardening action pinning (the report gives the SHA lookup commands), and observability request-body logging (structured outcome and reason fields) also pass. A third round fixed the `performance` measurement case (the case's permissions had blocked the benchmark); `dependency-upgrade` still reports, rather than reads, release notes it cannot fetch without network access, and named `orchestrate` runs still do the edits themselves when every step touches the same files. The five subagents were evaluated in 13 cases (Claude Code 2.1.319): 10 pass and 3 are partial. `reviewer` and `infra` were delegated to when asked for an independent review, and `debugger` when asked for a debugging subagent; `architect` and `planner` were used only when named, even when "Use proactively" was tried in their descriptions (reverted); for an unnamed one-line failing test, the main agent fixed it without the debugger. After a fix, the debugger subagent no longer edited code when it could not reproduce a failure (2 runs), though in one run the main agent then applied an unconfirmed fix itself. See `evals/*/results/`.
