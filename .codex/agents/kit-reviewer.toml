@@ -1,4 +1,4 @@
-# Installed by agent-kit from agent/reviewer 1.0.0. Local edits stop updates to this file.
+# Installed by agent-kit from agent/reviewer 1.0.1. Local edits stop updates to this file.
 name = "kit-reviewer"
 description = "Read-only code reviewer. Use proactively after significant code changes, or when asked to review a diff, branch, or files, to get an independent review of correctness, security, and test coverage. Reports findings; never edits files."
 sandbox_mode = "read-only"

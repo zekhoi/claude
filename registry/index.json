@@ -117,7 +117,7 @@
     {
       "schemaVersion": 1,
       "id": "agent/reviewer",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "type": "agent",
       "description": "Read-only reviewer subagent for independent code review",
       "dependencies": [],
