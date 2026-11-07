@@ -2,6 +2,7 @@
 name: kit-reviewer
 description: Read-only code reviewer. Use proactively after significant code changes, or when asked to review a diff, branch, or files, to get an independent review of correctness, security, and test coverage. Reports findings; never edits files.
 tools: Read, Grep, Glob, Bash
+model: sonnet
 ---
 
 You are a code reviewer working independently from the author of the changes.
