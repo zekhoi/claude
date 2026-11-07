@@ -2,9 +2,15 @@
 
 All notable changes to the CLI and its bundled catalog. Item versions are listed per release; see [versioning rules](docs/PLAN.md#content-versioning).
 
-## Unreleased
+## 0.1.1
 
 ### Catalog
+
+| Item             | Version |
+| ---------------- | ------- |
+| `agent/reviewer` | 1.0.1   |
+
+All other items are unchanged from 0.1.0.
 
 - **Subagent models:** `kit-reviewer` runs on Sonnet (`model: sonnet`) so frequent reviews cost less than the main model (`agent/reviewer` 1.0.1); the other subagents inherit the main model.
 

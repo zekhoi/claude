@@ -1,6 +1,6 @@
 {
   "name": "agent-kit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Engineering guidelines, skills, rules, and subagents for code review, debugging, feature work, commits, pull requests, security audits, and database design.",
   "author": {
     "name": "Khoironi Kurnia Syah",
