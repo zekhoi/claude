@@ -101,7 +101,7 @@
         {
           "destination": ".claude/agents/kit-reviewer.md",
           "install": "file",
-          "sha256": "dfab73c3887e6ecf6edb50013c0c87644319985d3c883fdf897af7ee8b12ef13"
+          "sha256": "5e68b5eab85f2ffe1f8e75020214fb61765d7658d8ff9bdd3eb75fab243d5ddb"
         },
         {
           "destination": ".codex/agents/kit-reviewer.toml",
