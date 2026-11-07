@@ -77,7 +77,7 @@ jobs:
             if (!ok) { console.error("npm " + version + " is older than 11.5.1"); process.exit(1); }
           ' "$(npm --version)"
       # Publishes the exact tarball that passed the gates. Trusted publishing adds provenance.
-      - run: npm publish artifacts/*.tgz --access public
+      - run: npm publish ./artifacts/*.tgz --access public
 
   smoke:
     name: smoke test published package
