@@ -10,7 +10,7 @@
       "name": "agent-kit",
       "source": "./plugins/agent-kit",
       "description": "Engineering guidelines, skills, rules, and subagents for code review, debugging, feature work, commits, pull requests, security audits, and database design.",
-      "version": "0.1.0"
+      "version": "0.1.1"
     }
   ]
 }
